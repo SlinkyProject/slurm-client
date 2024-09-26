@@ -1,0 +1,10 @@
+---
+package: v0040
+generate:
+  client: true
+  embedded-spec: true
+  models: true
+output: slurm.gen.go
+output-options:
+  skip-fmt: false
+  skip-prune: true

@@ -1,0 +1,101 @@
+---
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+default_stages:
+  - pre-commit
+fail_fast: true
+exclude: boilerplate\..*|.*\.gen\..*|.*\.gotmpl$
+repos:
+  - repo: local
+    hooks:
+      - id: commitlint
+        name: commitlint
+        entry: commitlint/commitlint:edge
+        args:
+          - --config=commitlint.config.ts
+          - --edit
+          - --strict
+        language: docker_image
+        pass_filenames: false
+        stages: [commit-msg]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-json
+      - id: check-yaml
+      - id: check-symlinks
+      - id: check-added-large-files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: detect-private-key
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        args:
+          - --wrap=80
+        exclude: (\.chglog/.*|CHANGELOG)\.md
+        additional_dependencies:
+          - mdformat-toc
+          - mdformat-tables
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.2.3
+    hooks:
+      - id: yamlfmt
+        args:
+          - --mapping=2
+          - --sequence=4
+          - --offset=2
+  - repo: https://github.com/pecigonzalo/pre-commit-shfmt
+    rev: v2.2.0
+    hooks:
+      - id: shell-fmt-go
+        args:
+          - -w
+          - -s
+          - -l
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        args:
+          - --severity=warning
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      - id: go-fmt
+      - id: go-mod-tidy
+      - id: go-build-mod
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run --timeout=10m
+        language: system
+        files: \.go$
+        pass_filenames: false
+      - id: make-tests
+        name: Make Tests
+        entry: make test
+        types: [go]
+        language: system
+        files: \.go$
+        pass_filenames: false
+      - id: make-audit
+        name: Make audit
+        entry: make audit
+        types: [go]
+        language: system
+        files: \.go$
+        pass_filenames: false
+      - id: make-codecov
+        name: Make codecov
+        entry: make codecov
+        types: [go]
+        language: system
+        files: \.go$
+        pass_filenames: false

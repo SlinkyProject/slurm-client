@@ -1,0 +1,39 @@
+---
+
+.docker:
+  image: docker:27.3.0
+  services:
+    - docker:27.3.0-rc.1-dind
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - apk update && apk upgrade
+    - apk add --no-cache git go
+    - export PATH=$PATH:$HOME/go/bin/
+    - go env -w GOPRIVATE=github.com/SlinkyProject/*
+
+test:
+  extends: .docker
+  script:
+    - apk update && apk upgrade
+    - apk add --no-cache make bash shellcheck shfmt pre-commit
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    - go install golang.org/x/vuln/cmd/govulncheck@latest
+    - pre-commit run --all-files --show-diff-on-failure
+    - make test
+    - make audit
+  artifacts:
+    expire_in: 7 days
+    paths:
+      - cover.html
+      - govulnreport.txt
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+secret_detection:
+  allow_failure: false
+  artifacts:
+    when: on_failure
+    expire_in: 7 days
+    paths:
+      - gl-secret-detection-report.json
