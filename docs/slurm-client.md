@@ -1,6 +1,6 @@
 # Slurm Client
 
-<!-- mdformat-toc start --slug=github --no-anchors --maxlevel=3 --minlevel=1 -->
+<!-- mdformat-toc start --slug=github --no-anchors --maxlevel=6 --minlevel=1 -->
 
 - [Slurm Client](#slurm-client)
   - [Overview](#overview)
