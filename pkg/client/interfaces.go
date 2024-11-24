@@ -104,18 +104,30 @@ type Informer interface {
 }
 
 type SlurmClientInterface interface {
-	// Job
+	SlurmJobInfoInterface
+	SlurmNodeInterface
+	SlurmPartitionInterface
+	SlurmPingInfoInterface
+}
+
+type SlurmJobInfoInterface interface {
 	GetJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error)
 	ListJobInfos(ctx context.Context) (*types.JobInfoList, error)
-	// Node
+}
+
+type SlurmNodeInterface interface {
 	DeleteNode(ctx context.Context, nodeName string) error
 	GetNode(ctx context.Context, nodeName string) (*types.Node, error)
 	ListNodes(ctx context.Context) (*types.NodeList, error)
 	UpdateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error
-	// Partition
+}
+
+type SlurmPartitionInterface interface {
 	GetPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error)
 	ListPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error)
-	// Ping
+}
+
+type SlurmPingInfoInterface interface {
 	GetPing(ctx context.Context, host string) (*types.Ping, error)
 	ListPing(ctx context.Context) (*types.PingList, error)
 }
