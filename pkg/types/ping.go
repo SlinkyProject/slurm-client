@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
 // SPDX-License-Identifier: Apache-2.0
 
+// +kubebuilder:object:generate=true
 package types
 
 import (
@@ -23,9 +24,6 @@ type Ping struct {
 	Hostname string
 	Pinged   bool
 }
-
-//+kubebuilder:object:root=true
-//+kubebuilder:object:generate=false
 
 // GetKey implements Object.
 func (p *Ping) GetKey() object.ObjectKey {
