@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
 // SPDX-License-Identifier: Apache-2.0
 
+// +kubebuilder:object:generate=true
 package types
 
 import (
@@ -70,9 +71,6 @@ type Node struct {
 	AllocCpus     int32
 	AllocIdleCpus int32
 }
-
-//+kubebuilder:object:root=true
-//+kubebuilder:object:generate=false
 
 type NodeInfo struct {
 	Namespace string `json:"namespace"`

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
 // SPDX-License-Identifier: Apache-2.0
 
+// +kubebuilder:object:generate=true
 package types
 
 import (
@@ -35,9 +36,6 @@ type PartitionInfo struct {
 	PartitionState set.Set[PartitionInfoPartitionState]
 	Cpus           int32
 }
-
-//+kubebuilder:object:root=true
-//+kubebuilder:object:generate=false
 
 // GetKey implements Object.
 func (p *PartitionInfo) GetKey() object.ObjectKey {
