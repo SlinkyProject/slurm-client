@@ -6,7 +6,6 @@ toolchain go1.22.5
 
 require (
 	github.com/getkin/kin-openapi v0.122.0
-	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/oapi-codegen/runtime v1.1.1
 	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.3
@@ -25,7 +24,6 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20240525223248-4bfdf5a9a2af // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
