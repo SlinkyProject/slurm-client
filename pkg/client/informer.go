@@ -94,7 +94,6 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 
 	i.mu.Lock()
 	i.started = true
-	i.hasSynced = true
 	i.mu.Unlock()
 
 	go i.runInformer(stopCh)
