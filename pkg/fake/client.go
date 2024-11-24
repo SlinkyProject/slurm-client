@@ -105,8 +105,8 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.Node:
 		cache := entry.(*types.Node)
 		*o = *cache
-	case *types.Ping:
-		cache := entry.(*types.Ping)
+	case *types.ControllerPing:
+		cache := entry.(*types.ControllerPing)
 		*o = *cache
 	case *types.JobInfo:
 		cache := entry.(*types.JobInfo)

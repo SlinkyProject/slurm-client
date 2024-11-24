@@ -107,7 +107,7 @@ type SlurmClientInterface interface {
 	SlurmJobInfoInterface
 	SlurmNodeInterface
 	SlurmPartitionInterface
-	SlurmPingInfoInterface
+	SlurmControllerPingInfoInterface
 }
 
 type SlurmJobInfoInterface interface {
@@ -127,7 +127,7 @@ type SlurmPartitionInterface interface {
 	ListPartitionInfo(ctx context.Context) (*types.PartitionInfoList, error)
 }
 
-type SlurmPingInfoInterface interface {
-	GetPing(ctx context.Context, host string) (*types.Ping, error)
-	ListPing(ctx context.Context) (*types.PingList, error)
+type SlurmControllerPingInfoInterface interface {
+	GetControllerPing(ctx context.Context, host string) (*types.ControllerPing, error)
+	ListControllerPing(ctx context.Context) (*types.ControllerPingList, error)
 }

@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Changed object name `Ping` => `ControllerPing`.
+
 ### Removed
 
 - Removed the skipCache client option in operations that do not read cache.

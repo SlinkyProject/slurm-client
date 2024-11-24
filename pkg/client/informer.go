@@ -112,8 +112,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 		switch i.objectType {
 		case slurmtypes.ObjectTypeNode:
 			list = &slurmtypes.NodeList{}
-		case slurmtypes.ObjectTypePing:
-			list = &slurmtypes.PingList{}
+		case slurmtypes.ObjectTypeControllerPing:
+			list = &slurmtypes.ControllerPingList{}
 		case slurmtypes.ObjectTypeJobInfo:
 			list = &slurmtypes.JobInfoList{}
 		case slurmtypes.ObjectTypePartitionInfo:
@@ -169,8 +169,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 		switch i.objectType {
 		case slurmtypes.ObjectTypeNode:
 			obj = &slurmtypes.Node{}
-		case slurmtypes.ObjectTypePing:
-			obj = &slurmtypes.Ping{}
+		case slurmtypes.ObjectTypeControllerPing:
+			obj = &slurmtypes.ControllerPing{}
 		case slurmtypes.ObjectTypeJobInfo:
 			obj = &slurmtypes.JobInfo{}
 		case slurmtypes.ObjectTypePartitionInfo:
@@ -410,8 +410,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	case *slurmtypes.Node:
 		cache := entry.object.(*slurmtypes.Node)
 		*o = *cache
-	case *slurmtypes.Ping:
-		cache := entry.object.(*slurmtypes.Ping)
+	case *slurmtypes.ControllerPing:
+		cache := entry.object.(*slurmtypes.ControllerPing)
 		*o = *cache
 	case *slurmtypes.JobInfo:
 		cache := entry.object.(*slurmtypes.JobInfo)

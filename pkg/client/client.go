@@ -205,8 +205,8 @@ func (c *client) Get(
 			return err
 		}
 		(*o) = (*node)
-	case *types.Ping:
-		ping, err := c.getPing(ctx, string(key))
+	case *types.ControllerPing:
+		ping, err := c.getControllerPing(ctx, string(key))
 		if err != nil {
 			return err
 		}
@@ -257,8 +257,8 @@ func (c *client) List(
 			return err
 		}
 		(*objList) = (*nodeList)
-	case *types.PingList:
-		pingList, err := c.listPing(ctx)
+	case *types.ControllerPingList:
+		pingList, err := c.listControllerPing(ctx)
 		if err != nil {
 			return err
 		}

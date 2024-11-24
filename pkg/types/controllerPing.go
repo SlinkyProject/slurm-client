@@ -11,22 +11,22 @@ import (
 )
 
 const (
-	ObjectTypePing = "ping"
+	ObjectTypeControllerPing = "controllerPing"
 )
 
 const (
-	PingPingedUP   = "UP"
-	PingPingedDOWN = "DOWN"
+	ControllerPingPingedUP   = "UP"
+	ControllerPingPingedDOWN = "DOWN"
 )
 
-// Ping represents a Slurm slurmctld ping.
-type Ping struct {
+// ControllerPing represents a Slurm slurmctld ping.
+type ControllerPing struct {
 	Hostname string
 	Pinged   bool
 }
 
 // GetKey implements Object.
-func (p *Ping) GetKey() object.ObjectKey {
+func (p *ControllerPing) GetKey() object.ObjectKey {
 	if p.Hostname == "" {
 		panic("Hostname cannot be empty")
 	}
@@ -34,32 +34,32 @@ func (p *Ping) GetKey() object.ObjectKey {
 }
 
 // GetType implements Object.
-func (p *Ping) GetType() object.ObjectType {
-	return ObjectTypePing
+func (p *ControllerPing) GetType() object.ObjectType {
+	return ObjectTypeControllerPing
 }
 
 // DeepEqualObject implements Object.
-func (in *Ping) DeepEqualObject(object object.Object) bool {
+func (in *ControllerPing) DeepEqualObject(object object.Object) bool {
 	return reflect.DeepEqual(in, object)
 }
 
 // DeepCopyObject implements Object.
-func (p *Ping) DeepCopyObject() object.Object {
+func (p *ControllerPing) DeepCopyObject() object.Object {
 	return p.DeepCopy()
 }
 
-// PingList represents a list of Slurm slurmctld pings.
-type PingList struct {
-	Items []Ping
+// ControllerPingList represents a list of Slurm slurmctld pings.
+type ControllerPingList struct {
+	Items []ControllerPing
 }
 
 // GetType implements ObjectList.
-func (p *PingList) GetType() object.ObjectType {
-	return ObjectTypePing
+func (p *ControllerPingList) GetType() object.ObjectType {
+	return ObjectTypeControllerPing
 }
 
 // GetItems implements ObjectList.
-func (p *PingList) GetItems() []object.Object {
+func (p *ControllerPingList) GetItems() []object.Object {
 	pings := make([]object.Object, 0)
 	for _, ping := range p.Items {
 		pings = append(pings, ping.DeepCopyObject())
@@ -68,18 +68,18 @@ func (p *PingList) GetItems() []object.Object {
 }
 
 // Size implements ObjectList.
-func (p *PingList) Size() int {
+func (p *ControllerPingList) Size() int {
 	return len(p.Items)
 }
 
 // AppendItem implements ObjectList.
-func (p *PingList) AppendItem(object object.Object) {
-	ping := object.(*Ping)
+func (p *ControllerPingList) AppendItem(object object.Object) {
+	ping := object.(*ControllerPing)
 	ping = ping.DeepCopy()
 	p.Items = append(p.Items, *ping)
 }
 
 // DeepCopyObjectList implements ObjectList.
-func (in *PingList) DeepCopyObjectList() object.ObjectList {
+func (in *ControllerPingList) DeepCopyObjectList() object.ObjectList {
 	return in.DeepCopy()
 }

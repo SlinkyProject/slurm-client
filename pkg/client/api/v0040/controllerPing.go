@@ -14,21 +14,21 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func parsePing(pingV api.V0040ControllerPing) types.Ping {
-	ping := types.Ping{
+func parseControllerPing(pingV api.V0040ControllerPing) types.ControllerPing {
+	ping := types.ControllerPing{
 		Hostname: ptr.Deref(pingV.Hostname, ""),
-		Pinged:   ptr.Deref(pingV.Pinged, "") == types.PingPingedUP,
+		Pinged:   ptr.Deref(pingV.Pinged, "") == types.ControllerPingPingedUP,
 	}
 	return ping
 }
 
-// GetPing implements SlurmClientInterface
-func (c *SlurmClient) GetPing(ctx context.Context, host string) (*types.Ping, error) {
-	pingList, err := c.ListPing(ctx)
+// GetControllerPing implements SlurmClientInterface
+func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*types.ControllerPing, error) {
+	pingList, err := c.ListControllerPing(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ping := &types.Ping{}
+	ping := &types.ControllerPing{}
 	for _, p := range pingList.Items {
 		if p.Hostname == host {
 			ping = &p
@@ -37,17 +37,17 @@ func (c *SlurmClient) GetPing(ctx context.Context, host string) (*types.Ping, er
 	return ping, nil
 }
 
-// ListPing implements SlurmClientInterface
-func (c *SlurmClient) ListPing(ctx context.Context) (*types.PingList, error) {
+// ListControllerPing implements SlurmClientInterface
+func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.ControllerPingList, error) {
 	res, err := c.SlurmV0040GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	pingList := &types.PingList{}
+	pingList := &types.ControllerPingList{}
 	for _, p := range res.JSON200.Pings {
-		ping := parsePing(p)
+		ping := parseControllerPing(p)
 		pingList.AppendItem(&ping)
 	}
 	return pingList, nil
