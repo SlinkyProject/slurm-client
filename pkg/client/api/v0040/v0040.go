@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/go-retryablehttp"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
 )
 
@@ -26,10 +24,7 @@ type SlurmClient struct {
 }
 
 func NewSlurmClient(server, token string, httpServer *http.Client) (*SlurmClient, error) {
-	retryClient := retryablehttp.NewClient()
-	retryClient.Logger = nil
-
-	httpClient := retryClient.StandardClient()
+	httpClient := http.DefaultClient
 	if httpServer != nil {
 		httpClient = httpServer
 	}
