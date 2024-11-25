@@ -344,11 +344,6 @@ func (i *informerCache) Create(
 	obj object.Object,
 	opts ...CreateOption,
 ) error {
-	i.mu.Lock()
-	i.hasSynced = false
-	i.mu.Unlock()
-	i.syncCh <- true
-
 	err := i.writer.Create(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -360,11 +355,6 @@ func (i *informerCache) Delete(
 	obj object.Object,
 	opts ...DeleteOption,
 ) error {
-	i.mu.Lock()
-	i.hasSynced = false
-	i.mu.Unlock()
-	i.syncCh <- true
-
 	err := i.writer.Delete(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -376,11 +366,6 @@ func (i *informerCache) DeleteAllOf(
 	obj object.Object,
 	opts ...DeleteAllOfOption,
 ) error {
-	i.mu.Lock()
-	i.hasSynced = false
-	i.mu.Unlock()
-	i.syncCh <- true
-
 	err := i.writer.DeleteAllOf(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -462,11 +447,6 @@ func (i *informerCache) Update(
 	obj object.Object,
 	opts ...UpdateOption,
 ) error {
-	i.mu.Lock()
-	i.hasSynced = false
-	i.mu.Unlock()
-	i.syncCh <- true
-
 	err := i.writer.Update(ctx, obj, opts...)
 	i.syncObjCh <- obj.GetKey()
 	return err
