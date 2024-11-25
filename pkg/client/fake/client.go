@@ -102,17 +102,29 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		return errors.New(http.StatusText(http.StatusNotFound))
 	}
 	switch o := obj.(type) {
-	case *types.Node:
-		cache := entry.(*types.Node)
+	case *types.V0040ControllerPing:
+		cache := entry.(*types.V0040ControllerPing)
 		*o = *cache
-	case *types.ControllerPing:
-		cache := entry.(*types.ControllerPing)
+	case *types.V0041ControllerPing:
+		cache := entry.(*types.V0041ControllerPing)
 		*o = *cache
-	case *types.JobInfo:
-		cache := entry.(*types.JobInfo)
+	case *types.V0040JobInfo:
+		cache := entry.(*types.V0040JobInfo)
 		*o = *cache
-	case *types.PartitionInfo:
-		cache := entry.(*types.PartitionInfo)
+	case *types.V0041JobInfo:
+		cache := entry.(*types.V0041JobInfo)
+		*o = *cache
+	case *types.V0040Node:
+		cache := entry.(*types.V0040Node)
+		*o = *cache
+	case *types.V0041Node:
+		cache := entry.(*types.V0041Node)
+		*o = *cache
+	case *types.V0040PartitionInfo:
+		cache := entry.(*types.V0040PartitionInfo)
+		*o = *cache
+	case *types.V0041PartitionInfo:
+		cache := entry.(*types.V0041PartitionInfo)
 		*o = *cache
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -155,7 +167,7 @@ func (c *fakeClient) DeleteAllOf(ctx context.Context, obj object.Object, opts ..
 	panic("unimplemented")
 }
 
-func (c *fakeClient) Update(ctx context.Context, obj object.Object, opts ...client.UpdateOption) error {
+func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error {
 	t := obj.GetType()
 	k := obj.GetKey()
 	if _, ok := c.cache[t][k]; !ok {

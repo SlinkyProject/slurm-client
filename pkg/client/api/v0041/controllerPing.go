@@ -10,45 +10,43 @@ import (
 
 	"k8s.io/utils/ptr"
 
-	api "github.com/SlinkyProject/slurm-client/api/v0041"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
-func parseControllerPing(pingV api.V0041ControllerPing) types.ControllerPing {
-	ping := types.ControllerPing{
-		Hostname: ptr.Deref(pingV.Hostname, ""),
-		Pinged:   ptr.Deref(pingV.Pinged, "") == types.ControllerPingPingedUP,
-	}
-	return ping
+type ControllerPingInfoInterface interface {
+	GetControllerPing(ctx context.Context, host string) (*types.V0041ControllerPing, error)
+	ListControllerPing(ctx context.Context) (*types.V0041ControllerPingList, error)
 }
 
-// GetControllerPing implements SlurmClientInterface
-func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*types.ControllerPing, error) {
-	pingList, err := c.ListControllerPing(ctx)
+// GetControllerPing implements ClientInterface
+func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*types.V0041ControllerPing, error) {
+	list, err := c.ListControllerPing(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ping := &types.ControllerPing{}
-	for _, p := range pingList.Items {
-		if p.Hostname == host {
-			ping = &p
+	for _, item := range list.Items {
+		pingHost := ptr.Deref(item.Hostname, "")
+		if pingHost == host {
+			return &item, nil
 		}
 	}
-	return ping, nil
+	return nil, errors.New(http.StatusText(http.StatusNotFound))
 }
 
-// ListControllerPing implements SlurmClientInterface
-func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.ControllerPingList, error) {
+// ListControllerPing implements ClientInterface
+func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0041ControllerPingList, error) {
 	res, err := c.SlurmV0041GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	pingList := &types.ControllerPingList{}
-	for _, p := range res.JSON200.Pings {
-		ping := parseControllerPing(p)
-		pingList.AppendItem(&ping)
+	list := &types.V0041ControllerPingList{
+		Items: make([]types.V0041ControllerPing, len(res.JSON200.Pings)),
 	}
-	return pingList, nil
+	for i, item := range res.JSON200.Pings {
+		utils.RemarshalOrDie(item, &list.Items[i])
+	}
+	return list, nil
 }

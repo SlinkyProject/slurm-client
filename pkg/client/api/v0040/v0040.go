@@ -19,11 +19,21 @@ const (
 	headerApplicationJson = "application/json"
 )
 
+type ClientInterface interface {
+	api.ClientWithResponsesInterface
+	ControllerPingInfoInterface
+	JobInfoInterface
+	NodeInterface
+	PartitionInterface
+}
+
 type SlurmClient struct {
 	api.ClientWithResponsesInterface
 }
 
-func NewSlurmClient(server, token string, httpServer *http.Client) (*SlurmClient, error) {
+var _ ClientInterface = &SlurmClient{}
+
+func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterface, error) {
 	httpClient := http.DefaultClient
 	if httpServer != nil {
 		httpClient = httpServer
@@ -48,5 +58,3 @@ func NewSlurmClient(server, token string, httpServer *http.Client) (*SlurmClient
 
 	return &SlurmClient{client}, nil
 }
-
-var _ = SlurmClient{}

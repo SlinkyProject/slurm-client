@@ -49,9 +49,6 @@ func validate(config *Config) error {
 }
 
 type client struct {
-	clients   []SlurmClientInterface
-	clientUse int
-
 	mu        sync.RWMutex
 	informers map[object.ObjectType]InformerCache
 	uncached  set.Set[object.ObjectType]
@@ -59,6 +56,9 @@ type client struct {
 	stopped   bool
 	ctx       context.Context
 	cancel    context.CancelFunc
+
+	v0040Client v0040.ClientInterface
+	v0041Client v0041.ClientInterface
 
 	server          string
 	authToken       string
@@ -77,22 +77,20 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	}
 	options.ApplyOptions(opts)
 
-	slurmClientV0041, err := v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	v0040Client, err := v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create client: %v", err)
 	}
 
-	slurmClientV0040, err := v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	v0041Client, err := v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create client: %v", err)
 	}
 
 	// create return client object
 	client := &client{
-		clients: []SlurmClientInterface{
-			slurmClientV0041,
-			slurmClientV0040,
-		},
+		v0040Client:     v0040Client,
+		v0041Client:     v0041Client,
 		informers:       make(map[object.ObjectType]InformerCache),
 		uncached:        make(set.Set[object.ObjectType]),
 		authToken:       config.AuthToken,
@@ -129,17 +127,17 @@ func (c *client) Delete(
 	options := &DeleteOptions{}
 	options.ApplyOptions(opts)
 
-	switch o := obj.(type) {
-	case *types.Node:
-		err := c.deleteNode(ctx, string(o.GetKey()))
-		if err != nil {
-			return err
-		}
+	key := string(obj.GetKey())
+	switch obj.(type) {
+	case *types.V0040Node:
+		return c.v0040Client.DeleteNode(ctx, key)
+
+	case *types.V0041Node:
+		return c.v0041Client.DeleteNode(ctx, key)
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
-
-	return nil
 }
 
 // DeleteAllOf implements Client.
@@ -155,27 +153,32 @@ func (c *client) DeleteAllOf(
 func (c *client) Update(
 	ctx context.Context,
 	obj object.Object,
+	req any,
 	opts ...UpdateOption,
 ) error {
 	// Apply options
 	options := &UpdateOptions{}
 	options.ApplyOptions(opts)
 
+	key := string(obj.GetKey())
 	switch o := obj.(type) {
-	case *types.Node:
-		// Get original node to get deltas from
-		originalNode := &types.Node{}
-		if err := c.Get(ctx, object.ObjectKey(o.Name), originalNode); err != nil {
+	case *types.V0040Node:
+		err := c.v0040Client.UpdateNode(ctx, key, req)
+		if err != nil {
 			return err
 		}
-		if err := c.updateNode(ctx, o, originalNode); err != nil {
+		return c.Get(ctx, obj.GetKey(), o)
+
+	case *types.V0041Node:
+		err := c.v0041Client.UpdateNode(ctx, key, req)
+		if err != nil {
 			return err
 		}
+		return c.Get(ctx, obj.GetKey(), o)
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
-
-	return nil
 }
 
 // Get implements Client.
@@ -199,30 +202,56 @@ func (c *client) Get(
 	}
 
 	switch o := obj.(type) {
-	case *types.Node:
-		node, err := c.getNode(ctx, string(key))
+	case *types.V0040ControllerPing:
+		out, err := c.v0040Client.GetControllerPing(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		(*o) = (*node)
-	case *types.ControllerPing:
-		ping, err := c.getControllerPing(ctx, string(key))
+		*o = *out
+	case *types.V0040JobInfo:
+		out, err := c.v0040Client.GetJobInfo(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		(*o) = (*ping)
-	case *types.JobInfo:
-		node, err := c.getJobInfo(ctx, string(key))
+		*o = *out
+	case *types.V0040Node:
+		out, err := c.v0040Client.GetNode(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		(*o) = (*node)
-	case *types.PartitionInfo:
-		node, err := c.getPartitionInfo(ctx, string(key))
+		*o = *out
+	case *types.V0040PartitionInfo:
+		out, err := c.v0040Client.GetPartitionInfo(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		(*o) = (*node)
+		*o = *out
+
+	case *types.V0041ControllerPing:
+		out, err := c.v0041Client.GetControllerPing(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0041JobInfo:
+		out, err := c.v0041Client.GetJobInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0041Node:
+		out, err := c.v0041Client.GetNode(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0041PartitionInfo:
+		out, err := c.v0041Client.GetPartitionInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -251,30 +280,56 @@ func (c *client) List(
 
 	// Determine ObjectList type
 	switch objList := list.(type) {
-	case *types.NodeList:
-		nodeList, err := c.listNodes(ctx)
+	case *types.V0040ControllerPingList:
+		out, err := c.v0040Client.ListControllerPing(ctx)
 		if err != nil {
 			return err
 		}
-		(*objList) = (*nodeList)
-	case *types.ControllerPingList:
-		pingList, err := c.listControllerPing(ctx)
+		*objList = *out
+	case *types.V0040JobInfoList:
+		out, err := c.v0040Client.ListJobInfo(ctx)
 		if err != nil {
 			return err
 		}
-		(*objList) = (*pingList)
-	case *types.JobInfoList:
-		jobInfoList, err := c.listJobInfos(ctx)
+		*objList = *out
+	case *types.V0040NodeList:
+		out, err := c.v0040Client.ListNodes(ctx)
 		if err != nil {
 			return err
 		}
-		(*objList) = (*jobInfoList)
-	case *types.PartitionInfoList:
-		partitionInfoList, err := c.listPartitionInfos(ctx)
+		*objList = *out
+	case *types.V0040PartitionInfoList:
+		out, err := c.v0040Client.ListPartitionInfo(ctx)
 		if err != nil {
 			return err
 		}
-		(*objList) = (*partitionInfoList)
+		*objList = *out
+
+	case *types.V0041ControllerPingList:
+		out, err := c.v0041Client.ListControllerPing(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0041JobInfoList:
+		out, err := c.v0041Client.ListJobInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0041NodeList:
+		out, err := c.v0041Client.ListNodes(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0041PartitionInfoList:
+		out, err := c.v0041Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -400,13 +455,4 @@ func (c *client) Stop() {
 
 	c.cancel()
 	c.started = false
-}
-
-func tolerateError(err error) bool {
-	errText := err.Error()
-	if errText == http.StatusText(http.StatusNotFound) ||
-		errText == http.StatusText(http.StatusNoContent) {
-		return true
-	}
-	return false
 }

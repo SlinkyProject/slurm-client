@@ -11,7 +11,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 // Reader knows how to read and list Slurm objects.
@@ -33,12 +32,12 @@ type Writer interface {
 	// struct pointer so that obj can be updated with the content returned by the Server.
 	Create(ctx context.Context, obj object.Object, opts ...CreateOption) error
 
-	// Delete deletes the given obj from Slurm cluster.
-	Delete(ctx context.Context, obj object.Object, opts ...DeleteOption) error
-
 	// Update updates the given obj in the Slurm cluster. obj must be a
 	// struct pointer so that obj can be updated with the content returned by the Server.
-	Update(ctx context.Context, obj object.Object, opts ...UpdateOption) error
+	Update(ctx context.Context, obj object.Object, req any, opts ...UpdateOption) error
+
+	// Delete deletes the given obj from Slurm cluster.
+	Delete(ctx context.Context, obj object.Object, opts ...DeleteOption) error
 
 	// DeleteAllOf deletes all objects of the given type matching the given options.
 	DeleteAllOf(ctx context.Context, obj object.Object, opts ...DeleteAllOfOption) error
@@ -48,7 +47,6 @@ type Writer interface {
 type Client interface {
 	Reader
 	Writer
-
 	Informers
 
 	GetServer() string
@@ -101,33 +99,4 @@ type Informer interface {
 	// Run starts and runs the informer, returning after it stops.
 	// The informer will be stopped when stopCh is closed.
 	Run(stopCh <-chan struct{})
-}
-
-type SlurmClientInterface interface {
-	SlurmJobInfoInterface
-	SlurmNodeInterface
-	SlurmPartitionInterface
-	SlurmControllerPingInfoInterface
-}
-
-type SlurmJobInfoInterface interface {
-	GetJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error)
-	ListJobInfo(ctx context.Context) (*types.JobInfoList, error)
-}
-
-type SlurmNodeInterface interface {
-	DeleteNode(ctx context.Context, nodeName string) error
-	GetNode(ctx context.Context, nodeName string) (*types.Node, error)
-	ListNodes(ctx context.Context) (*types.NodeList, error)
-	UpdateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error
-}
-
-type SlurmPartitionInterface interface {
-	GetPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error)
-	ListPartitionInfo(ctx context.Context) (*types.PartitionInfoList, error)
-}
-
-type SlurmControllerPingInfoInterface interface {
-	GetControllerPing(ctx context.Context, host string) (*types.ControllerPing, error)
-	ListControllerPing(ctx context.Context) (*types.ControllerPingList, error)
 }

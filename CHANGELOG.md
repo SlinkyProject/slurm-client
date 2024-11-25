@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 - Changed object name `Ping` => `ControllerPing`.
 - Changed `fake` and `interceptor` module path.
+- Changed Slurm object types to their versioned representation.
+- Changed `Update()` function signature, added `req` parameter.
 
 ### Removed
 

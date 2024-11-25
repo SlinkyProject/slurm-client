@@ -8,35 +8,19 @@ import (
 	"errors"
 	"net/http"
 
-	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0041"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
-func parseNode(nodeV api.V0041Node) types.Node {
-	node := types.Node{
-		Address:       ptr.Deref(nodeV.Address, ""),
-		Comment:       ptr.Deref(nodeV.Comment, ""),
-		Extra:         ptr.Deref(nodeV.Extra, ""),
-		Name:          ptr.Deref(nodeV.Name, ""),
-		Partitions:    make(set.Set[string], 0),
-		State:         make(set.Set[types.NodeState], 0),
-		Cpus:          ptr.Deref(nodeV.Cpus, 0),
-		AllocCpus:     ptr.Deref(nodeV.AllocCpus, 0),
-		AllocIdleCpus: ptr.Deref(nodeV.AllocIdleCpus, 0),
-	}
-	partitions := ptr.Deref(nodeV.Partitions, api.V0041CsvString{})
-	node.Partitions.Insert(partitions...)
-	states := ptr.Deref(nodeV.State, []api.V0041NodeState{})
-	for _, state := range states {
-		node.State.Insert(types.NodeState(state))
-	}
-	return node
+type NodeInterface interface {
+	DeleteNode(ctx context.Context, nodeName string) error
+	UpdateNode(ctx context.Context, nodeName string, req any) error
+	GetNode(ctx context.Context, nodeName string) (*types.V0041Node, error)
+	ListNodes(ctx context.Context) (*types.V0041NodeList, error)
 }
 
-// DeleteNode implements SlurmClientInterface
+// DeleteNode implements ClientInterface
 func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 	res, err := c.SlurmV0041DeleteNodeWithResponse(ctx, nodeName)
 	if err != nil {
@@ -47,31 +31,14 @@ func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 	return nil
 }
 
-// UpdateNode implements SlurmClientInterface
-func (c *SlurmClient) UpdateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error {
-	body := api.SlurmV0041PostNodeJSONRequestBody{
-		// No way to know what the node name changed from.
-		// Name: utils.Reference([]string{node.Name}),
+// UpdateNode implements ClientInterface
+func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) error {
+	r, ok := req.(api.V0041UpdateNodeMsg)
+	if !ok {
+		return errors.New("expected req to be V0041UpdateNodeMsg")
 	}
-
-	if node.Comment != originalNode.Comment {
-		body.Comment = ptr.To(node.Comment)
-	}
-
-	if node.Extra != originalNode.Extra {
-		body.Extra = ptr.To(node.Extra)
-	}
-
-	if !node.State.Equal(originalNode.State) {
-		diffStates := node.State.Difference(originalNode.State)
-		states := []api.V0041UpdateNodeMsgState{}
-		for _, state := range diffStates.UnsortedList() {
-			states = append(states, api.V0041UpdateNodeMsgState(state))
-		}
-		body.State = ptr.To(states)
-	}
-
-	res, err := c.SlurmV0041PostNodeWithResponse(ctx, node.Name, body)
+	body := api.SlurmV0041PostNodeJSONRequestBody(r)
+	res, err := c.SlurmV0041PostNodeWithResponse(ctx, nodeName, body)
 	if err != nil {
 		return err
 	} else if res.StatusCode() != 200 {
@@ -80,8 +47,8 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, node *types.Node, original
 	return nil
 }
 
-// GetNode implements SlurmClientInterface
-func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.Node, error) {
+// GetNode implements ClientInterface
+func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V0041Node, error) {
 	params := &api.SlurmV0041GetNodeParams{}
 	res, err := c.SlurmV0041GetNodeWithResponse(ctx, nodeName, params)
 	if err != nil {
@@ -91,13 +58,13 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.Node
 	} else if len(res.JSON200.Nodes) == 0 {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
-	nodeV := res.JSON200.Nodes[0]
-	node := parseNode(nodeV)
-	return &node, nil
+	out := &types.V0041Node{}
+	utils.RemarshalOrDie(res.JSON200.Nodes[0], out)
+	return out, nil
 }
 
-// ListNodes implements SlurmClientInterface
-func (c *SlurmClient) ListNodes(ctx context.Context) (*types.NodeList, error) {
+// ListNodes implements ClientInterface
+func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0041NodeList, error) {
 	params := &api.SlurmV0041GetNodesParams{}
 	res, err := c.SlurmV0041GetNodesWithResponse(ctx, params)
 	if err != nil {
@@ -105,10 +72,11 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.NodeList, error) {
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	nodeList := &types.NodeList{}
-	for _, nodeV := range res.JSON200.Nodes {
-		node := parseNode(nodeV)
-		nodeList.Items = append(nodeList.Items, node)
+	list := &types.V0041NodeList{
+		Items: make([]types.V0041Node, len(res.JSON200.Nodes)),
 	}
-	return nodeList, nil
+	for i, item := range res.JSON200.Nodes {
+		utils.RemarshalOrDie(item, &list.Items[i])
+	}
+	return list, nil
 }

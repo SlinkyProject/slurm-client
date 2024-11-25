@@ -16,7 +16,7 @@ import (
 
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 const (
@@ -110,14 +110,24 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 	for {
 		var list object.ObjectList
 		switch i.objectType {
-		case slurmtypes.ObjectTypeNode:
-			list = &slurmtypes.NodeList{}
-		case slurmtypes.ObjectTypeControllerPing:
-			list = &slurmtypes.ControllerPingList{}
-		case slurmtypes.ObjectTypeJobInfo:
-			list = &slurmtypes.JobInfoList{}
-		case slurmtypes.ObjectTypePartitionInfo:
-			list = &slurmtypes.PartitionInfoList{}
+		case types.ObjectTypeV0040ControllerPing:
+			list = &types.V0040ControllerPingList{}
+		case types.ObjectTypeV0040JobInfo:
+			list = &types.V0040JobInfoList{}
+		case types.ObjectTypeV0040Node:
+			list = &types.V0040NodeList{}
+		case types.ObjectTypeV0040PartitionInfo:
+			list = &types.V0040PartitionInfoList{}
+
+		case types.ObjectTypeV0041ControllerPing:
+			list = &types.V0041ControllerPingList{}
+		case types.ObjectTypeV0041JobInfo:
+			list = &types.V0041JobInfoList{}
+		case types.ObjectTypeV0041Node:
+			list = &types.V0041NodeList{}
+		case types.ObjectTypeV0041PartitionInfo:
+			list = &types.V0041PartitionInfoList{}
+
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
 			// We cannot recover from here because the informer has started a
@@ -167,14 +177,24 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 
 		var obj object.Object
 		switch i.objectType {
-		case slurmtypes.ObjectTypeNode:
-			obj = &slurmtypes.Node{}
-		case slurmtypes.ObjectTypeControllerPing:
-			obj = &slurmtypes.ControllerPing{}
-		case slurmtypes.ObjectTypeJobInfo:
-			obj = &slurmtypes.JobInfo{}
-		case slurmtypes.ObjectTypePartitionInfo:
-			obj = &slurmtypes.PartitionInfo{}
+		case types.ObjectTypeV0040ControllerPing:
+			obj = &types.V0040ControllerPing{}
+		case types.ObjectTypeV0040JobInfo:
+			obj = &types.V0040JobInfo{}
+		case types.ObjectTypeV0040Node:
+			obj = &types.V0040Node{}
+		case types.ObjectTypeV0040PartitionInfo:
+			obj = &types.V0040PartitionInfo{}
+
+		case types.ObjectTypeV0041ControllerPing:
+			obj = &types.V0041ControllerPing{}
+		case types.ObjectTypeV0041JobInfo:
+			obj = &types.V0041JobInfo{}
+		case types.ObjectTypeV0041Node:
+			obj = &types.V0041Node{}
+		case types.ObjectTypeV0041PartitionInfo:
+			obj = &types.V0041PartitionInfo{}
+
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
 			// We cannot recover from here because the informer has started a
@@ -375,9 +395,10 @@ func (i *informerCache) DeleteAllOf(
 func (i *informerCache) Update(
 	ctx context.Context,
 	obj object.Object,
+	req any,
 	opts ...UpdateOption,
 ) error {
-	err := i.writer.Update(ctx, obj, opts...)
+	err := i.writer.Update(ctx, obj, req, opts...)
 	i.syncObjCh <- obj.GetKey()
 	return err
 }
@@ -407,18 +428,32 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	}
 
 	switch o := obj.(type) {
-	case *slurmtypes.Node:
-		cache := entry.object.(*slurmtypes.Node)
+	case *types.V0040ControllerPing:
+		cache := entry.object.(*types.V0040ControllerPing)
 		*o = *cache
-	case *slurmtypes.ControllerPing:
-		cache := entry.object.(*slurmtypes.ControllerPing)
+	case *types.V0040JobInfo:
+		cache := entry.object.(*types.V0040JobInfo)
 		*o = *cache
-	case *slurmtypes.JobInfo:
-		cache := entry.object.(*slurmtypes.JobInfo)
+	case *types.V0040Node:
+		cache := entry.object.(*types.V0040Node)
 		*o = *cache
-	case *slurmtypes.PartitionInfo:
-		cache := entry.object.(*slurmtypes.PartitionInfo)
+	case *types.V0040PartitionInfo:
+		cache := entry.object.(*types.V0040PartitionInfo)
 		*o = *cache
+
+	case *types.V0041ControllerPing:
+		cache := entry.object.(*types.V0041ControllerPing)
+		*o = *cache
+	case *types.V0041JobInfo:
+		cache := entry.object.(*types.V0041JobInfo)
+		*o = *cache
+	case *types.V0041Node:
+		cache := entry.object.(*types.V0041Node)
+		*o = *cache
+	case *types.V0041PartitionInfo:
+		cache := entry.object.(*types.V0041PartitionInfo)
+		*o = *cache
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
