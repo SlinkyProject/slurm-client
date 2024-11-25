@@ -35,7 +35,7 @@ func (c *client) listPartitionInfos(ctx context.Context) (*types.PartitionInfoLi
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
-		partitionInfoList, err = c.clients[i].ListPartitionInfos(ctx)
+		partitionInfoList, err = c.clients[i].ListPartitionInfo(ctx)
 		if err == nil {
 			c.clientUse = i
 			break

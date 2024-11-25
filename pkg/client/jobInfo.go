@@ -31,13 +31,13 @@ func (c *client) getJobInfo(ctx context.Context, jobId string) (*types.JobInfo, 
 	return jobInfo, nil
 }
 
-// ListJobInfos implements SlurmClientInterface
+// ListJobInfo implements SlurmClientInterface
 func (c *client) listJobInfos(ctx context.Context) (*types.JobInfoList, error) {
 	var jobInfoList *types.JobInfoList
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
-		jobInfoList, err = c.clients[i].ListJobInfos(ctx)
+		jobInfoList, err = c.clients[i].ListJobInfo(ctx)
 		if err == nil {
 			c.clientUse = i
 			break
@@ -48,6 +48,6 @@ func (c *client) listJobInfos(ctx context.Context) (*types.JobInfoList, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.V(1).Info("ListJobInfos()", "size", jobInfoList.Size(), "jobList", jobInfoList)
+	log.V(1).Info("ListJobInfo()", "size", jobInfoList.Size(), "jobList", jobInfoList)
 	return jobInfoList, nil
 }

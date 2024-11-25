@@ -112,7 +112,7 @@ type SlurmClientInterface interface {
 
 type SlurmJobInfoInterface interface {
 	GetJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error)
-	ListJobInfos(ctx context.Context) (*types.JobInfoList, error)
+	ListJobInfo(ctx context.Context) (*types.JobInfoList, error)
 }
 
 type SlurmNodeInterface interface {
@@ -124,7 +124,7 @@ type SlurmNodeInterface interface {
 
 type SlurmPartitionInterface interface {
 	GetPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error)
-	ListPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error)
+	ListPartitionInfo(ctx context.Context) (*types.PartitionInfoList, error)
 }
 
 type SlurmPingInfoInterface interface {
