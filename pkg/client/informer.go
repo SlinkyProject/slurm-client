@@ -348,7 +348,7 @@ func (i *informerCache) Create(
 	i.hasSynced = false
 	i.mu.Unlock()
 	i.syncCh <- true
-	opts = append(opts, &CreateOptions{SkipCache: true})
+
 	err := i.writer.Create(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -365,7 +365,6 @@ func (i *informerCache) Delete(
 	i.mu.Unlock()
 	i.syncCh <- true
 
-	opts = append(opts, &DeleteOptions{SkipCache: true})
 	err := i.writer.Delete(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -382,7 +381,6 @@ func (i *informerCache) DeleteAllOf(
 	i.mu.Unlock()
 	i.syncCh <- true
 
-	opts = append(opts, &DeleteAllOfOptions{DeleteOptions: DeleteOptions{SkipCache: true}})
 	err := i.writer.DeleteAllOf(ctx, obj, opts...)
 	i.syncCh <- true
 	return err
@@ -469,7 +467,6 @@ func (i *informerCache) Update(
 	i.mu.Unlock()
 	i.syncCh <- true
 
-	opts = append(opts, &UpdateOptions{SkipCache: true})
 	err := i.writer.Update(ctx, obj, opts...)
 	i.syncObjCh <- obj.GetKey()
 	return err

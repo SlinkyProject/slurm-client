@@ -128,15 +128,6 @@ func (c *client) Delete(
 	options := &DeleteOptions{}
 	options.ApplyOptions(opts)
 
-	if !options.SkipCache {
-		objectType := obj.GetType()
-		objectType = object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
-		informerCache := c.GetInformer(objectType)
-		if informerCache.HasStarted() && !c.uncached.Has(objectType) {
-			return informerCache.Delete(ctx, obj, opts...)
-		}
-	}
-
 	switch o := obj.(type) {
 	case *slurmtypes.Node:
 		err := c.deleteNode(ctx, string(o.GetKey()))
@@ -272,15 +263,6 @@ func (c *client) Update(
 	// Apply options
 	options := &UpdateOptions{}
 	options.ApplyOptions(opts)
-
-	if !options.SkipCache {
-		objectType := obj.GetType()
-		objectType = object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
-		informerCache := c.GetInformer(objectType)
-		if informerCache.HasStarted() && !c.uncached.Has(objectType) {
-			return informerCache.Update(ctx, obj, opts...)
-		}
-	}
 
 	switch o := obj.(type) {
 	case *slurmtypes.Node:

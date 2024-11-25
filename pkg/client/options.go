@@ -108,8 +108,6 @@ var _ ClientOption = &ClientOptions{}
 // CreateOptions contains options for create requests. It's generally a subset
 // of metav1.CreateOptions.
 type CreateOptions struct {
-	// SkipCache indicates not to use cache when fetching data.
-	SkipCache bool
 }
 
 // ApplyOptions applies the given create options on these options,
@@ -123,7 +121,6 @@ func (o *CreateOptions) ApplyOptions(opts []CreateOption) *CreateOptions {
 
 // ApplyToCreate implements CreateOption.
 func (o *CreateOptions) ApplyToCreate(co *CreateOptions) {
-	co.SkipCache = o.SkipCache
 }
 
 var _ CreateOption = &CreateOptions{}
@@ -135,8 +132,6 @@ var _ CreateOption = &CreateOptions{}
 // DeleteOptions contains options for delete requests. It's generally a subset
 // of metav1.DeleteOptions.
 type DeleteOptions struct {
-	// SkipCache indicates not to use cache when fetching data.
-	SkipCache bool
 }
 
 // ApplyOptions applies the given delete options on these options,
@@ -152,7 +147,6 @@ var _ DeleteOption = &DeleteOptions{}
 
 // ApplyToDelete implements DeleteOption.
 func (o *DeleteOptions) ApplyToDelete(do *DeleteOptions) {
-	do.SkipCache = o.SkipCache
 }
 
 // }}}
@@ -225,8 +219,6 @@ func (o *ListOptions) ApplyOptions(opts []ListOption) *ListOptions {
 
 // UpdateOptions contains options for create requests.
 type UpdateOptions struct {
-	// SkipCache indicates not to use cache when fetching data.
-	SkipCache bool
 }
 
 // ApplyOptions applies the given update options on these options,
@@ -242,7 +234,6 @@ var _ UpdateOption = &UpdateOptions{}
 
 // ApplyToUpdate implements UpdateOption.
 func (o *UpdateOptions) ApplyToUpdate(uo *UpdateOptions) {
-	uo.SkipCache = o.SkipCache
 }
 
 // }}}
@@ -272,12 +263,9 @@ func (o *PatchOptions) ApplyToPatch(po *PatchOptions) {
 
 // {{{ DeleteAllOf Options
 
-// these are all just delete options and list options
-
 // DeleteAllOfOptions contains options for deletecollection (deleteallof) requests.
 // It's just list and delete options smooshed together.
 type DeleteAllOfOptions struct {
-	ListOptions
 	DeleteOptions
 }
 
@@ -294,7 +282,6 @@ var _ DeleteAllOfOption = &DeleteAllOfOptions{}
 
 // ApplyToDeleteAllOf implements DeleteAllOfOption.
 func (o *DeleteAllOfOptions) ApplyToDeleteAllOf(do *DeleteAllOfOptions) {
-	o.ApplyToList(&do.ListOptions)
 	o.ApplyToDelete(&do.DeleteOptions)
 }
 

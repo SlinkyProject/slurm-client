@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
+- Removed the skipCache client option in operations that do not read cache.
+
 ## \[v0.1.0\] - 2024-11-08
 
 ### Added
