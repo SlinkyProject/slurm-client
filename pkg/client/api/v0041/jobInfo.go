@@ -50,8 +50,8 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.JobI
 	return &jobInfo, nil
 }
 
-// ListJobInfos implements SlurmClientInterface
-func (c *SlurmClient) ListJobInfos(ctx context.Context) (*types.JobInfoList, error) {
+// ListJobInfo implements SlurmClientInterface
+func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.JobInfoList, error) {
 	params := &api.SlurmV0041GetJobsParams{}
 	res, err := c.SlurmV0041GetJobsWithResponse(ctx, params)
 	if err != nil {

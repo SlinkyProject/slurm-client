@@ -46,8 +46,8 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 	return &partitionInfo, nil
 }
 
-// ListPartitionInfos implements SlurmClientInterface
-func (c *SlurmClient) ListPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error) {
+// ListPartitionInfo implements SlurmClientInterface
+func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.PartitionInfoList, error) {
 	params := &api.SlurmV0040GetPartitionsParams{}
 	res, err := c.SlurmV0040GetPartitionsWithResponse(ctx, params)
 	if err != nil {
