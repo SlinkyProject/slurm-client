@@ -11,7 +11,7 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type fakeClient struct {
@@ -102,17 +102,17 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		return errors.New(http.StatusText(http.StatusNotFound))
 	}
 	switch o := obj.(type) {
-	case *slurmtypes.Node:
-		cache := entry.(*slurmtypes.Node)
+	case *types.Node:
+		cache := entry.(*types.Node)
 		*o = *cache
-	case *slurmtypes.Ping:
-		cache := entry.(*slurmtypes.Ping)
+	case *types.Ping:
+		cache := entry.(*types.Ping)
 		*o = *cache
-	case *slurmtypes.JobInfo:
-		cache := entry.(*slurmtypes.JobInfo)
+	case *types.JobInfo:
+		cache := entry.(*types.JobInfo)
 		*o = *cache
-	case *slurmtypes.PartitionInfo:
-		cache := entry.(*slurmtypes.PartitionInfo)
+	case *types.PartitionInfo:
+		cache := entry.(*types.PartitionInfo)
 		*o = *cache
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))

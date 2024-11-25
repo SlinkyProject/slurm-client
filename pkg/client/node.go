@@ -6,13 +6,12 @@ package client
 import (
 	"context"
 
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func (c *client) getNode(ctx context.Context, nodeName string) (*slurmtypes.Node, error) {
-	var node *slurmtypes.Node
+func (c *client) getNode(ctx context.Context, nodeName string) (*types.Node, error) {
+	var node *types.Node
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
@@ -31,8 +30,8 @@ func (c *client) getNode(ctx context.Context, nodeName string) (*slurmtypes.Node
 	return node, nil
 }
 
-func (c *client) listNodes(ctx context.Context) (*slurmtypes.NodeList, error) {
-	var nodeList *slurmtypes.NodeList
+func (c *client) listNodes(ctx context.Context) (*types.NodeList, error) {
+	var nodeList *types.NodeList
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
@@ -70,7 +69,7 @@ func (c *client) deleteNode(ctx context.Context, nodeName string) error {
 	return nil
 }
 
-func (c *client) updateNode(ctx context.Context, node *slurmtypes.Node, originalNode *slurmtypes.Node) error {
+func (c *client) updateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error {
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {

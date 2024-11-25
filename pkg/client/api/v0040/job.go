@@ -12,16 +12,16 @@ import (
 	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func parseJobInfo(jobInfoV api.V0040JobInfo) slurmtypes.JobInfo {
-	jobInfo := slurmtypes.JobInfo{
+func parseJobInfo(jobInfoV api.V0040JobInfo) types.JobInfo {
+	jobInfo := types.JobInfo{
 		JobId:        ptr.Deref(jobInfoV.JobId, 0),
 		Partition:    ptr.Deref(jobInfoV.Partition, ""),
 		Uid:          ptr.Deref(jobInfoV.UserId, 0),
 		UserName:     ptr.Deref(jobInfoV.UserName, ""),
-		JobState:     make(set.Set[slurmtypes.JobInfoJobState], 0),
+		JobState:     make(set.Set[types.JobInfoJobState], 0),
 		Cpus:         ptr.Deref(jobInfoV.Cpus.Number, 0),
 		NodeCount:    ptr.Deref(jobInfoV.NodeCount.Number, 0),
 		Hold:         ptr.Deref(jobInfoV.Hold, false),
@@ -29,13 +29,13 @@ func parseJobInfo(jobInfoV api.V0040JobInfo) slurmtypes.JobInfo {
 	}
 	states := ptr.Deref(jobInfoV.JobState, []api.V0040JobInfoJobState{})
 	for _, state := range states {
-		jobInfo.JobState.Insert(slurmtypes.JobInfoJobState(state))
+		jobInfo.JobState.Insert(types.JobInfoJobState(state))
 	}
 	return jobInfo
 }
 
 // GetJobInfo implements SlurmClientInterface
-func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*slurmtypes.JobInfo, error) {
+func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error) {
 	params := &api.SlurmV0040GetJobParams{}
 	res, err := c.SlurmV0040GetJobWithResponse(ctx, jobId, params)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*slurmtypes
 }
 
 // ListJobInfos implements SlurmClientInterface
-func (c *SlurmClient) ListJobInfos(ctx context.Context) (*slurmtypes.JobInfoList, error) {
+func (c *SlurmClient) ListJobInfos(ctx context.Context) (*types.JobInfoList, error) {
 	params := &api.SlurmV0040GetJobsParams{}
 	res, err := c.SlurmV0040GetJobsWithResponse(ctx, params)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *SlurmClient) ListJobInfos(ctx context.Context) (*slurmtypes.JobInfoList
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	jobInfoList := &slurmtypes.JobInfoList{}
+	jobInfoList := &types.JobInfoList{}
 	for _, jobInfoV := range res.JSON200.Jobs {
 		jobInfo := parseJobInfo(jobInfoV)
 		jobInfoList.Items = append(jobInfoList.Items, jobInfo)

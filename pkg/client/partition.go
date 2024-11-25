@@ -6,13 +6,12 @@ package client
 import (
 	"context"
 
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func (c *client) getPartitionInfo(ctx context.Context, name string) (*slurmtypes.PartitionInfo, error) {
-	var partitionInfo *slurmtypes.PartitionInfo
+func (c *client) getPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error) {
+	var partitionInfo *types.PartitionInfo
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
@@ -31,8 +30,8 @@ func (c *client) getPartitionInfo(ctx context.Context, name string) (*slurmtypes
 	return partitionInfo, nil
 }
 
-func (c *client) listPartitionInfos(ctx context.Context) (*slurmtypes.PartitionInfoList, error) {
-	var partitionInfoList *slurmtypes.PartitionInfoList
+func (c *client) listPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error) {
+	var partitionInfoList *types.PartitionInfoList
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {

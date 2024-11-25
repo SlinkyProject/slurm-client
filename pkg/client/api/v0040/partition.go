@@ -12,26 +12,26 @@ import (
 	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func parsePartitionInfo(partitionInfoV api.V0040PartitionInfo) slurmtypes.PartitionInfo {
-	partitionInfo := slurmtypes.PartitionInfo{
+func parsePartitionInfo(partitionInfoV api.V0040PartitionInfo) types.PartitionInfo {
+	partitionInfo := types.PartitionInfo{
 		Name:           ptr.Deref(partitionInfoV.Name, ""),
 		NodeSets:       ptr.Deref(partitionInfoV.NodeSets, ""),
 		Nodes:          ptr.Deref(partitionInfoV.Nodes.Total, 0),
 		Cpus:           ptr.Deref(partitionInfoV.Cpus.Total, 0),
-		PartitionState: make(set.Set[slurmtypes.PartitionInfoPartitionState], 0),
+		PartitionState: make(set.Set[types.PartitionInfoPartitionState], 0),
 	}
 	states := ptr.Deref(partitionInfoV.Partition.State, []api.V0040PartitionInfoPartitionState{})
 	for _, state := range states {
-		partitionInfo.PartitionState.Insert(slurmtypes.PartitionInfoPartitionState(state))
+		partitionInfo.PartitionState.Insert(types.PartitionInfoPartitionState(state))
 	}
 	return partitionInfo
 }
 
 // GetPartitionInfo implements SlurmClientInterface
-func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*slurmtypes.PartitionInfo, error) {
+func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error) {
 	params := &api.SlurmV0040GetPartitionParams{}
 	res, err := c.SlurmV0040GetPartitionWithResponse(ctx, name, params)
 	if err != nil {
@@ -47,7 +47,7 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*slurm
 }
 
 // ListPartitionInfos implements SlurmClientInterface
-func (c *SlurmClient) ListPartitionInfos(ctx context.Context) (*slurmtypes.PartitionInfoList, error) {
+func (c *SlurmClient) ListPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error) {
 	params := &api.SlurmV0040GetPartitionsParams{}
 	res, err := c.SlurmV0040GetPartitionsWithResponse(ctx, params)
 	if err != nil {
@@ -55,7 +55,7 @@ func (c *SlurmClient) ListPartitionInfos(ctx context.Context) (*slurmtypes.Parti
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	partitionInfoList := &slurmtypes.PartitionInfoList{}
+	partitionInfoList := &types.PartitionInfoList{}
 	for _, partitionInfoV := range res.JSON200.Partitions {
 		partitionInfo := parsePartitionInfo(partitionInfoV)
 		partitionInfoList.Items = append(partitionInfoList.Items, partitionInfo)
