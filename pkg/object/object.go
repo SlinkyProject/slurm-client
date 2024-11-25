@@ -17,7 +17,6 @@ type Object interface {
 type ObjectList interface {
 	GetType() ObjectType
 	GetItems() []Object
-	Size() int
 	AppendItem(Object)
 	DeepCopyObjectList() ObjectList
 }

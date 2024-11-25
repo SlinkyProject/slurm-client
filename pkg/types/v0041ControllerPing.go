@@ -73,11 +73,6 @@ func (o *V0041ControllerPingList) GetItems() []object.Object {
 	return list
 }
 
-// Size implements ObjectList.
-func (o *V0041ControllerPingList) Size() int {
-	return len(o.Items)
-}
-
 // AppendItem implements ObjectList.
 func (o *V0041ControllerPingList) AppendItem(object object.Object) {
 	out := object.(*V0041ControllerPing)

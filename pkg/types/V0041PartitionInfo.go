@@ -65,11 +65,6 @@ func (o *V0041PartitionInfoList) GetItems() []object.Object {
 	return list
 }
 
-// Size implements ObjectList.
-func (o *V0041PartitionInfoList) Size() int {
-	return len(o.Items)
-}
-
 // AppendItem implements ObjectList.
 func (o *V0041PartitionInfoList) AppendItem(object object.Object) {
 	out := object.(*V0041PartitionInfo)

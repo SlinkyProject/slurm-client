@@ -66,11 +66,6 @@ func (o *V0040JobInfoList) GetItems() []object.Object {
 	return list
 }
 
-// Size implements ObjectList.
-func (o *V0040JobInfoList) Size() int {
-	return len(o.Items)
-}
-
 // AppendItem implements ObjectList.
 func (o *V0040JobInfoList) AppendItem(object object.Object) {
 	out := object.(*V0040JobInfo)
