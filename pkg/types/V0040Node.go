@@ -4,8 +4,6 @@
 package types
 
 import (
-	"reflect"
-
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
@@ -39,11 +37,6 @@ func (o *V0040Node) GetKey() object.ObjectKey {
 // GetType implements Object.
 func (o *V0040Node) GetType() object.ObjectType {
 	return ObjectTypeV0040Node
-}
-
-// DeepEqualObject implements Object.
-func (o *V0040Node) DeepEqualObject(object object.Object) bool {
-	return reflect.DeepEqual(o, object)
 }
 
 // DeepCopyObject implements Object.

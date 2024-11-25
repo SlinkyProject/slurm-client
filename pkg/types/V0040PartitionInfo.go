@@ -4,8 +4,6 @@
 package types
 
 import (
-	"reflect"
-
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
@@ -29,11 +27,6 @@ func (o *V0040PartitionInfo) GetKey() object.ObjectKey {
 // GetType implements Object.
 func (o *V0040PartitionInfo) GetType() object.ObjectType {
 	return ObjectTypeV0040PartitionInfo
-}
-
-// DeepEqualObject implements Object.
-func (in *V0040PartitionInfo) DeepEqualObject(object object.Object) bool {
-	return reflect.DeepEqual(in, object)
 }
 
 // DeepCopyObject implements Object.

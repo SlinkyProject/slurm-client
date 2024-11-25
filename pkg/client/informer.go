@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
@@ -259,7 +260,7 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 		if !ok {
 			insert = true
 			e.Type = event.Added
-		} else if ok && !now.Before(entry.lastUpdate) && !entry.object.DeepEqualObject(item) {
+		} else if ok && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, item) {
 			insert = true
 			e.Type = event.Modified
 			e.ObjectOld = entry.object.DeepCopyObject()
@@ -298,7 +299,7 @@ func (i *informerCache) processObject(obj object.Object) {
 	if !ok {
 		insert = true
 		e.Type = event.Added
-	} else if ok && !now.Before(entry.lastUpdate) && !entry.object.DeepEqualObject(obj) {
+	} else if ok && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, obj) {
 		insert = true
 		e.Type = event.Modified
 		e.ObjectOld = entry.object.DeepCopyObject()

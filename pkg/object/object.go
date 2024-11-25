@@ -10,7 +10,6 @@ type ObjectKey string
 type Object interface {
 	GetKey() ObjectKey
 	GetType() ObjectType
-	DeepEqualObject(Object) bool
 	DeepCopyObject() Object
 }
 

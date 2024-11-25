@@ -4,8 +4,6 @@
 package types
 
 import (
-	"reflect"
-
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0041"
@@ -30,11 +28,6 @@ func (o *V0041JobInfo) GetKey() object.ObjectKey {
 // GetType implements Object.
 func (o *V0041JobInfo) GetType() object.ObjectType {
 	return ObjectTypeV0041JobInfo
-}
-
-// DeepEqualObject implements Object.
-func (o *V0041JobInfo) DeepEqualObject(object object.Object) bool {
-	return reflect.DeepEqual(o, object)
 }
 
 // DeepCopyObject implements Object.
