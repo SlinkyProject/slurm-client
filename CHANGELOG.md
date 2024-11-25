@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Changed object name `Ping` => `ControllerPing`.
+- Changed `fake` and `interceptor` module path.
 
 ### Removed
 
