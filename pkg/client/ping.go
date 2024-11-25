@@ -6,13 +6,12 @@ package client
 import (
 	"context"
 
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func (c *client) getPing(ctx context.Context, host string) (*slurmtypes.Ping, error) {
-	var ping *slurmtypes.Ping
+func (c *client) getPing(ctx context.Context, host string) (*types.Ping, error) {
+	var ping *types.Ping
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
@@ -31,8 +30,8 @@ func (c *client) getPing(ctx context.Context, host string) (*slurmtypes.Ping, er
 	return ping, nil
 }
 
-func (c *client) listPing(ctx context.Context) (*slurmtypes.PingList, error) {
-	var pingList *slurmtypes.PingList
+func (c *client) listPing(ctx context.Context) (*types.PingList, error) {
+	var pingList *types.PingList
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {

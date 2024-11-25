@@ -6,14 +6,13 @@ package client
 import (
 	"context"
 
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 // GetJobInfo implements SlurmClientInterface
-func (c *client) getJobInfo(ctx context.Context, jobId string) (*slurmtypes.JobInfo, error) {
-	var jobInfo *slurmtypes.JobInfo
+func (c *client) getJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error) {
+	var jobInfo *types.JobInfo
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {
@@ -33,8 +32,8 @@ func (c *client) getJobInfo(ctx context.Context, jobId string) (*slurmtypes.JobI
 }
 
 // ListJobInfos implements SlurmClientInterface
-func (c *client) listJobInfos(ctx context.Context) (*slurmtypes.JobInfoList, error) {
-	var jobInfoList *slurmtypes.JobInfoList
+func (c *client) listJobInfos(ctx context.Context) (*types.JobInfoList, error) {
+	var jobInfoList *types.JobInfoList
 	var err error
 	log := log.FromContext(ctx)
 	for i := c.clientUse; i < len(c.clients); i++ {

@@ -18,7 +18,7 @@ import (
 	v0041 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0041"
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 // Config holds the common attributes that can be passed to a Slurm client on
@@ -129,7 +129,7 @@ func (c *client) Delete(
 	options.ApplyOptions(opts)
 
 	switch o := obj.(type) {
-	case *slurmtypes.Node:
+	case *types.Node:
 		err := c.deleteNode(ctx, string(o.GetKey()))
 		if err != nil {
 			return err
@@ -171,25 +171,25 @@ func (c *client) Get(
 	}
 
 	switch o := obj.(type) {
-	case *slurmtypes.Node:
+	case *types.Node:
 		node, err := c.getNode(ctx, string(key))
 		if err != nil {
 			return err
 		}
 		(*o) = (*node)
-	case *slurmtypes.Ping:
+	case *types.Ping:
 		ping, err := c.getPing(ctx, string(key))
 		if err != nil {
 			return err
 		}
 		(*o) = (*ping)
-	case *slurmtypes.JobInfo:
+	case *types.JobInfo:
 		node, err := c.getJobInfo(ctx, string(key))
 		if err != nil {
 			return err
 		}
 		(*o) = (*node)
-	case *slurmtypes.PartitionInfo:
+	case *types.PartitionInfo:
 		node, err := c.getPartitionInfo(ctx, string(key))
 		if err != nil {
 			return err
@@ -223,25 +223,25 @@ func (c *client) List(
 
 	// Determine ObjectList type
 	switch objList := list.(type) {
-	case *slurmtypes.NodeList:
+	case *types.NodeList:
 		nodeList, err := c.listNodes(ctx)
 		if err != nil {
 			return err
 		}
 		(*objList) = (*nodeList)
-	case *slurmtypes.PingList:
+	case *types.PingList:
 		pingList, err := c.listPing(ctx)
 		if err != nil {
 			return err
 		}
 		(*objList) = (*pingList)
-	case *slurmtypes.JobInfoList:
+	case *types.JobInfoList:
 		jobInfoList, err := c.listJobInfos(ctx)
 		if err != nil {
 			return err
 		}
 		(*objList) = (*jobInfoList)
-	case *slurmtypes.PartitionInfoList:
+	case *types.PartitionInfoList:
 		partitionInfoList, err := c.listPartitionInfos(ctx)
 		if err != nil {
 			return err
@@ -265,9 +265,9 @@ func (c *client) Update(
 	options.ApplyOptions(opts)
 
 	switch o := obj.(type) {
-	case *slurmtypes.Node:
+	case *types.Node:
 		// Get original node to get deltas from
-		originalNode := &slurmtypes.Node{}
+		originalNode := &types.Node{}
 		if err := c.Get(ctx, object.ObjectKey(o.Name), originalNode); err != nil {
 			return err
 		}

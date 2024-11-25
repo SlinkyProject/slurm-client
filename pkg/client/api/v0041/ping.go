@@ -11,24 +11,24 @@ import (
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0041"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
-func parsePing(pingV api.V0041ControllerPing) slurmtypes.Ping {
-	ping := slurmtypes.Ping{
+func parsePing(pingV api.V0041ControllerPing) types.Ping {
+	ping := types.Ping{
 		Hostname: ptr.Deref(pingV.Hostname, ""),
-		Pinged:   ptr.Deref(pingV.Pinged, "") == slurmtypes.PingPingedUP,
+		Pinged:   ptr.Deref(pingV.Pinged, "") == types.PingPingedUP,
 	}
 	return ping
 }
 
 // GetPing implements SlurmClientInterface
-func (c *SlurmClient) GetPing(ctx context.Context, host string) (*slurmtypes.Ping, error) {
+func (c *SlurmClient) GetPing(ctx context.Context, host string) (*types.Ping, error) {
 	pingList, err := c.ListPing(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ping := &slurmtypes.Ping{}
+	ping := &types.Ping{}
 	for _, p := range pingList.Items {
 		if p.Hostname == host {
 			ping = &p
@@ -38,14 +38,14 @@ func (c *SlurmClient) GetPing(ctx context.Context, host string) (*slurmtypes.Pin
 }
 
 // ListPing implements SlurmClientInterface
-func (c *SlurmClient) ListPing(ctx context.Context) (*slurmtypes.PingList, error) {
+func (c *SlurmClient) ListPing(ctx context.Context) (*types.PingList, error) {
 	res, err := c.SlurmV0041GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
 		return nil, errors.New(http.StatusText(res.StatusCode()))
 	}
-	pingList := &slurmtypes.PingList{}
+	pingList := &types.PingList{}
 	for _, p := range res.JSON200.Pings {
 		ping := parsePing(p)
 		pingList.AppendItem(&ping)

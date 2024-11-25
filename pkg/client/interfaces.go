@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	slurmtypes "github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 // Reader knows how to read and list Slurm objects.
@@ -105,17 +105,17 @@ type Informer interface {
 
 type SlurmClientInterface interface {
 	// Job
-	GetJobInfo(ctx context.Context, jobId string) (*slurmtypes.JobInfo, error)
-	ListJobInfos(ctx context.Context) (*slurmtypes.JobInfoList, error)
+	GetJobInfo(ctx context.Context, jobId string) (*types.JobInfo, error)
+	ListJobInfos(ctx context.Context) (*types.JobInfoList, error)
 	// Node
 	DeleteNode(ctx context.Context, nodeName string) error
-	GetNode(ctx context.Context, nodeName string) (*slurmtypes.Node, error)
-	ListNodes(ctx context.Context) (*slurmtypes.NodeList, error)
-	UpdateNode(ctx context.Context, node *slurmtypes.Node, originalNode *slurmtypes.Node) error
+	GetNode(ctx context.Context, nodeName string) (*types.Node, error)
+	ListNodes(ctx context.Context) (*types.NodeList, error)
+	UpdateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error
 	// Partition
-	GetPartitionInfo(ctx context.Context, name string) (*slurmtypes.PartitionInfo, error)
-	ListPartitionInfos(ctx context.Context) (*slurmtypes.PartitionInfoList, error)
+	GetPartitionInfo(ctx context.Context, name string) (*types.PartitionInfo, error)
+	ListPartitionInfos(ctx context.Context) (*types.PartitionInfoList, error)
 	// Ping
-	GetPing(ctx context.Context, host string) (*slurmtypes.Ping, error)
-	ListPing(ctx context.Context) (*slurmtypes.PingList, error)
+	GetPing(ctx context.Context, host string) (*types.Ping, error)
+	ListPing(ctx context.Context) (*types.PingList, error)
 }
