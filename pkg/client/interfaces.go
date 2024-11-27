@@ -30,7 +30,7 @@ type Reader interface {
 type Writer interface {
 	// Create saves the object obj in the Slurm cluster. obj must be a
 	// struct pointer so that obj can be updated with the content returned by the Server.
-	Create(ctx context.Context, obj object.Object, opts ...CreateOption) error
+	Create(ctx context.Context, obj object.Object, req any, opts ...CreateOption) error
 
 	// Update updates the given obj in the Slurm cluster. obj must be a
 	// struct pointer so that obj can be updated with the content returned by the Server.

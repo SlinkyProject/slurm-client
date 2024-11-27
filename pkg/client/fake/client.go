@@ -139,7 +139,7 @@ func (c *fakeClient) List(ctx context.Context, list object.ObjectList, opts ...c
 	return nil
 }
 
-func (c *fakeClient) Create(ctx context.Context, obj object.Object, opts ...client.CreateOption) error {
+func (c *fakeClient) Create(ctx context.Context, obj object.Object, req any, opts ...client.CreateOption) error {
 	t := obj.GetType()
 	k := obj.GetKey()
 	_, exists := c.cache[t][k]

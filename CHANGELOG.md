@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Changed `fake` and `interceptor` module path.
 - Changed Slurm object types to their versioned representation.
 - Changed `Update()` function signature, added `req` parameter.
+- Changed the `Create()` function signature, added `req` parameter.
 
 ### Removed
 

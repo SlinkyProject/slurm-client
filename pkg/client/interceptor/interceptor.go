@@ -14,7 +14,7 @@ import (
 type Funcs struct {
 	Get         func(ctx context.Context, key object.ObjectKey, obj object.Object, opts ...client.GetOption) error
 	List        func(ctx context.Context, list object.ObjectList, opts ...client.ListOption) error
-	Create      func(ctx context.Context, obj object.Object, opts ...client.CreateOption) error
+	Create      func(ctx context.Context, obj object.Object, req any, opts ...client.CreateOption) error
 	Delete      func(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error
 	Update      func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
 	GetInformer func(obj object.ObjectType) client.InformerCache
@@ -51,11 +51,11 @@ func (c *interceptor) List(ctx context.Context, list object.ObjectList, opts ...
 	return c.client.List(ctx, list, opts...)
 }
 
-func (c *interceptor) Create(ctx context.Context, obj object.Object, opts ...client.CreateOption) error {
+func (c *interceptor) Create(ctx context.Context, obj object.Object, req any, opts ...client.CreateOption) error {
 	if c.funcs.Create != nil {
-		return c.funcs.Create(ctx, obj, opts...)
+		return c.funcs.Create(ctx, obj, req, opts...)
 	}
-	return c.client.Create(ctx, obj, opts...)
+	return c.client.Create(ctx, obj, req, opts...)
 }
 
 func (c *interceptor) Delete(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error {

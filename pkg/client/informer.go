@@ -363,9 +363,10 @@ func (i *informerCache) WaitForSyncGet(ctx context.Context, interval time.Durati
 func (i *informerCache) Create(
 	ctx context.Context,
 	obj object.Object,
+	req any,
 	opts ...CreateOption,
 ) error {
-	err := i.writer.Create(ctx, obj, opts...)
+	err := i.writer.Create(ctx, obj, req, opts...)
 	i.syncCh <- true
 	return err
 }

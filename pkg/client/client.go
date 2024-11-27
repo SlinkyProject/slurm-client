@@ -112,9 +112,17 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 func (c *client) Create(
 	ctx context.Context,
 	obj object.Object,
+	req any,
 	opts ...CreateOption,
 ) error {
-	panic("unimplemented")
+	// Apply options
+	options := &CreateOptions{}
+	options.ApplyOptions(opts)
+
+	switch obj.(type) {
+	default:
+		return errors.New(http.StatusText(http.StatusNotImplemented))
+	}
 }
 
 // Delete implements Client.
