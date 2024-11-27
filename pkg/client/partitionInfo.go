@@ -46,6 +46,6 @@ func (c *client) listPartitionInfos(ctx context.Context) (*types.PartitionInfoLi
 	if err != nil {
 		return nil, err
 	}
-	log.V(1).Info("ListPartitionInfos()", "size", partitionInfoList.Size(), "partitionList", partitionInfoList)
+	log.V(1).Info("ListPartitionInfo()", "size", partitionInfoList.Size(), "partitionList", partitionInfoList)
 	return partitionInfoList, nil
 }
