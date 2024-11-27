@@ -101,10 +101,10 @@ get-u: ## Run `go get -u`
 .PHONY: test
 test: ## Run tests.
 	rm -f cover.out cover.html
-	go test `go list ./... | grep -v "/api"` -v -coverprofile cover.out
+	go test `go list ./... | grep -v "slurm-client/api"` -v -coverprofile cover.out
 	go tool cover -html cover.out -o cover.html
 
-CODECOV_PERCENT ?= 0.0
+CODECOV_PERCENT ?= 56.0
 
 .PHONY: codecov
 codecov: test ## Run codecov checking
