@@ -47,39 +47,6 @@ func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 	return nil
 }
 
-// GetNode implements SlurmClientInterface
-func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.Node, error) {
-	params := &api.SlurmV0041GetNodeParams{}
-	res, err := c.SlurmV0041GetNodeWithResponse(ctx, nodeName, params)
-	if err != nil {
-		return nil, err
-	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
-	} else if len(res.JSON200.Nodes) == 0 {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
-	}
-	nodeV := res.JSON200.Nodes[0]
-	node := parseNode(nodeV)
-	return &node, nil
-}
-
-// ListNodes implements SlurmClientInterface
-func (c *SlurmClient) ListNodes(ctx context.Context) (*types.NodeList, error) {
-	params := &api.SlurmV0041GetNodesParams{}
-	res, err := c.SlurmV0041GetNodesWithResponse(ctx, params)
-	if err != nil {
-		return nil, err
-	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
-	}
-	nodeList := &types.NodeList{}
-	for _, nodeV := range res.JSON200.Nodes {
-		node := parseNode(nodeV)
-		nodeList.Items = append(nodeList.Items, node)
-	}
-	return nodeList, nil
-}
-
 // UpdateNode implements SlurmClientInterface
 func (c *SlurmClient) UpdateNode(ctx context.Context, node *types.Node, originalNode *types.Node) error {
 	body := api.SlurmV0041PostNodeJSONRequestBody{
@@ -111,4 +78,37 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, node *types.Node, original
 		return errors.New(http.StatusText(res.StatusCode()))
 	}
 	return nil
+}
+
+// GetNode implements SlurmClientInterface
+func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.Node, error) {
+	params := &api.SlurmV0041GetNodeParams{}
+	res, err := c.SlurmV0041GetNodeWithResponse(ctx, nodeName, params)
+	if err != nil {
+		return nil, err
+	} else if res.StatusCode() != 200 {
+		return nil, errors.New(http.StatusText(res.StatusCode()))
+	} else if len(res.JSON200.Nodes) == 0 {
+		return nil, errors.New(http.StatusText(http.StatusNotFound))
+	}
+	nodeV := res.JSON200.Nodes[0]
+	node := parseNode(nodeV)
+	return &node, nil
+}
+
+// ListNodes implements SlurmClientInterface
+func (c *SlurmClient) ListNodes(ctx context.Context) (*types.NodeList, error) {
+	params := &api.SlurmV0041GetNodesParams{}
+	res, err := c.SlurmV0041GetNodesWithResponse(ctx, params)
+	if err != nil {
+		return nil, err
+	} else if res.StatusCode() != 200 {
+		return nil, errors.New(http.StatusText(res.StatusCode()))
+	}
+	nodeList := &types.NodeList{}
+	for _, nodeV := range res.JSON200.Nodes {
+		node := parseNode(nodeV)
+		nodeList.Items = append(nodeList.Items, node)
+	}
+	return nodeList, nil
 }
