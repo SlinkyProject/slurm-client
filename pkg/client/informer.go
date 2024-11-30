@@ -371,6 +371,17 @@ func (i *informerCache) DeleteAllOf(
 	return err
 }
 
+// Update implements InformerCache.
+func (i *informerCache) Update(
+	ctx context.Context,
+	obj object.Object,
+	opts ...UpdateOption,
+) error {
+	err := i.writer.Update(ctx, obj, opts...)
+	i.syncObjCh <- obj.GetKey()
+	return err
+}
+
 // Get implements InformerCache.
 func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj object.Object, opts ...GetOption) error {
 	options := &GetOptions{}
@@ -439,15 +450,4 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	}
 
 	return nil
-}
-
-// Update implements InformerCache.
-func (i *informerCache) Update(
-	ctx context.Context,
-	obj object.Object,
-	opts ...UpdateOption,
-) error {
-	err := i.writer.Update(ctx, obj, opts...)
-	i.syncObjCh <- obj.GetKey()
-	return err
 }

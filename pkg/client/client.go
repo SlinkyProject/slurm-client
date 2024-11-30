@@ -150,6 +150,33 @@ func (c *client) DeleteAllOf(
 	panic("unimplemented")
 }
 
+// Update implements Client.
+func (c *client) Update(
+	ctx context.Context,
+	obj object.Object,
+	opts ...UpdateOption,
+) error {
+	// Apply options
+	options := &UpdateOptions{}
+	options.ApplyOptions(opts)
+
+	switch o := obj.(type) {
+	case *types.Node:
+		// Get original node to get deltas from
+		originalNode := &types.Node{}
+		if err := c.Get(ctx, object.ObjectKey(o.Name), originalNode); err != nil {
+			return err
+		}
+		if err := c.updateNode(ctx, o, originalNode); err != nil {
+			return err
+		}
+	default:
+		return errors.New(http.StatusText(http.StatusNotImplemented))
+	}
+
+	return nil
+}
+
 // Get implements Client.
 func (c *client) Get(
 	ctx context.Context,
@@ -247,33 +274,6 @@ func (c *client) List(
 			return err
 		}
 		(*objList) = (*partitionInfoList)
-	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
-	}
-
-	return nil
-}
-
-// Update implements Client.
-func (c *client) Update(
-	ctx context.Context,
-	obj object.Object,
-	opts ...UpdateOption,
-) error {
-	// Apply options
-	options := &UpdateOptions{}
-	options.ApplyOptions(opts)
-
-	switch o := obj.(type) {
-	case *types.Node:
-		// Get original node to get deltas from
-		originalNode := &types.Node{}
-		if err := c.Get(ctx, object.ObjectKey(o.Name), originalNode); err != nil {
-			return err
-		}
-		if err := c.updateNode(ctx, o, originalNode); err != nil {
-			return err
-		}
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
