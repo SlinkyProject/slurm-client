@@ -142,7 +142,12 @@ func (c *fakeClient) Create(ctx context.Context, obj object.Object, opts ...clie
 }
 
 func (c *fakeClient) Delete(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error {
-	delete(c.cache[obj.GetType()], obj.GetKey())
+	t := obj.GetType()
+	k := obj.GetKey()
+	if _, ok := c.cache[t][k]; !ok {
+		return errors.New(http.StatusText(http.StatusNotFound))
+	}
+	delete(c.cache[t], k)
 	return nil
 }
 
