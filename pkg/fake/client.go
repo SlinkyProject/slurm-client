@@ -128,11 +128,16 @@ func (c *fakeClient) List(ctx context.Context, list object.ObjectList, opts ...c
 }
 
 func (c *fakeClient) Create(ctx context.Context, obj object.Object, opts ...client.CreateOption) error {
-	_, exists := c.cache[obj.GetType()][obj.GetKey()]
+	t := obj.GetType()
+	k := obj.GetKey()
+	_, exists := c.cache[t][k]
 	if exists {
 		return errors.New(http.StatusText(http.StatusConflict))
 	}
-	c.cache[obj.GetType()][obj.GetKey()] = obj.DeepCopyObject()
+	if _, ok := c.cache[t]; !ok {
+		c.cache[t] = make(map[object.ObjectKey]object.Object)
+	}
+	c.cache[t][k] = obj.DeepCopyObject()
 	return nil
 }
 
@@ -146,10 +151,15 @@ func (c *fakeClient) DeleteAllOf(ctx context.Context, obj object.Object, opts ..
 }
 
 func (c *fakeClient) Update(ctx context.Context, obj object.Object, opts ...client.UpdateOption) error {
-	if _, ok := c.cache[obj.GetType()][obj.GetKey()]; !ok {
+	t := obj.GetType()
+	k := obj.GetKey()
+	if _, ok := c.cache[t][k]; !ok {
 		return errors.New(http.StatusText(http.StatusNotFound))
 	}
-	c.cache[obj.GetType()][obj.GetKey()] = obj.DeepCopyObject()
+	if _, ok := c.cache[t]; !ok {
+		c.cache[t] = make(map[object.ObjectKey]object.Object)
+	}
+	c.cache[t][k] = obj.DeepCopyObject()
 	return nil
 }
 
