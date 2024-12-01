@@ -130,7 +130,7 @@ func (c *fakeClient) List(ctx context.Context, list object.ObjectList, opts ...c
 func (c *fakeClient) Create(ctx context.Context, obj object.Object, opts ...client.CreateOption) error {
 	_, exists := c.cache[obj.GetType()][obj.GetKey()]
 	if exists {
-		panic("Tried to create an object that was already in the cache.")
+		return errors.New(http.StatusText(http.StatusConflict))
 	}
 	c.cache[obj.GetType()][obj.GetKey()] = obj.DeepCopyObject()
 	return nil
@@ -146,8 +146,8 @@ func (c *fakeClient) DeleteAllOf(ctx context.Context, obj object.Object, opts ..
 }
 
 func (c *fakeClient) Update(ctx context.Context, obj object.Object, opts ...client.UpdateOption) error {
-	if c.cache[obj.GetType()][obj.GetKey()] == nil {
-		panic("Tried to update an object that was not in the cache.")
+	if _, ok := c.cache[obj.GetType()][obj.GetKey()]; !ok {
+		return errors.New(http.StatusText(http.StatusNotFound))
 	}
 	c.cache[obj.GetType()][obj.GetKey()] = obj.DeepCopyObject()
 	return nil
