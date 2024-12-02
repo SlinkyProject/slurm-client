@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added `Create()` and `Delete()` support for v40 JobInfo.
+- Added `Create()` and `Delete()` support for v41 JobInfo, including
+  "placeholder" job.
 
 ### Fixed
 

@@ -14,8 +14,55 @@ import (
 )
 
 type JobInfoInterface interface {
+	CreateJobInfo(ctx context.Context, req any) (*int32, error)
+	CreateJobInfoAlloc(ctx context.Context, req any) (*int32, error)
+	DeleteJobInfo(ctx context.Context, jobId string) error
 	GetJobInfo(ctx context.Context, jobId string) (*types.V0041JobInfo, error)
 	ListJobInfo(ctx context.Context) (*types.V0041JobInfoList, error)
+}
+
+// CreateJobInfo implements ClientInterface
+func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error) {
+	r, ok := req.(api.V0041JobSubmitReq)
+	if !ok {
+		return nil, errors.New("expected req to be V0041JobSubmitReq")
+	}
+	body := api.SlurmV0041PostJobSubmitJSONRequestBody(r)
+	res, err := c.SlurmV0041PostJobSubmitWithResponse(ctx, body)
+	if err != nil {
+		return nil, err
+	} else if res.StatusCode() != 200 {
+		return nil, errors.New(http.StatusText(res.StatusCode()))
+	}
+	return res.JSON200.JobId, nil
+}
+
+// CreateJobInfoAlloc implements ClientInterface
+func (c *SlurmClient) CreateJobInfoAlloc(ctx context.Context, req any) (*int32, error) {
+	r, ok := req.(api.V0041JobAllocReq)
+	if !ok {
+		return nil, errors.New("expected req to be V0041JobAllocReq")
+	}
+	body := api.SlurmV0041PostJobAllocateJSONRequestBody(r)
+	res, err := c.SlurmV0041PostJobAllocateWithResponse(ctx, body)
+	if err != nil {
+		return nil, err
+	} else if res.StatusCode() != 200 {
+		return nil, errors.New(http.StatusText(res.StatusCode()))
+	}
+	return res.JSON200.JobId, nil
+}
+
+// DeleteJobInfo implements ClientInterface
+func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
+	params := &api.SlurmV0041DeleteJobParams{}
+	res, err := c.SlurmV0041DeleteJobWithResponse(ctx, jobId, params)
+	if err != nil {
+		return err
+	} else if res.StatusCode() != 200 {
+		return errors.New(http.StatusText(res.StatusCode()))
+	}
+	return nil
 }
 
 // GetJobInfo implements ClientInterface

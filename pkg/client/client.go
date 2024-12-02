@@ -129,6 +129,20 @@ func (c *client) Create(
 		key := object.ObjectKey(utils.NumberToString(*jobId))
 		return c.Get(ctx, key, o)
 
+	case *types.V0041JobInfo:
+		var jobId *int32
+		var err error
+		if options.Allocation {
+			jobId, err = c.v0041Client.CreateJobInfoAlloc(ctx, req)
+		} else {
+			jobId, err = c.v0041Client.CreateJobInfo(ctx, req)
+		}
+		if err != nil {
+			return err
+		}
+		key := object.ObjectKey(utils.NumberToString(*jobId))
+		return c.Get(ctx, key, o)
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -151,6 +165,8 @@ func (c *client) Delete(
 	case *types.V0040Node:
 		return c.v0040Client.DeleteNode(ctx, key)
 
+	case *types.V0041JobInfo:
+		return c.v0041Client.DeleteJobInfo(ctx, key)
 	case *types.V0041Node:
 		return c.v0041Client.DeleteNode(ctx, key)
 
