@@ -19,6 +19,7 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
+	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 // Config holds the common attributes that can be passed to a Slurm client on
@@ -119,7 +120,15 @@ func (c *client) Create(
 	options := &CreateOptions{}
 	options.ApplyOptions(opts)
 
-	switch obj.(type) {
+	switch o := obj.(type) {
+	case *types.V0040JobInfo:
+		jobId, err := c.v0040Client.CreateJobInfo(ctx, req)
+		if err != nil {
+			return err
+		}
+		key := object.ObjectKey(utils.NumberToString(*jobId))
+		return c.Get(ctx, key, o)
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -137,6 +146,8 @@ func (c *client) Delete(
 
 	key := string(obj.GetKey())
 	switch obj.(type) {
+	case *types.V0040JobInfo:
+		return c.v0040Client.DeleteJobInfo(ctx, key)
 	case *types.V0040Node:
 		return c.v0040Client.DeleteNode(ctx, key)
 

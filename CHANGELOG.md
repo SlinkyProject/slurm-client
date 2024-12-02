@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added `Create()` and `Delete()` support for v40 JobInfo.
+
 ### Fixed
 
 - Fixed race condition between client cache Start and Stop.
