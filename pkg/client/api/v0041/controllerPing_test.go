@@ -86,6 +86,12 @@ func TestSlurmClient_GetControllerPing(t *testing.T) {
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
 								},
+								JSONDefault: &api.V0041OpenapiPingArrayResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
 							}
 							return res, nil
 						},
@@ -203,6 +209,12 @@ func TestSlurmClient_ListControllerPing(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0041OpenapiPingArrayResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil

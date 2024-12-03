@@ -86,6 +86,12 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
 								},
+								JSONDefault: &api.V0040OpenapiPartitionResp{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
 							}
 							return res, nil
 						},
@@ -205,6 +211,12 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0040OpenapiPartitionResp{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil

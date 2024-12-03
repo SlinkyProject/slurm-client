@@ -8,6 +8,9 @@ import (
 	"errors"
 	"net/http"
 
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/utils/ptr"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0041"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
@@ -32,7 +35,15 @@ func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return nil, utilerrors.NewAggregate(errs)
 	}
 	return res.JSON200.JobId, nil
 }
@@ -48,7 +59,15 @@ func (c *SlurmClient) CreateJobInfoAlloc(ctx context.Context, req any) (*int32, 
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return nil, utilerrors.NewAggregate(errs)
 	}
 	return res.JSON200.JobId, nil
 }
@@ -60,7 +79,15 @@ func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
 	if err != nil {
 		return err
 	} else if res.StatusCode() != 200 {
-		return errors.New(http.StatusText(res.StatusCode()))
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return utilerrors.NewAggregate(errs)
 	}
 	return nil
 }
@@ -72,7 +99,15 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return nil, utilerrors.NewAggregate(errs)
 	} else if len(res.JSON200.Jobs) == 0 {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
@@ -88,7 +123,15 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0041JobInfoList,
 	if err != nil {
 		return nil, err
 	} else if res.StatusCode() != 200 {
-		return nil, errors.New(http.StatusText(res.StatusCode()))
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return nil, utilerrors.NewAggregate(errs)
 	}
 	list := &types.V0041JobInfoList{
 		Items: make([]types.V0041JobInfo, len(res.JSON200.Jobs)),

@@ -94,6 +94,12 @@ func TestSlurmClient_CreateJobInfo(t *testing.T) {
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
 								},
+								JSONDefault: &api.V0040OpenapiJobSubmitResponse{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
 							}
 							return res, nil
 						},
@@ -177,6 +183,12 @@ func TestSlurmClient_DeleteJobInfo(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0040OpenapiResp{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil
@@ -287,6 +299,12 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0040OpenapiJobInfoResp{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil
@@ -407,6 +425,12 @@ func TestSlurmClient_ListJobInfo(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0040OpenapiJobInfoResp{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil

@@ -54,6 +54,12 @@ func TestSlurmClient_DeleteNode(t *testing.T) {
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
 								},
+								JSONDefault: &api.V0041OpenapiResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
 							}
 							return res, nil
 						},
@@ -133,6 +139,12 @@ func TestSlurmClient_UpdateNode(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0041OpenapiResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil
@@ -244,6 +256,12 @@ func TestSlurmClient_GetNode(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0041OpenapiNodesResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil
@@ -362,6 +380,12 @@ func TestSlurmClient_ListNodes(t *testing.T) {
 								HTTPResponse: &http.Response{
 									Status:     http.StatusText(http.StatusInternalServerError),
 									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0041OpenapiNodesResp{
+									Errors: &[]api.V0041OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
 								},
 							}
 							return res, nil
