@@ -1,0 +1,110 @@
+---
+# SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  database:
+    image: docker.io/mariadb:latest
+    container_name: mariadb
+    hostname: mariadb
+    restart: unless-stopped
+    ports:
+      - 13306:3306
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+    volumes:
+      - mariadb_data:/tmp/mariadb
+    networks:
+      - default
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  accounting:
+    image: ghcr.io/slinkyproject/slurmdbd:24.05-ubuntu-24.04
+    container_name: slurmdbd
+    hostname: slurmdbd
+    entrypoint: /opt/entrypoint/slurmdbd.sh
+    restart: unless-stopped
+    ports:
+      - 6819:6819
+    volumes:
+      - ./compose/etc/:/opt/etc/slurm/:ro
+      - ./compose/entrypoint/:/opt/entrypoint/:ro
+    networks:
+      - default
+    depends_on:
+      database:
+        condition: service_healthy
+  control-plane:
+    image: ghcr.io/slinkyproject/slurmctld:24.05-ubuntu-24.04
+    container_name: slurmctld
+    hostname: slurmctld
+    entrypoint: /opt/entrypoint/slurmctld.sh
+    restart: unless-stopped
+    ports:
+      - 6817:6817
+    volumes:
+      - ./compose/etc/:/opt/etc/slurm/:ro
+      - ./compose/entrypoint/:/opt/entrypoint/:ro
+    networks:
+      - default
+    depends_on:
+      accounting:
+        condition: service_started
+  compute:
+    image: ghcr.io/slinkyproject/slurmd:24.05-ubuntu-24.04
+    container_name: slurmd
+    hostname: slurmd
+    entrypoint: /opt/entrypoint/slurmd.sh
+    restart: unless-stopped
+    ports:
+      - 6818:6818
+    volumes:
+      - ./compose/etc/:/opt/etc/slurm/:ro
+      - ./compose/entrypoint/:/opt/entrypoint/:ro
+    networks:
+      - default
+    depends_on:
+      control-plane:
+        condition: service_started
+  restapi:
+    image: ghcr.io/slinkyproject/slurmrestd:24.05-ubuntu-24.04
+    container_name: slurmrestd
+    hostname: slurmrestd
+    environment:
+      - SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check
+    entrypoint: /opt/entrypoint/slurmrestd.sh
+    restart: unless-stopped
+    ports:
+      - 6820:6820
+    volumes:
+      - ./compose/etc/:/opt/etc/slurm/:ro
+      - ./compose/entrypoint/:/opt/entrypoint/:ro
+    networks:
+      - default
+    depends_on:
+      control-plane:
+        condition: service_started
+  authcred:
+    image: ghcr.io/slinkyproject/sackd:24.05-ubuntu-24.04
+    container_name: sackd
+    hostname: sackd
+    entrypoint: /opt/entrypoint/sackd.sh
+    restart: unless-stopped
+    volumes:
+      - ./compose/etc/:/opt/etc/slurm/:ro
+      - ./compose/entrypoint/:/opt/entrypoint/:ro
+    networks:
+      - default
+    depends_on:
+      control-plane:
+        condition: service_started
+volumes:
+  mariadb_data:
+    driver: local
+networks:
+  default:
+    driver: bridge
