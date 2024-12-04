@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fixed race condition between client cache Start and Stop.
+
 ### Changed
 
 ### Removed
