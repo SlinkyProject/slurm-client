@@ -56,6 +56,7 @@ type client struct {
 	informers map[object.ObjectType]InformerCache
 	uncached  set.Set[object.ObjectType]
 	started   bool
+	stopped   bool
 	ctx       context.Context
 	cancel    context.CancelFunc
 
@@ -324,29 +325,45 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 
 // Start implements Client.
 func (c *client) Start(ctx context.Context) {
-	c.mu.RLock()
-	if c.started {
-		defer c.mu.RUnlock()
+	c.mu.Lock()
+	if c.started || c.stopped || ctx.Err() != nil {
+		defer c.mu.Unlock()
 		return
 	}
-	c.mu.RUnlock()
-
-	c.mu.Lock()
 	c.ctx, c.cancel = context.WithCancel(ctx)
-	c.mu.Unlock()
-
 	ticker := time.NewTicker(defaultSyncPeriod)
 	defer ticker.Stop()
 	stopCh := make(chan struct{})
+	c.started = true
+	c.stopped = false
+	c.mu.Unlock()
+
 	for {
 		c.mu.Lock()
+		select {
+		case <-ctx.Done():
+			defer c.mu.Unlock()
+			c.started = false
+			c.stopped = true
+			close(stopCh)
+			return
+		case <-c.ctx.Done():
+			// c.ctx is a copy of ctx and technically not the same context for
+			// determining when Done() is emitted.
+			defer c.mu.Unlock()
+			c.started = false
+			c.stopped = true
+			close(stopCh)
+			return
+		default:
+			// do not block
+		}
 		for objectType, ic := range c.informers {
 			if c.uncached.Has(objectType) {
 				continue
 			}
 			go ic.Run(stopCh)
 		}
-		c.started = true
 		c.mu.Unlock()
 
 		select {
@@ -356,6 +373,16 @@ func (c *client) Start(ctx context.Context) {
 			c.mu.Lock()
 			defer c.mu.Unlock()
 			c.started = false
+			c.stopped = true
+			close(stopCh)
+			return
+		case <-c.ctx.Done():
+			// c.ctx is a copy of ctx and technically not the same context for
+			// determining when Done() is emitted.
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			c.started = false
+			c.stopped = true
 			close(stopCh)
 			return
 		}
@@ -364,17 +391,15 @@ func (c *client) Start(ctx context.Context) {
 
 // Stop implements Client.
 func (c *client) Stop() {
-	c.mu.RLock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.stopped = true
 	if !c.started {
-		defer c.mu.RUnlock()
 		return
 	}
-	c.mu.RUnlock()
 
-	c.mu.Lock()
 	c.cancel()
 	c.started = false
-	c.mu.Unlock()
 }
 
 func tolerateError(err error) bool {
