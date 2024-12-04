@@ -4,8 +4,6 @@
 package types
 
 import (
-	"bytes"
-	"encoding/json"
 	"reflect"
 
 	"k8s.io/utils/ptr"
@@ -31,26 +29,6 @@ func (o *V0040Node) GetStateAsSet() set.Set[api.V0040NodeState] {
 		out.Insert(s)
 	}
 	return out
-}
-
-type V0040NodeInfo struct {
-	Namespace string `json:"namespace"`
-	PodName   string `json:"podName"`
-}
-
-func (nodeInfo *V0040NodeInfo) Equal(cmp V0040NodeInfo) bool {
-	a, _ := json.Marshal(nodeInfo)
-	b, _ := json.Marshal(cmp)
-	return bytes.Equal(a, b)
-}
-
-func (nodeInfo *V0040NodeInfo) ToString() string {
-	b, _ := json.Marshal(nodeInfo)
-	return string(b)
-}
-
-func V0040NodeInfoParse(str string, out *V0040NodeInfo) error {
-	return json.Unmarshal([]byte(str), &out)
 }
 
 // GetKey implements Object.
