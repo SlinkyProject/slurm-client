@@ -381,17 +381,6 @@ func (i *informerCache) Delete(
 	return err
 }
 
-// DeleteAllOf implements Client.
-func (i *informerCache) DeleteAllOf(
-	ctx context.Context,
-	obj object.Object,
-	opts ...DeleteAllOfOption,
-) error {
-	err := i.writer.DeleteAllOf(ctx, obj, opts...)
-	i.syncCh <- true
-	return err
-}
-
 // Update implements InformerCache.
 func (i *informerCache) Update(
 	ctx context.Context,

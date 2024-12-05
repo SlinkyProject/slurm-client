@@ -52,12 +52,6 @@ type UpdateOption interface {
 	ApplyToUpdate(*UpdateOptions)
 }
 
-// DeleteAllOfOption is some configuration that modifies options for a delete request.
-type DeleteAllOfOption interface {
-	// ApplyToDeleteAllOf applies this configuration to the given deletecollection options.
-	ApplyToDeleteAllOf(*DeleteAllOfOptions)
-}
-
 // }}}
 
 // {{{ Client Options
@@ -228,32 +222,6 @@ var _ UpdateOption = &UpdateOptions{}
 
 // ApplyToUpdate implements UpdateOption.
 func (o *UpdateOptions) ApplyToUpdate(uo *UpdateOptions) {
-}
-
-// }}}
-
-// {{{ DeleteAllOf Options
-
-// DeleteAllOfOptions contains options for deletecollection (deleteallof) requests.
-// It's just list and delete options smooshed together.
-type DeleteAllOfOptions struct {
-	DeleteOptions
-}
-
-// ApplyOptions applies the given deleteallof options on these options,
-// and then returns itself (for convenient chaining).
-func (o *DeleteAllOfOptions) ApplyOptions(opts []DeleteAllOfOption) *DeleteAllOfOptions {
-	for _, opt := range opts {
-		opt.ApplyToDeleteAllOf(o)
-	}
-	return o
-}
-
-var _ DeleteAllOfOption = &DeleteAllOfOptions{}
-
-// ApplyToDeleteAllOf implements DeleteAllOfOption.
-func (o *DeleteAllOfOptions) ApplyToDeleteAllOf(do *DeleteAllOfOptions) {
-	o.ApplyToDelete(&do.DeleteOptions)
 }
 
 // }}}

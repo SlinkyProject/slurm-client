@@ -16,7 +16,6 @@ type Funcs struct {
 	List        func(ctx context.Context, list object.ObjectList, opts ...client.ListOption) error
 	Create      func(ctx context.Context, obj object.Object, opts ...client.CreateOption) error
 	Delete      func(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error
-	DeleteAllOf func(ctx context.Context, obj object.Object, opts ...client.DeleteAllOfOption) error
 	Update      func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
 	GetInformer func(obj object.ObjectType) client.InformerCache
 	GetServer   func() string
@@ -64,13 +63,6 @@ func (c *interceptor) Delete(ctx context.Context, obj object.Object, opts ...cli
 		return c.funcs.Delete(ctx, obj, opts...)
 	}
 	return c.client.Delete(ctx, obj, opts...)
-}
-
-func (c *interceptor) DeleteAllOf(ctx context.Context, obj object.Object, opts ...client.DeleteAllOfOption) error {
-	if c.funcs.DeleteAllOf != nil {
-		return c.funcs.DeleteAllOf(ctx, obj, opts...)
-	}
-	return c.client.DeleteAllOf(ctx, obj, opts...)
 }
 
 func (c *interceptor) Update(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error {

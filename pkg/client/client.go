@@ -140,15 +140,6 @@ func (c *client) Delete(
 	}
 }
 
-// DeleteAllOf implements Client.
-func (c *client) DeleteAllOf(
-	ctx context.Context,
-	obj object.Object,
-	opts ...DeleteAllOfOption,
-) error {
-	panic("unimplemented")
-}
-
 // Update implements Client.
 func (c *client) Update(
 	ctx context.Context,

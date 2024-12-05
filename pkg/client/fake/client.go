@@ -163,10 +163,6 @@ func (c *fakeClient) Delete(ctx context.Context, obj object.Object, opts ...clie
 	return nil
 }
 
-func (c *fakeClient) DeleteAllOf(ctx context.Context, obj object.Object, opts ...client.DeleteAllOfOption) error {
-	panic("unimplemented")
-}
-
 func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error {
 	t := obj.GetType()
 	k := obj.GetKey()

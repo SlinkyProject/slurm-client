@@ -38,9 +38,6 @@ type Writer interface {
 
 	// Delete deletes the given obj from Slurm cluster.
 	Delete(ctx context.Context, obj object.Object, opts ...DeleteOption) error
-
-	// DeleteAllOf deletes all objects of the given type matching the given options.
-	DeleteAllOf(ctx context.Context, obj object.Object, opts ...DeleteAllOfOption) error
 }
 
 // Client knows how to perform CRUD operations on Slurm objects.
