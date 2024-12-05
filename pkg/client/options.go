@@ -52,12 +52,6 @@ type UpdateOption interface {
 	ApplyToUpdate(*UpdateOptions)
 }
 
-// PatchOption is some configuration that modifies options for a patch request.
-type PatchOption interface {
-	// ApplyToPatch applies this configuration to the given patch options.
-	ApplyToPatch(*PatchOptions)
-}
-
 // DeleteAllOfOption is some configuration that modifies options for a delete request.
 type DeleteAllOfOption interface {
 	// ApplyToDeleteAllOf applies this configuration to the given deletecollection options.
@@ -234,29 +228,6 @@ var _ UpdateOption = &UpdateOptions{}
 
 // ApplyToUpdate implements UpdateOption.
 func (o *UpdateOptions) ApplyToUpdate(uo *UpdateOptions) {
-}
-
-// }}}
-
-// {{{ Patch Options
-
-// PatchOptions contains options for patch requests.
-type PatchOptions struct {
-}
-
-// ApplyOptions applies the given patch options on these options,
-// and then returns itself (for convenient chaining).
-func (o *PatchOptions) ApplyOptions(opts []PatchOption) *PatchOptions {
-	for _, opt := range opts {
-		opt.ApplyToPatch(o)
-	}
-	return o
-}
-
-var _ PatchOption = &PatchOptions{}
-
-// ApplyToPatch implements PatchOptions.
-func (o *PatchOptions) ApplyToPatch(po *PatchOptions) {
 }
 
 // }}}
