@@ -67,10 +67,10 @@ generate-api: ## Generate Slurm OpenAPI spec file.
 ifeq ($(SLURM_DATA_PARSER), )
 	@$(eval SLURM_DATA_PARSER = $(shell \
 		$(CONTAINER_TOOL) run --rm -t \
-		--volume ./hack/etc/slurm:/etc/slurm --volume ./:/workspace --workdir /workspace \
-		--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
-		${SLURM_IMAGE} \
-		-d list 2>&1 | grep -Eo 'data_parser/.+' | sort -u | tail -n 1 | sed -e 's/data_parser\///g'))
+			--volume ./hack/etc/slurm:/etc/slurm --volume ./:/workspace --workdir /workspace \
+			--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
+			${SLURM_IMAGE} \
+			-d list 2>&1 | grep -Eo 'data_parser/.+' | sort -u | tail -n 1 | sed -e 's/data_parser\///g'))
 endif
 	@$(eval SLURM_GO_MODULE := $(shell echo ${SLURM_DATA_PARSER} | sed -e 's/\.//g'))
 	mkdir -p api/${SLURM_GO_MODULE}
