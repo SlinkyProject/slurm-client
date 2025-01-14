@@ -151,6 +151,28 @@ var _ = Describe("NewFakeClient", func() {
 			err := client.Update(ctx, obj, req)
 			Expect(err).NotTo(HaveOccurred())
 		})
+		It("should mutate object after update", func() {
+			comment := "test update with mutation"
+			obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("node-0")}}
+			updateFn := func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error {
+				switch o := obj.(type) {
+				case *types.V0041Node:
+					r, ok := req.(v0041.V0041UpdateNodeMsg)
+					if !ok {
+						return errors.New("failed to cast request object")
+					}
+					o.Comment = r.Comment
+				default:
+					return errors.New("failed to cast slurm object")
+				}
+				return nil
+			}
+			client := NewClientBuilder().WithObjects(obj).WithUpdateFn(updateFn).Build()
+			req := v0041.V0041UpdateNodeMsg{Comment: &comment}
+			err := client.Update(ctx, obj, req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(obj.Comment).To(BeEquivalentTo(&comment))
+		})
 		It("should return Not Found", func() {
 			client := NewFakeClient()
 			obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("node-0")}}

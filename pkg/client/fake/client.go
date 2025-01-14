@@ -17,9 +17,13 @@ import (
 type fakeClient struct {
 	cache map[object.ObjectType]map[object.ObjectKey]object.Object
 
+	updateFn updateFunc
+
 	server    string
 	authToken string
 }
+
+type updateFunc func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
 
 var _ client.Client = &fakeClient{}
 var FakeSecret = "slurm-token"
@@ -37,6 +41,7 @@ func NewClientBuilder() *ClientBuilder {
 
 // ClientBuilder builds a fake client.
 type ClientBuilder struct {
+	updateFn         updateFunc
 	initLists        []object.ObjectList
 	initObject       []object.Object
 	interceptorFuncs *interceptor.Funcs
@@ -54,6 +59,13 @@ func (f *ClientBuilder) WithLists(initLists ...object.ObjectList) *ClientBuilder
 	return f
 }
 
+// WithUpdateFn configures the client with the server side update function.
+// Mutations to function parameter object.Object are preserved in cache.
+func (f *ClientBuilder) WithUpdateFn(updateFn updateFunc) *ClientBuilder {
+	f.updateFn = updateFn
+	return f
+}
+
 // WithInterceptorFuncs configures the client methods to be intercepted using the provided interceptor.Funcs.
 func (f *ClientBuilder) WithInterceptorFuncs(interceptorFuncs interceptor.Funcs) *ClientBuilder {
 	f.interceptorFuncs = &interceptorFuncs
@@ -62,7 +74,6 @@ func (f *ClientBuilder) WithInterceptorFuncs(interceptorFuncs interceptor.Funcs)
 
 // Build builds and returns a new fake client.
 func (f *ClientBuilder) Build() client.Client {
-
 	cache := make(map[object.ObjectType]map[object.ObjectKey]object.Object)
 
 	for _, list := range f.initLists {
@@ -84,6 +95,7 @@ func (f *ClientBuilder) Build() client.Client {
 	}
 
 	var result client.Client = &fakeClient{
+		updateFn:  f.updateFn,
 		server:    FakeServer,
 		authToken: FakeSecret,
 		cache:     cache,
@@ -171,6 +183,11 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 	}
 	if _, ok := c.cache[t]; !ok {
 		c.cache[t] = make(map[object.ObjectKey]object.Object)
+	}
+	if c.updateFn != nil {
+		if err := c.updateFn(ctx, obj, req, opts...); err != nil {
+			return err
+		}
 	}
 	c.cache[t][k] = obj.DeepCopyObject()
 	return nil
