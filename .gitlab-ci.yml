@@ -6,9 +6,9 @@ variables:
   DOCKER_DRIVER: overlay2
 
 .docker:
-  image: docker:27.3.0
+  image: docker:27.5.0
   services:
-    - name: docker:27.3.0-rc.1-dind
+    - name: docker:27.5.0-rc.1-dind
       command:
         - --tls=false
   before_script:
