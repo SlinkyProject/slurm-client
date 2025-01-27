@@ -5,6 +5,7 @@ package types
 
 import (
 	"k8s.io/utils/ptr"
+	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -38,6 +39,15 @@ func (o *V0040JobInfo) DeepCopyObject() object.Object {
 func (o *V0040JobInfo) DeepCopy() *V0040JobInfo {
 	out := new(V0040JobInfo)
 	utils.RemarshalOrDie(o, out)
+	return out
+}
+
+func (o *V0040JobInfo) GetStateAsSet() set.Set[api.V0040JobInfoJobState] {
+	out := make(set.Set[api.V0040JobInfoJobState])
+	states := ptr.Deref(o.JobState, []api.V0040JobInfoJobState{})
+	for _, s := range states {
+		out.Insert(s)
+	}
 	return out
 }
 
