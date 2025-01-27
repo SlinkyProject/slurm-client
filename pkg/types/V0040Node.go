@@ -20,15 +20,6 @@ type V0040Node struct {
 	api.V0040Node
 }
 
-func (o *V0040Node) GetStateAsSet() set.Set[api.V0040NodeState] {
-	out := make(set.Set[api.V0040NodeState])
-	states := ptr.Deref(o.State, []api.V0040NodeState{})
-	for _, s := range states {
-		out.Insert(s)
-	}
-	return out
-}
-
 // GetKey implements Object.
 func (o *V0040Node) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
@@ -47,6 +38,15 @@ func (o *V0040Node) DeepCopyObject() object.Object {
 func (o *V0040Node) DeepCopy() *V0040Node {
 	out := new(V0040Node)
 	utils.RemarshalOrDie(o, out)
+	return out
+}
+
+func (o *V0040Node) GetStateAsSet() set.Set[api.V0040NodeState] {
+	out := make(set.Set[api.V0040NodeState])
+	states := ptr.Deref(o.State, []api.V0040NodeState{})
+	for _, s := range states {
+		out.Insert(s)
+	}
 	return out
 }
 
