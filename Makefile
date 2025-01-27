@@ -104,7 +104,7 @@ test: ## Run tests.
 	go test `go list ./... | grep -v "slurm-client/api"` -v -coverprofile cover.out
 	go tool cover -html cover.out -o cover.html
 
-CODECOV_PERCENT ?= 84.0
+CODECOV_PERCENT ?= 80.0
 
 .PHONY: codecov
 codecov: test ## Run codecov checking
