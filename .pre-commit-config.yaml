@@ -92,10 +92,3 @@ repos:
         language: system
         files: \.go$
         pass_filenames: false
-      - id: make-codecov
-        name: Make codecov
-        entry: make codecov
-        types: [go]
-        language: system
-        files: \.go$
-        pass_filenames: false

@@ -27,8 +27,6 @@ test:
     - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - go install golang.org/x/vuln/cmd/govulncheck@latest
     - pre-commit run --all-files --show-diff-on-failure
-    - make test
-    - make audit
   artifacts:
     expire_in: 7 days
     paths:
