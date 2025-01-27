@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## \[Unreleased\]
+## [Unreleased]
 
 ### Added
 
@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
   "placeholder" job.
 - Added aggregated errors created from Slurm API errors.
 - Added job `GetStateAsSet()` helper functions.
+- Added partition `GetStateAsSet()` helper functions.
 
 ### Fixed
 
