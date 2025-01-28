@@ -13,6 +13,14 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
+// ObjectKey identifies a Slurm Object.
+type ObjectKey = object.ObjectKey
+
+// ObjectKeyFromObject returns the ObjectKey given a object.Object.
+func ObjectKeyFromObject(obj object.Object) ObjectKey {
+	return obj.GetKey()
+}
+
 // Reader knows how to read and list Slurm objects.
 type Reader interface {
 	// Get retrieves an obj for the given object key from the Slurm Cluster.
