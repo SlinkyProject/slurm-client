@@ -71,9 +71,11 @@ func (o *V0040JobInfoList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0040JobInfoList) AppendItem(object object.Object) {
-	out := object.(*V0040JobInfo)
-	utils.RemarshalOrDie(object, out)
-	o.Items = append(o.Items, *out)
+	out, ok := object.(*V0040JobInfo)
+	if ok {
+		utils.RemarshalOrDie(object, out)
+		o.Items = append(o.Items, *out)
+	}
 }
 
 // DeepCopyObjectList implements ObjectList.

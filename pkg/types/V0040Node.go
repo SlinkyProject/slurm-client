@@ -70,9 +70,11 @@ func (o *V0040NodeList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0040NodeList) AppendItem(object object.Object) {
-	out := object.(*V0040Node)
-	utils.RemarshalOrDie(object, out)
-	o.Items = append(o.Items, *out)
+	out, ok := object.(*V0040Node)
+	if ok {
+		utils.RemarshalOrDie(object, out)
+		o.Items = append(o.Items, *out)
+	}
 }
 
 // DeepCopyObjectList implements ObjectList.

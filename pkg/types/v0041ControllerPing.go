@@ -26,9 +26,6 @@ type V0041ControllerPing struct {
 
 // GetKey implements Object.
 func (o *V0041ControllerPing) GetKey() object.ObjectKey {
-	if o.Hostname == nil {
-		panic("Hostname cannot be empty")
-	}
 	return object.ObjectKey(ptr.Deref(o.Hostname, ""))
 }
 
@@ -68,9 +65,11 @@ func (o *V0041ControllerPingList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0041ControllerPingList) AppendItem(object object.Object) {
-	out := object.(*V0041ControllerPing)
-	utils.RemarshalOrDie(object, out)
-	o.Items = append(o.Items, *out)
+	out, ok := object.(*V0041ControllerPing)
+	if ok {
+		utils.RemarshalOrDie(object, out)
+		o.Items = append(o.Items, *out)
+	}
 }
 
 // DeepCopyObjectList implements ObjectList.
