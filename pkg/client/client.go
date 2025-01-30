@@ -19,7 +19,6 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 // Config holds the common attributes that can be passed to a Slurm client on
@@ -126,7 +125,7 @@ func (c *client) Create(
 		if err != nil {
 			return err
 		}
-		key := object.ObjectKey(utils.NumberToString(*jobId))
+		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
 
 	case *types.V0041JobInfo:
@@ -140,7 +139,7 @@ func (c *client) Create(
 		if err != nil {
 			return err
 		}
-		key := object.ObjectKey(utils.NumberToString(*jobId))
+		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
 
 	default:

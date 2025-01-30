@@ -5,9 +5,6 @@ package utils
 
 import (
 	"encoding/json"
-	"strconv"
-
-	"golang.org/x/exp/constraints"
 )
 
 func Remarshal(in any, out any) error {
@@ -22,12 +19,4 @@ func RemarshalOrDie(in any, out any) {
 	if err := Remarshal(in, out); err != nil {
 		panic(err)
 	}
-}
-
-type number interface {
-	constraints.Integer | constraints.Float
-}
-
-func NumberToString[T number](t T) string {
-	return strconv.FormatInt(int64(t), 10)
 }
