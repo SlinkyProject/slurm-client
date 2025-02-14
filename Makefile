@@ -58,6 +58,7 @@ generate: ## Run all generate targets.
 
 CONTAINER_TOOL ?= docker
 SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:24.05-ubuntu-24.04
+SLURM_DATA_PARSER_OPTS ?= +prefer_refs
 
 TEMPLATES_DIR = api/.template
 OAPI_CODEGEN_VERSION ?= v2.3.0
@@ -78,7 +79,7 @@ endif
 		--volume ./:/workspace --workdir /workspace \
 		--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
 		${SLURM_IMAGE} \
-		-f /dev/null -s openapi/slurmdbd,openapi/slurmctld -d data_parser/${SLURM_DATA_PARSER}+prefer_refs --generate-openapi-spec 2>/dev/null > api/${SLURM_GO_MODULE}/slurm-openapi.gen.json
+		-f /dev/null -s openapi/slurmdbd,openapi/slurmctld -d data_parser/${SLURM_DATA_PARSER}${SLURM_DATA_PARSER_OPTS} --generate-openapi-spec 2>/dev/null > api/${SLURM_GO_MODULE}/slurm-openapi.gen.json
 	$(foreach file, $(wildcard $(TEMPLATES_DIR)/*), sed -e "s/{{SLURM_GO_MODULE}}/${SLURM_GO_MODULE}/g" -e "s/{{OAPI_CODEGEN_VERSION}}/${OAPI_CODEGEN_VERSION}/g" ${file} > api/${SLURM_GO_MODULE}/$(shell basename ${file} .tpl);)
 
 .PHONY: fmt
