@@ -187,6 +187,12 @@ func (c *client) Update(
 
 	key := string(obj.GetKey())
 	switch o := obj.(type) {
+	case *types.V0040JobInfo:
+		err := c.v0040Client.UpdateJobInfo(ctx, key, req)
+		if err != nil {
+			return err
+		}
+		return c.Get(ctx, obj.GetKey(), o)
 	case *types.V0040Node:
 		err := c.v0040Client.UpdateNode(ctx, key, req)
 		if err != nil {
@@ -194,6 +200,12 @@ func (c *client) Update(
 		}
 		return c.Get(ctx, obj.GetKey(), o)
 
+	case *types.V0041JobInfo:
+		err := c.v0041Client.UpdateJobInfo(ctx, key, req)
+		if err != nil {
+			return err
+		}
+		return c.Get(ctx, obj.GetKey(), o)
 	case *types.V0041Node:
 		err := c.v0041Client.UpdateNode(ctx, key, req)
 		if err != nil {

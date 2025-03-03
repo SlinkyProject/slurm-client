@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Added aggregated errors created from Slurm API errors.
 - Added job `GetStateAsSet()` helper functions.
 - Added partition `GetStateAsSet()` helper functions.
+- Added `Update()` support for v4{0,1} JobInfo
 
 ### Fixed
 

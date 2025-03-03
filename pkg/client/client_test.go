@@ -221,6 +221,32 @@ var _ = Describe("Client", func() {
 			}, SpecTimeout(testTimeout))
 		})
 
+		Context("Update", func() {
+			updateReq := v0040.V0040JobDescMsg{
+				Comment: ptr.To("v0040"),
+			}
+
+			It("should fail if the object does not exist", func(ctx SpecContext) {
+				By("update the object")
+				obj := &types.V0040JobInfo{V0040JobInfo: v0040.V0040JobInfo{JobId: ptr.To[int32](0)}}
+				err := cl.Update(ctx, obj, updateReq)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should update the existing object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0040JobInfo{}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("update the object")
+				err = cl.Update(ctx, obj, updateReq)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("validating the object field was updated")
+				Expect(equality.Semantic.DeepEqual(obj.Comment, updateReq.Comment)).To(BeTrue())
+			}, SpecTimeout(testTimeout))
+		})
+
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
@@ -524,6 +550,32 @@ var _ = Describe("Client", func() {
 				By("deleting the object")
 				err = cl.Delete(ctx, obj)
 				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("Update", func() {
+			updateReq := v0041.V0041JobDescMsg{
+				Comment: ptr.To("v0041"),
+			}
+
+			It("should fail if the object does not exist", func(ctx SpecContext) {
+				By("update the object")
+				obj := &types.V0041JobInfo{V0041JobInfo: v0041.V0041JobInfo{JobId: ptr.To[int32](0)}}
+				err := cl.Update(ctx, obj, updateReq)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should update the existing object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0041JobInfo{}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("update the object")
+				err = cl.Update(ctx, obj, updateReq)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("validating the object field was updated")
+				Expect(equality.Semantic.DeepEqual(obj.Comment, updateReq.Comment)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
 		})
 

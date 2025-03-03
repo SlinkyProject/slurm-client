@@ -19,6 +19,7 @@ import (
 type JobInfoInterface interface {
 	CreateJobInfo(ctx context.Context, req any) (*int32, error)
 	DeleteJobInfo(ctx context.Context, jobId string) error
+	UpdateJobInfo(ctx context.Context, jobId string, req any) error
 	GetJobInfo(ctx context.Context, jobId string) (*types.V0040JobInfo, error)
 	ListJobInfo(ctx context.Context) (*types.V0040JobInfoList, error)
 }
@@ -51,6 +52,30 @@ func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error
 func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
 	params := &api.SlurmV0040DeleteJobParams{}
 	res, err := c.SlurmV0040DeleteJobWithResponse(ctx, jobId, params)
+	if err != nil {
+		return err
+	} else if res.StatusCode() != 200 {
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0040OpenapiError{}) {
+				if e.Error != nil {
+					errs = append(errs, errors.New(*e.Error))
+				}
+			}
+		}
+		return utilerrors.NewAggregate(errs)
+	}
+	return nil
+}
+
+// UpdateJobInfo implements ClientInterface
+func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) error {
+	r, ok := req.(api.V0040JobDescMsg)
+	if !ok {
+		return errors.New("expected req to be V0040JobDescMsg")
+	}
+	body := api.SlurmV0040PostJobJSONRequestBody(r)
+	res, err := c.SlurmV0040PostJobWithResponse(ctx, jobId, body)
 	if err != nil {
 		return err
 	} else if res.StatusCode() != 200 {

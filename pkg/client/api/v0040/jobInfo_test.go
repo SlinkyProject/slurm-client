@@ -10,12 +10,11 @@ import (
 	"reflect"
 	"testing"
 
-	"k8s.io/utils/ptr"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0040"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0040/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0040/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
+	"k8s.io/utils/ptr"
 )
 
 func TestSlurmClient_CreateJobInfo(t *testing.T) {
@@ -227,6 +226,93 @@ func TestSlurmClient_DeleteJobInfo(t *testing.T) {
 			}
 			if err := c.DeleteJobInfo(tt.args.ctx, tt.args.jobId); (err != nil) != tt.wantErr {
 				t.Errorf("SlurmClient.DeleteJobInfo() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestSlurmClient_UpdateJobInfo(t *testing.T) {
+	type fields struct {
+		ClientWithResponsesInterface api.ClientWithResponsesInterface
+	}
+	type args struct {
+		ctx   context.Context
+		jobId string
+		req   any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Update existing job",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClient(),
+			},
+			args: args{
+				ctx:   context.Background(),
+				jobId: "1",
+				req:   api.V0040JobDescMsg{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "HTTP Status != 200",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClientBuilder().
+					WithInterceptorFuncs(interceptor.Funcs{
+						SlurmV0040PostJobWithResponse: func(ctx context.Context, jobId string, body api.V0040JobDescMsg, reqEditors ...api.RequestEditorFn) (*api.SlurmV0040PostJobResponse, error) {
+							res := &api.SlurmV0040PostJobResponse{
+								HTTPResponse: &http.Response{
+									Status:     http.StatusText(http.StatusInternalServerError),
+									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0040OpenapiJobPostResponse{
+									Errors: &[]api.V0040OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
+							}
+							return res, nil
+						},
+					}).
+					Build(),
+			},
+			args: args{
+				ctx:   context.Background(),
+				jobId: "1",
+				req:   api.V0040JobDescMsg{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "HTTP Error",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClientBuilder().
+					WithInterceptorFuncs(interceptor.Funcs{
+						SlurmV0040PostJobWithResponse: func(ctx context.Context, jobId string, body api.V0040JobDescMsg, reqEditors ...api.RequestEditorFn) (*api.SlurmV0040PostJobResponse, error) {
+							return nil, errors.New(http.StatusText(http.StatusBadGateway))
+						},
+					}).
+					Build(),
+			},
+			args: args{
+				ctx:   context.Background(),
+				jobId: "0",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &SlurmClient{
+				ClientWithResponsesInterface: tt.fields.ClientWithResponsesInterface,
+			}
+			if err := c.UpdateJobInfo(tt.args.ctx, tt.args.jobId, tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("SlurmClient.UpdateJobInfo() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
