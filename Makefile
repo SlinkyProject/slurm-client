@@ -57,7 +57,7 @@ generate: ## Run all generate targets.
 	go generate ./...
 
 CONTAINER_TOOL ?= docker
-SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:24.05-ubuntu-24.04
+SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:24.05.7-ubuntu24.04
 SLURM_DATA_PARSER_OPTS ?= +prefer_refs
 
 TEMPLATES_DIR = api/.template

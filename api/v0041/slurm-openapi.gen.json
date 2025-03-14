@@ -345,7 +345,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -461,7 +461,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -641,7 +641,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -906,7 +906,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -1173,7 +1173,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -1438,7 +1438,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -1692,7 +1692,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -1829,7 +1829,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -2420,7 +2420,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -2607,7 +2607,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -2921,7 +2921,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format name list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -3082,7 +3082,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format name list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -3809,7 +3809,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "CSV format list",
+            "description": "Ignored; process JSON manually to control output format",
             "required": false,
             "schema": {
               "type": "string"
@@ -12029,7 +12029,7 @@
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-24.05.4&openapi\/slurmdbd&openapi\/slurmctld"
+    "version": "Slurm-24.05.7&openapi\/slurmdbd&openapi\/slurmctld"
   },
   "servers": [
     {
