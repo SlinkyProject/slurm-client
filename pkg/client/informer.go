@@ -404,6 +404,10 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		i.hasSynced = false
 		i.mu.Unlock()
 		i.syncObjCh <- key
+	} else if options.WaitRefreshCache {
+		i.mu.Lock()
+		i.hasSynced = false
+		i.mu.Unlock()
 	}
 
 	if err := i.WaitForSyncGet(ctx, waitSyncPeriod); err != nil {
@@ -462,6 +466,10 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.hasSynced = false
 		i.mu.Unlock()
 		i.syncCh <- true
+	} else if options.WaitRefreshCache {
+		i.mu.Lock()
+		i.hasSynced = false
+		i.mu.Unlock()
 	}
 
 	if err := i.WaitForSyncList(ctx, waitSyncPeriod); err != nil {

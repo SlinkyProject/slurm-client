@@ -152,6 +152,9 @@ type GetOptions struct {
 
 	// RefreshCache indicates to refresh the cache before reading from it.
 	RefreshCache bool
+
+	// WaitRefreshCache indicates to wait for the next cache refresh before reading from it.
+	WaitRefreshCache bool
 }
 
 var _ GetOption = &GetOptions{}
@@ -160,6 +163,7 @@ var _ GetOption = &GetOptions{}
 func (o *GetOptions) ApplyToGet(lo *GetOptions) {
 	lo.SkipCache = o.SkipCache
 	lo.RefreshCache = o.RefreshCache
+	lo.WaitRefreshCache = o.WaitRefreshCache
 }
 
 // ApplyOptions applies the given get options on these options,
@@ -185,6 +189,9 @@ type ListOptions struct {
 
 	// RefreshCache indicates to refresh the cache before reading from it.
 	RefreshCache bool
+
+	// WaitRefreshCache indicates to wait for the next cache refresh before reading from it.
+	WaitRefreshCache bool
 }
 
 var _ ListOption = &ListOptions{}
@@ -193,6 +200,7 @@ var _ ListOption = &ListOptions{}
 func (o *ListOptions) ApplyToList(lo *ListOptions) {
 	lo.SkipCache = o.SkipCache
 	lo.RefreshCache = o.RefreshCache
+	lo.WaitRefreshCache = o.WaitRefreshCache
 }
 
 // ApplyOptions applies the given list options on these options,

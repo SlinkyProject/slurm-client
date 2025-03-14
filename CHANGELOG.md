@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Added job `GetStateAsSet()` helper functions.
 - Added partition `GetStateAsSet()` helper functions.
 - Added `Update()` support for v4{0,1} JobInfo
+- Added WaitRefreshCache option for Get and List, which will wait for the next
+  cache refresh before reading from cache.
 
 ### Fixed
 
