@@ -8,10 +8,15 @@ workflow:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_COMMIT_REF_PROTECTED == "true"
 
+stages:
+  - test
+  - release
+
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ''
   DOCKER_DRIVER: overlay2
+  VERSION: 0.2.0
 
 .docker:
   image: docker:27.5.0
@@ -28,6 +33,7 @@ variables:
     - go env -w GOPRIVATE=github.com/SlinkyProject/*
 
 test:
+  stage: test
   extends: .docker
   script:
     - apk update && apk upgrade
@@ -45,9 +51,47 @@ test:
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 secret_detection:
+  stage: test
   allow_failure: false
   artifacts:
     when: on_failure
     expire_in: 7 days
     paths:
       - gl-secret-detection-report.json
+
+release-tag:
+  stage: release
+  extends: .docker
+  script:
+    - set -euo pipefail
+    - |
+      if [ -z "$(echo "$VERSION" | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+$")" ]; then
+        echo "VERSION is not semver: `$VERSION`"
+        exit 1
+      fi
+    - commit_date="$(git show -s --pretty="format:%ad" --date="format:%Y%m%d%H%M%S" HEAD)"
+    - commit_hash="$(git rev-parse --short=12 HEAD)"
+    - tagversion="v${VERSION}-${commit_date}-${commit_hash}"
+    - git tag ${tagversion}
+    - git push origin ${tagversion}
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      when: manual
+
+release-branch:
+  stage: release
+  extends: .docker
+  script:
+    - set -euo pipefail
+    - |
+      if [ -z "$(echo "$VERSION" | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+$")" ]; then
+        echo "VERSION is not semver: `$VERSION`"
+        exit 1
+      fi
+    - major_minor="$(echo ${VERSION} | grep -Eo "^[0-9]+\.[0-9]+")"
+    - branch_name="release-${major_minor}"
+    - git branch ${branch_name}
+    - git push --set-upstream origin ${branch_name}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
