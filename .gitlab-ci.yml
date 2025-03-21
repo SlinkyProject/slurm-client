@@ -67,6 +67,13 @@ secret_detection:
     - go env -w GOPRIVATE=github.com/SlinkyProject/*
     - git version
     - |
+      if [ -z $CI_AUTH_TOKEN ]; then
+        echo "Runner lacks auth token. Either environment variables are not defined, or runner is on an unprotected branch/tag.";
+        exit 1;
+      fi
+    - git remote set-url origin ${CI_PROJECT_URL/gitlab.com/oauth2:${CI_AUTH_TOKEN}@gitlab.com}.git
+    - git remote -v
+    - |
       if [ -z "$(echo "$VERSION" | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+$")" ]; then
         echo "VERSION is not semver: `$VERSION`"
         exit 1
