@@ -64,7 +64,6 @@ secret_detection:
   before_script:
     - apk update && apk upgrade
     - apk add --no-cache git
-    - go env -w GOPRIVATE=github.com/SlinkyProject/*
     - git version
     - |
       if [ -z $CI_AUTH_TOKEN ]; then
