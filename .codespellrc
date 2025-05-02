@@ -1,0 +1,3 @@
+[codespell]
+skip = go.*,*.gen.*,
+    *.jpeg,*.png,*.png,*.svg,

@@ -397,7 +397,7 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	// Reverify existance after aquiring lock
+	// Reverify existence after acquiring lock
 	if informerCache, ok := c.informers[objectType]; ok {
 		return informerCache
 	}
