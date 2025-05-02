@@ -16,6 +16,7 @@ import (
 
 	v0040 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0040"
 	v0041 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0041"
+	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -59,6 +60,7 @@ type client struct {
 
 	v0040Client v0040.ClientInterface
 	v0041Client v0041.ClientInterface
+	v0042Client v0042.ClientInterface
 
 	server          string
 	authToken       string
@@ -87,10 +89,16 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 		return nil, fmt.Errorf("unable to create client: %v", err)
 	}
 
+	v0042Client, err := v0042.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create client: %v", err)
+	}
+
 	// create return client object
 	client := &client{
 		v0040Client:     v0040Client,
 		v0041Client:     v0041Client,
+		v0042Client:     v0042Client,
 		informers:       make(map[object.ObjectType]InformerCache),
 		uncached:        make(set.Set[object.ObjectType]),
 		authToken:       config.AuthToken,
@@ -142,6 +150,20 @@ func (c *client) Create(
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
 
+	case *types.V0042JobInfo:
+		var jobId *int32
+		var err error
+		if options.Allocation {
+			jobId, err = c.v0042Client.CreateJobInfoAlloc(ctx, req)
+		} else {
+			jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
+		}
+		if err != nil {
+			return err
+		}
+		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
+		return c.Get(ctx, key, o)
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -168,6 +190,11 @@ func (c *client) Delete(
 		return c.v0041Client.DeleteJobInfo(ctx, key)
 	case *types.V0041Node:
 		return c.v0041Client.DeleteNode(ctx, key)
+
+	case *types.V0042JobInfo:
+		return c.v0042Client.DeleteJobInfo(ctx, key)
+	case *types.V0042Node:
+		return c.v0042Client.DeleteNode(ctx, key)
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -208,6 +235,19 @@ func (c *client) Update(
 		return c.Get(ctx, obj.GetKey(), o)
 	case *types.V0041Node:
 		err := c.v0041Client.UpdateNode(ctx, key, req)
+		if err != nil {
+			return err
+		}
+		return c.Get(ctx, obj.GetKey(), o)
+
+	case *types.V0042JobInfo:
+		err := c.v0042Client.UpdateJobInfo(ctx, key, req)
+		if err != nil {
+			return err
+		}
+		return c.Get(ctx, obj.GetKey(), o)
+	case *types.V0042Node:
+		err := c.v0042Client.UpdateNode(ctx, key, req)
 		if err != nil {
 			return err
 		}
@@ -289,6 +329,31 @@ func (c *client) Get(
 		}
 		*o = *out
 
+	case *types.V0042ControllerPing:
+		out, err := c.v0042Client.GetControllerPing(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042JobInfo:
+		out, err := c.v0042Client.GetJobInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042Node:
+		out, err := c.v0042Client.GetNode(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042PartitionInfo:
+		out, err := c.v0042Client.GetPartitionInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -362,6 +427,31 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0041PartitionInfoList:
 		out, err := c.v0041Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+
+	case *types.V0042ControllerPingList:
+		out, err := c.v0042Client.ListControllerPing(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042JobInfoList:
+		out, err := c.v0042Client.ListJobInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042NodeList:
+		out, err := c.v0042Client.ListNodes(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042PartitionInfoList:
+		out, err := c.v0042Client.ListPartitionInfo(ctx)
 		if err != nil {
 			return err
 		}

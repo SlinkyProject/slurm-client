@@ -129,6 +129,15 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 		case types.ObjectTypeV0041PartitionInfo:
 			list = &types.V0041PartitionInfoList{}
 
+		case types.ObjectTypeV0042ControllerPing:
+			list = &types.V0042ControllerPingList{}
+		case types.ObjectTypeV0042JobInfo:
+			list = &types.V0042JobInfoList{}
+		case types.ObjectTypeV0042Node:
+			list = &types.V0042NodeList{}
+		case types.ObjectTypeV0042PartitionInfo:
+			list = &types.V0042PartitionInfoList{}
+
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
 			// We cannot recover from here because the informer has started a
@@ -195,6 +204,15 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0041Node{}
 		case types.ObjectTypeV0041PartitionInfo:
 			obj = &types.V0041PartitionInfo{}
+
+		case types.ObjectTypeV0042ControllerPing:
+			obj = &types.V0042ControllerPing{}
+		case types.ObjectTypeV0042JobInfo:
+			obj = &types.V0042JobInfo{}
+		case types.ObjectTypeV0042Node:
+			obj = &types.V0042Node{}
+		case types.ObjectTypeV0042PartitionInfo:
+			obj = &types.V0042PartitionInfo{}
 
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
