@@ -53,8 +53,18 @@ $(LOCALBIN):
 
 .PHONY: generate
 generate: ## Run all generate targets.
-	$(MAKE) generate-api
+	$(MAKE) generate-api-matrix
 	go generate ./...
+
+.PHONY: generate-api-matrix
+generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
+	declare -A VERSION_MATRIX=( \
+		["ghcr.io/slinkyproject/slurmrestd:24.11.4-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:24.05.7-ubuntu24.04"]="+prefer_refs" \
+	); \
+	for key in $${!VERSION_MATRIX[@]}; do \
+		$(MAKE) generate-api SLURM_IMAGE=$${key} SLURM_DATA_PARSER_OPTS=$${VERSION_MATRIX[$${key}]} ; \
+	done
 
 CONTAINER_TOOL ?= docker
 SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:24.11.5-ubuntu24.04
