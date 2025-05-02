@@ -67,7 +67,7 @@ OAPI_CODEGEN_VERSION ?= v2.4.1
 generate-api: ## Generate Slurm OpenAPI spec file.
 ifeq ($(SLURM_DATA_PARSER), )
 	@$(eval SLURM_DATA_PARSER = $(shell \
-		$(CONTAINER_TOOL) run --rm -t \
+		$(CONTAINER_TOOL) run --rm \
 			--volume ./hack/etc/slurm:/etc/slurm --volume ./:/workspace --workdir /workspace \
 			--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
 			${SLURM_IMAGE} \
@@ -75,7 +75,7 @@ ifeq ($(SLURM_DATA_PARSER), )
 endif
 	@$(eval SLURM_GO_MODULE := $(shell echo ${SLURM_DATA_PARSER} | sed -e 's/\.//g'))
 	mkdir -p api/${SLURM_GO_MODULE}
-	$(CONTAINER_TOOL) run --rm -t \
+	$(CONTAINER_TOOL) run --rm \
 		--volume ./:/workspace --workdir /workspace \
 		--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
 		${SLURM_IMAGE} \
