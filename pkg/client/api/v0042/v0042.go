@@ -25,6 +25,7 @@ type ClientInterface interface {
 	JobInfoInterface
 	NodeInterface
 	PartitionInterface
+	StatsInterface
 }
 
 type SlurmClient struct {

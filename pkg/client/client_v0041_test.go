@@ -360,4 +360,40 @@ var _ = Describe("Client", func() {
 			}, SpecTimeout(testTimeout))
 		})
 	})
+
+	Describe("V0041Stats", func() {
+		var cl Client
+
+		BeforeEach(func() {
+			var err error
+			cl, err = NewClient(cfg)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cl).NotTo(BeNil())
+
+			go cl.Start(context.TODO())
+
+			DeferCleanup(func() {
+				cl.Stop()
+			})
+		})
+
+		Context("Get", func() {
+			It("should fetch stats", func(ctx SpecContext) {
+				By("fetching data")
+				obj := &types.V0041Stats{}
+				err := cl.Get(ctx, obj.GetKey(), obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("List", func() {
+			It("should return a list", func(ctx SpecContext) {
+				By("listing all objects")
+				list := &types.V0041StatsList{}
+				err := cl.List(ctx, list)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(list.Items).NotTo(BeEmpty())
+			}, SpecTimeout(testTimeout))
+		})
+	})
 })

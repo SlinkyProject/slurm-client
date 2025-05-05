@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Added v42 OpenAPI spec and generated API.
 - Added v42 client library support.
+- Added v41, v42 support for sdiag statistics.
 
 ### Fixed
 

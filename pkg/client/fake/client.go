@@ -138,6 +138,9 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0041PartitionInfo:
 		cache := entry.(*types.V0041PartitionInfo)
 		*o = *cache
+	case *types.V0041Stats:
+		cache := entry.(*types.V0041Stats)
+		*o = *cache
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}

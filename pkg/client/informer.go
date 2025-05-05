@@ -128,6 +128,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 			list = &types.V0041NodeList{}
 		case types.ObjectTypeV0041PartitionInfo:
 			list = &types.V0041PartitionInfoList{}
+		case types.ObjectTypeV0041Stats:
+			list = &types.V0041StatsList{}
 
 		case types.ObjectTypeV0042ControllerPing:
 			list = &types.V0042ControllerPingList{}
@@ -137,6 +139,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 			list = &types.V0042NodeList{}
 		case types.ObjectTypeV0042PartitionInfo:
 			list = &types.V0042PartitionInfoList{}
+		case types.ObjectTypeV0042Stats:
+			list = &types.V0042StatsList{}
 
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
@@ -204,6 +208,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0041Node{}
 		case types.ObjectTypeV0041PartitionInfo:
 			obj = &types.V0041PartitionInfo{}
+		case types.ObjectTypeV0041Stats:
+			obj = &types.V0041Stats{}
 
 		case types.ObjectTypeV0042ControllerPing:
 			obj = &types.V0042ControllerPing{}
@@ -213,6 +219,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0042Node{}
 		case types.ObjectTypeV0042PartitionInfo:
 			obj = &types.V0042PartitionInfo{}
+		case types.ObjectTypeV0042Stats:
+			obj = &types.V0042Stats{}
 
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.

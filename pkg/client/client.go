@@ -328,6 +328,12 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0041Stats:
+		out, err := c.v0041Client.GetStats(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
 
 	case *types.V0042ControllerPing:
 		out, err := c.v0042Client.GetControllerPing(ctx, string(key))
@@ -349,6 +355,12 @@ func (c *client) Get(
 		*o = *out
 	case *types.V0042PartitionInfo:
 		out, err := c.v0042Client.GetPartitionInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042Stats:
+		out, err := c.v0042Client.GetStats(ctx)
 		if err != nil {
 			return err
 		}
@@ -431,6 +443,12 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+	case *types.V0041StatsList:
+		out, err := c.v0041Client.ListStats(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
 
 	case *types.V0042ControllerPingList:
 		out, err := c.v0042Client.ListControllerPing(ctx)
@@ -452,6 +470,12 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0042PartitionInfoList:
 		out, err := c.v0042Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042StatsList:
+		out, err := c.v0042Client.ListStats(ctx)
 		if err != nil {
 			return err
 		}
