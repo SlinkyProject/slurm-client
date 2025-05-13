@@ -87,6 +87,23 @@ go slurmClient.Start(ctx)
 Create Slurm resources via client handle.
 
 ```golang
+// Create job via V0042 endpoint
+jobInfo := &types.V0042JobInfo{}
+req := v0041.V0042JobSubmitReq{
+	Job: &v0041.V0042JobDescMsg{
+		CurrentWorkingDirectory: ptr.To("/tmp"),
+		Environment: &v0041.V0042StringArray{
+			"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+		},
+		Script: ptr.To("#!/usr/bin/env bash\nsleep 30"),
+	},
+}
+if err := slurmClient.Create(ctx, jobInfo, req); err != nil {
+	return err
+}
+```
+
+```golang
 // Create job via V0041 endpoint
 jobInfo := &types.V0041JobInfo{}
 req := v0041.V0041JobSubmitReq{
@@ -125,6 +142,18 @@ if err := slurmClient.Create(ctx, jobInfo, req); err != nil {
 Delete Slurm resource via client handle.
 
 ```golang
+// Delete job via V0042 endpoint
+jobInfo := &types.V0042JobInfo{
+	V0042JobInfo: v0041.V0042JobInfo{
+		JobId: ptr.To("1"),
+	},
+}
+if err := slurmClient.Delete(ctx, jobInfo); err != nil {
+	return err
+}
+```
+
+```golang
 // Delete job via V0041 endpoint
 jobInfo := &types.V0041JobInfo{
 	V0041JobInfo: v0041.V0041JobInfo{
@@ -153,6 +182,15 @@ if err := slurmClient.Delete(ctx, jobInfo); err != nil {
 Get Slurm resource via client handle.
 
 ```golang
+// Fetch node via V0042 endpoint
+node := &types.V0042Node{}
+key := object.ObjectKey("node-0")
+if err := slurmClient.Get(ctx, key, node); err != nil {
+	return err
+}
+```
+
+```golang
 // Fetch node via V0041 endpoint
 node := &types.V0041Node{}
 key := object.ObjectKey("node-0")
@@ -175,6 +213,14 @@ if err := slurmClient.Get(ctx, key, node); err != nil {
 List Slurm resources via client handle.
 
 ```golang
+// Fetch list of nodes via V0042 endpoint
+nodeList := &types.V0042NodeList{}
+if err := slurmClient.List(ctx, nodeList); err != nil {
+	return err
+}
+```
+
+```golang
 // Fetch list of nodes via V0041 endpoint
 nodeList := &types.V0041NodeList{}
 if err := slurmClient.List(ctx, nodeList); err != nil {
@@ -193,6 +239,17 @@ if err := slurmClient.List(ctx, nodeList); err != nil {
 #### Update
 
 Update Slurm resource via client handle.
+
+```golang
+// Update job via V0042 endpoint
+jobInfo := &types.V0042JobInfo{}
+req := &v0041.V0042JobDescMsg{
+	Comment: ptr.To("updated comment")
+}
+if err := slurmClient.Update(ctx, jobInfo, req); err != nil {
+	return err
+}
+```
 
 ```golang
 // Update job via V0041 endpoint
