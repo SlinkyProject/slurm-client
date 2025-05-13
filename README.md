@@ -89,10 +89,10 @@ Create Slurm resources via client handle.
 ```golang
 // Create job via V0042 endpoint
 jobInfo := &types.V0042JobInfo{}
-req := v0041.V0042JobSubmitReq{
-	Job: &v0041.V0042JobDescMsg{
+req := v0042.V0042JobSubmitReq{
+	Job: &v0042.V0042JobDescMsg{
 		CurrentWorkingDirectory: ptr.To("/tmp"),
-		Environment: &v0041.V0042StringArray{
+		Environment: &v0042.V0042StringArray{
 			"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		},
 		Script: ptr.To("#!/usr/bin/env bash\nsleep 30"),
@@ -144,7 +144,7 @@ Delete Slurm resource via client handle.
 ```golang
 // Delete job via V0042 endpoint
 jobInfo := &types.V0042JobInfo{
-	V0042JobInfo: v0041.V0042JobInfo{
+	V0042JobInfo: v0042.V0042JobInfo{
 		JobId: ptr.To("1"),
 	},
 }
@@ -243,7 +243,7 @@ Update Slurm resource via client handle.
 ```golang
 // Update job via V0042 endpoint
 jobInfo := &types.V0042JobInfo{}
-req := &v0041.V0042JobDescMsg{
+req := &v0042.V0042JobDescMsg{
 	Comment: ptr.To("updated comment")
 }
 if err := slurmClient.Update(ctx, jobInfo, req); err != nil {
