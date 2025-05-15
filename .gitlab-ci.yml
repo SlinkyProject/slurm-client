@@ -28,8 +28,11 @@ variables:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - apk update && apk upgrade
-    - apk add --no-cache git go
+    - apk add --no-cache git
+    - wget -O go.tgz https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
+    - tar -C /usr/local -xzf go.tgz
     - export PATH=$PATH:$HOME/go/bin/
+    - export PATH=$PATH:/usr/local/go/bin
     - go env -w GOPRIVATE=github.com/SlinkyProject/*
 
 test:
