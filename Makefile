@@ -86,6 +86,7 @@ generate: ## Run all generate targets.
 .PHONY: generate-api-matrix
 generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	declare -A VERSION_MATRIX=( \
+		["ghcr.io/slinkyproject/slurmrestd:25.05.0-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:24.11.5-ubuntu24.04"]="+inline_enums" \
 		["ghcr.io/slinkyproject/slurmrestd:24.05.8-ubuntu24.04"]="+prefer_refs" \
 	); \
@@ -94,7 +95,7 @@ generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	done
 
 CONTAINER_TOOL ?= docker
-SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:24.11.5-ubuntu24.04
+SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.0-ubuntu24.04
 SLURM_DATA_PARSER_OPTS ?= +inline_enums
 
 TEMPLATES_DIR = api/.template
@@ -106,7 +107,8 @@ ifeq ($(SLURM_DATA_PARSER), )
 	@$(eval SLURM_DATA_PARSER = $(shell \
 		$(CONTAINER_TOOL) run --rm \
 			--volume ./hack/etc/slurm:/etc/slurm --volume ./:/workspace --workdir /workspace \
-			--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
+			--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv \
+			--user 65534:65534 \
 			${SLURM_IMAGE} \
 			-d list 2>&1 | grep -Eo 'data_parser/.+' | sort -u | tail -n 1 | sed -e 's/data_parser\///g'))
 endif
@@ -114,7 +116,8 @@ endif
 	mkdir -p api/${SLURM_GO_MODULE}
 	$(CONTAINER_TOOL) run --rm \
 		--volume ./:/workspace --workdir /workspace \
-		--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv,disable_user_check \
+		--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv \
+		--user 65534:65534 \
 		${SLURM_IMAGE} \
 		-f /dev/null -s openapi/slurmdbd,openapi/slurmctld -d data_parser/${SLURM_DATA_PARSER}${SLURM_DATA_PARSER_OPTS} --generate-openapi-spec 2>/dev/null > api/${SLURM_GO_MODULE}/slurm-openapi.gen.json
 	$(foreach file, $(wildcard $(TEMPLATES_DIR)/*), sed -e "s/{{SLURM_GO_MODULE}}/${SLURM_GO_MODULE}/g" -e "s/{{OAPI_CODEGEN_VERSION}}/${OAPI_CODEGEN_VERSION}/g" ${file} > api/${SLURM_GO_MODULE}/$(shell basename ${file} .tpl);)
