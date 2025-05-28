@@ -134,6 +134,30 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(res).To(Not(BeNil()))
 		})
 	})
+	Context("SlurmV0043PostReservationWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0043PostReservationWithBodyWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0043PostReservationWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0043PostReservationWithResponse(ctx, api.SlurmV0043PostReservationJSONRequestBody{}, nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0043DeleteReservationWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0043DeleteReservationWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
 	Context("SlurmV0043GetReservationWithResponse", func() {
 		It("should call the provided function", func() {
 			client := NewFakeClient()
@@ -146,6 +170,22 @@ var _ = Describe("NewFakeClient", func() {
 		It("should call the provided function", func() {
 			client := NewFakeClient()
 			res, err := client.SlurmV0043GetReservationsWithResponse(ctx, nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0043PostReservationsWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0043PostReservationsWithBodyWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0043PostReservationsWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0043PostReservationsWithResponse(ctx, api.SlurmV0043PostReservationsJSONRequestBody{}, nil)
 			Expect(err).To(BeNil())
 			Expect(res).To(Not(BeNil()))
 		})

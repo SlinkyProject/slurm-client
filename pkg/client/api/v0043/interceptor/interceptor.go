@@ -220,7 +220,7 @@ func (i *interceptor) SlurmV0043GetReconfigureWithResponse(ctx context.Context, 
 
 // SlurmV0043PostReservationWithBodyWithResponse implements V0043.ClientWithResponsesInterface.
 func (i *interceptor) SlurmV0043PostReservationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationResponse, error) {
-	if i.funcs.SlurmV0043PostReservationWithResponse != nil {
+	if i.funcs.SlurmV0043PostReservationWithBodyWithResponse != nil {
 		return i.funcs.SlurmV0043PostReservationWithBodyWithResponse(ctx, contentType, body, reqEditors...)
 	}
 	return i.client.SlurmV0043PostReservationWithBodyWithResponse(ctx, contentType, body, reqEditors...)
@@ -236,7 +236,7 @@ func (i *interceptor) SlurmV0043PostReservationWithResponse(ctx context.Context,
 
 // SlurmV0043DeleteReservationWithResponse implements V0043.ClientWithResponsesInterface.
 func (i *interceptor) SlurmV0043DeleteReservationWithResponse(ctx context.Context, reservationName string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043DeleteReservationResponse, error) {
-	if i.funcs.SlurmV0043GetReservationWithResponse != nil {
+	if i.funcs.SlurmV0043DeleteReservationWithResponse != nil {
 		return i.funcs.SlurmV0043DeleteReservationWithResponse(ctx, reservationName, reqEditors...)
 	}
 	return i.client.SlurmV0043DeleteReservationWithResponse(ctx, reservationName, reqEditors...)
@@ -260,7 +260,7 @@ func (i *interceptor) SlurmV0043GetReservationsWithResponse(ctx context.Context,
 
 // SlurmV0043PostReservationsWithBodyWithResponse implements V0043.ClientWithResponsesInterface.
 func (i *interceptor) SlurmV0043PostReservationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationsResponse, error) {
-	if i.funcs.SlurmV0043PostReservationsWithResponse != nil {
+	if i.funcs.SlurmV0043PostReservationsWithBodyWithResponse != nil {
 		return i.funcs.SlurmV0043PostReservationsWithBodyWithResponse(ctx, contentType, body, reqEditors...)
 	}
 	return i.client.SlurmV0043PostReservationsWithBodyWithResponse(ctx, contentType, body, reqEditors...)

@@ -391,6 +391,81 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
+	Context("SlurmV0043PostReservationWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			_, _ = client.SlurmV0043PostReservationWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0043PostReservationWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0043PostReservationWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationWithResponse: func(ctx context.Context, body api.SlurmV0043PostReservationJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			_, _ = client.SlurmV0043PostReservationWithResponse(ctx, api.SlurmV0043PostReservationJSONRequestBody{})
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationWithResponse: func(ctx context.Context, body api.SlurmV0043PostReservationJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0043PostReservationWithResponse(ctx, api.SlurmV0043PostReservationJSONRequestBody{})
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0043DeleteReservationWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0043DeleteReservationWithResponse: func(ctx context.Context, reservationName string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043DeleteReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			_, _ = client.SlurmV0043DeleteReservationWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0043DeleteReservationWithResponse: func(ctx context.Context, reservationName string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043DeleteReservationResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0043DeleteReservationWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
 	Context("SlurmV0043GetReservationWithResponse", func() {
 		It("should call the provided function", func() {
 			var called bool
@@ -438,6 +513,56 @@ var _ = Describe("NewClient", func() {
 			})
 			client2 := NewClient(client1, Funcs{})
 			_, _ = client2.SlurmV0043GetReservationsWithResponse(ctx, nil)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0043PostReservationsWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationsWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationsResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			_, _ = client.SlurmV0043PostReservationsWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationsWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationsResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0043PostReservationsWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0043PostReservationsWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationsWithResponse: func(ctx context.Context, body api.SlurmV0043PostReservationsJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationsResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			_, _ = client.SlurmV0043PostReservationsWithResponse(ctx, api.SlurmV0043PostReservationsJSONRequestBody{})
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0043PostReservationsWithResponse: func(ctx context.Context, body api.SlurmV0043PostReservationsJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0043PostReservationsResponse, error) {
+					called = true
+					return nil, nil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0043PostReservationsWithResponse(ctx, api.SlurmV0043PostReservationsJSONRequestBody{})
 			Expect(called).To(BeTrue())
 		})
 	})
