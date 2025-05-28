@@ -11,4 +11,4 @@ chmod 644 /etc/slurm/*.conf
 chmod 600 /etc/slurm/slurmdbd.conf
 chmod 600 /etc/slurm/*.key
 
-SLURM_JWT=daemon slurmrestd 0.0.0.0:6820
+SLURM_JWT=daemon slurmrestd -u 65534 -g 65534 0.0.0.0:6820

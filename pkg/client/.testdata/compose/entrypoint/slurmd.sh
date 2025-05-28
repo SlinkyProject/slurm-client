@@ -4,9 +4,6 @@
 
 set -euo pipefail
 
-mkdir -p /run/slurm/
-chown slurm:slurm /run/slurm/
-
 mkdir -p /etc/slurm/
 cp /opt/etc/slurm/* /etc/slurm/
 chown slurm:slurm /etc/slurm/*
