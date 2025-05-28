@@ -120,11 +120,23 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0041ControllerPing:
 		cache := entry.(*types.V0041ControllerPing)
 		*o = *cache
+	case *types.V0042ControllerPing:
+		cache := entry.(*types.V0042ControllerPing)
+		*o = *cache
+	case *types.V0043ControllerPing:
+		cache := entry.(*types.V0043ControllerPing)
+		*o = *cache
 	case *types.V0040JobInfo:
 		cache := entry.(*types.V0040JobInfo)
 		*o = *cache
 	case *types.V0041JobInfo:
 		cache := entry.(*types.V0041JobInfo)
+		*o = *cache
+	case *types.V0042JobInfo:
+		cache := entry.(*types.V0042JobInfo)
+		*o = *cache
+	case *types.V0043JobInfo:
+		cache := entry.(*types.V0043JobInfo)
 		*o = *cache
 	case *types.V0040Node:
 		cache := entry.(*types.V0040Node)
@@ -132,14 +144,32 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0041Node:
 		cache := entry.(*types.V0041Node)
 		*o = *cache
+	case *types.V0042Node:
+		cache := entry.(*types.V0042Node)
+		*o = *cache
+	case *types.V0043Node:
+		cache := entry.(*types.V0043Node)
+		*o = *cache
 	case *types.V0040PartitionInfo:
 		cache := entry.(*types.V0040PartitionInfo)
 		*o = *cache
 	case *types.V0041PartitionInfo:
 		cache := entry.(*types.V0041PartitionInfo)
 		*o = *cache
+	case *types.V0042PartitionInfo:
+		cache := entry.(*types.V0042PartitionInfo)
+		*o = *cache
+	case *types.V0043PartitionInfo:
+		cache := entry.(*types.V0043PartitionInfo)
+		*o = *cache
 	case *types.V0041Stats:
 		cache := entry.(*types.V0041Stats)
+		*o = *cache
+	case *types.V0042Stats:
+		cache := entry.(*types.V0042Stats)
+		*o = *cache
+	case *types.V0043Stats:
+		cache := entry.(*types.V0043Stats)
 		*o = *cache
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
