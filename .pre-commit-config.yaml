@@ -77,11 +77,21 @@ repos:
       - id: go-build-mod
   - repo: local
     hooks:
-      - id: golangci-lint
-        name: golangci-lint
-        entry: golangci-lint run --timeout=10m
+      # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
+      - id: make-golangci-lint
+        name: make-golangci-lint
+        entry: make golangci-lint
+        types: [go]
         language: system
-        files: \.go$
+        require_serial: true
+        pass_filenames: false
+      # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
+      - id: make-golangci-lint-fmt
+        name: make-golangci-lint-fmt
+        entry: make golangci-lint-fmt
+        types: [go]
+        language: system
+        require_serial: true
         pass_filenames: false
       - id: make-tests
         name: Make Tests

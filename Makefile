@@ -49,6 +49,32 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
+# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
+# $1 - target path with name of binary (ideally with version)
+# $2 - package url which can be installed
+# $3 - specific version of package
+define go-install-tool
+@[ -f $(1) ] || { \
+set -e; \
+package=$(2)@$(3) ;\
+echo "Downloading $${package}" ;\
+GOBIN=$(LOCALBIN) go install $${package} ;\
+mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
+}
+endef
+
+## Tool Binaries
+GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
+
+## Tool Versions
+GOLANGCI_LINT_VERSION ?= v2.1.6
+
+.PHONY: golangci-lint-bin
+golangci-lint-bin: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
+$(GOLANGCI_LINT): $(LOCALBIN)
+	wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION)
+	mv $(LOCALBIN)/golangci-lint $(GOLANGCI_LINT)
+
 ##@ Development
 
 .PHONY: generate
@@ -108,6 +134,16 @@ vet: ## Run go vet against code.
 get-u: ## Run `go get -u`
 	go get -u ./...
 	$(MAKE) tidy
+
+# https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
+.PHONY: golangci-lint
+golangci-lint: golangci-lint-bin ## Run golangci-lint.
+	$(GOLANGCI_LINT) run --new-from-rev HEAD --fix
+
+# https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
+.PHONY: golangci-lint-fmt
+golangci-lint-fmt: golangci-lint-bin ## Run golangci-lint fmt.
+	$(GOLANGCI_LINT) fmt
 
 CODECOV_PERCENT ?= 80.0
 

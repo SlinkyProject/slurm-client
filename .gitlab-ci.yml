@@ -41,7 +41,6 @@ test:
   script:
     - apk update && apk upgrade
     - apk add --no-cache make bash shellcheck shfmt pre-commit
-    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - go install golang.org/x/vuln/cmd/govulncheck@latest
     - pre-commit run --verbose --all-files --show-diff-on-failure
   coverage: /total:\s+\(statements\)\s+\d+.\d+%/
