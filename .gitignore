@@ -130,4 +130,3 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/go,helm,linux,macos,windows,visualstudiocode
 
 Dockerfile.cross
-govulnreport.txt

@@ -39,7 +39,6 @@ build: fmt tidy vet ## Build project
 .PHONY: clean
 clean: ## Clean artifacts
 	rm -f cover.out cover.html
-	rm -f govulnreport.txt
 	rm -rf bin/
 
 ##@ Build Dependencies
@@ -65,9 +64,11 @@ endef
 
 ## Tool Binaries
 GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
+GOVULNCHECK ?= $(LOCALBIN)/govulncheck-$(GOVULNCHECK_VERSION)
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.1.6
+GOVULNCHECK_VERSION ?= latest
 
 .PHONY: golangci-lint-bin
 golangci-lint-bin: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
@@ -135,6 +136,10 @@ get-u: ## Run `go get -u`
 	go get -u ./...
 	$(MAKE) tidy
 
+.PHONY: govulncheck
+govulncheck: govulncheck-bin ## Run govulncheck
+	$(GOVULNCHECK) ./...
+
 # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
 .PHONY: golangci-lint
 golangci-lint: golangci-lint-bin ## Run golangci-lint.
@@ -159,11 +164,3 @@ test: ## Run tests.
 			echo "Total test coverage ($${percentage}%) is less than the coverage threshold ($(CODECOV_PERCENT)%)."; \
 			exit 1; \
 		fi
-
-.PHONY: vuln-scan
-vuln-scan: ## Run vulnerability scanning tool
-	GOBIN=$(LOCALBIN) go install golang.org/x/vuln/cmd/govulncheck@latest
-	govulncheck ./... > govulnreport.txt 2>&1 || echo "Found vulnerabilities.  Details in govulnreport.txt"
-
-.PHONY: audit
-audit: fmt tidy vet vuln-scan ## Run testing tools
