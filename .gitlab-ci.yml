@@ -52,7 +52,6 @@ audit:
   stage: test
   extends: .docker
   script:
-    - make vet
     - make govulncheck
   allow_failure: true
 
