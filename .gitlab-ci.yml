@@ -28,7 +28,7 @@ variables:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - apk update && apk upgrade
-    - apk add --no-cache git
+    - apk add --no-cache bash git make
     - wget -O go.tgz https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
     - tar -C /usr/local -xzf go.tgz
     - export PATH=$PATH:$HOME/go/bin/
@@ -40,7 +40,7 @@ test:
   extends: .docker
   script:
     - apk update && apk upgrade
-    - apk add --no-cache make bash shellcheck shfmt pre-commit
+    - apk add --no-cache shellcheck shfmt pre-commit
     - pre-commit run --verbose --all-files --show-diff-on-failure
   coverage: /total:\s+\(statements\)\s+\d+.\d+%/
   artifacts:
