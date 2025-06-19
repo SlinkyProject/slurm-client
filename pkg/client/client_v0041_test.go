@@ -361,6 +361,42 @@ var _ = Describe("Client", func() {
 		})
 	})
 
+	Describe("V0041Reconfigure", func() {
+		var cl Client
+
+		BeforeEach(func() {
+			var err error
+			cl, err = NewClient(cfg)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cl).NotTo(BeNil())
+
+			go cl.Start(context.TODO())
+
+			DeferCleanup(func() {
+				cl.Stop()
+			})
+		})
+
+		Context("Get", func() {
+			It("should reconfigure", func(ctx SpecContext) {
+				By("making request")
+				obj := &types.V0041Reconfigure{}
+				err := cl.Get(ctx, obj.GetKey(), obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("List", func() {
+			It("should reconfigure", func(ctx SpecContext) {
+				By("making requests")
+				list := &types.V0041ReconfigureList{}
+				err := cl.List(ctx, list)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(list.Items).NotTo(BeEmpty())
+			}, SpecTimeout(testTimeout))
+		})
+	})
+
 	Describe("V0041Stats", func() {
 		var cl Client
 

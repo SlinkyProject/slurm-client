@@ -78,6 +78,11 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	// Apply options
 	options := &ClientOptions{
 		CacheSyncPeriod: defaultSyncPeriod,
+		DisableFor: []object.Object{
+			&types.V0043Reconfigure{},
+			&types.V0042Reconfigure{},
+			&types.V0041Reconfigure{},
+		},
 	}
 	options.ApplyOptions(opts)
 
@@ -368,6 +373,12 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0041Reconfigure:
+		out, err := c.v0041Client.GetReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
 	case *types.V0041Stats:
 		out, err := c.v0041Client.GetStats(ctx)
 		if err != nil {
@@ -399,6 +410,12 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0042Reconfigure:
+		out, err := c.v0042Client.GetReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
 	case *types.V0042Stats:
 		out, err := c.v0042Client.GetStats(ctx)
 		if err != nil {
@@ -426,6 +443,12 @@ func (c *client) Get(
 		*o = *out
 	case *types.V0043PartitionInfo:
 		out, err := c.v0043Client.GetPartitionInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0043Reconfigure:
+		out, err := c.v0043Client.GetReconfigure(ctx)
 		if err != nil {
 			return err
 		}
@@ -514,6 +537,12 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+	case *types.V0041ReconfigureList:
+		out, err := c.v0041Client.ListReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
 	case *types.V0041StatsList:
 		out, err := c.v0041Client.ListStats(ctx)
 		if err != nil {
@@ -545,6 +574,12 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+	case *types.V0042ReconfigureList:
+		out, err := c.v0042Client.ListReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
 	case *types.V0042StatsList:
 		out, err := c.v0042Client.ListStats(ctx)
 		if err != nil {
@@ -572,6 +607,12 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0043PartitionInfoList:
 		out, err := c.v0043Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0043ReconfigureList:
+		out, err := c.v0043Client.ListReconfigure(ctx)
 		if err != nil {
 			return err
 		}
