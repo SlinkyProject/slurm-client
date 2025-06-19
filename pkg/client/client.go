@@ -430,6 +430,12 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0043Stats:
+		out, err := c.v0043Client.GetStats(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -566,6 +572,12 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0043PartitionInfoList:
 		out, err := c.v0043Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0043StatsList:
+		out, err := c.v0043Client.ListStats(ctx)
 		if err != nil {
 			return err
 		}
