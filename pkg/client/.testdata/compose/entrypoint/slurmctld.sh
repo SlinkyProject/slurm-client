@@ -17,4 +17,4 @@ chown slurm:slurm /etc/slurm/*
 chmod 644 /etc/slurm/*.conf
 chmod 600 /etc/slurm/*.key
 
-slurmctld -D
+exec tini -g -- slurmctld -D

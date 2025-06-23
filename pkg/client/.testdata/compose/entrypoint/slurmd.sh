@@ -11,4 +11,4 @@ chmod 644 /etc/slurm/*.conf
 chmod 600 /etc/slurm/slurmdbd.conf
 chmod 600 /etc/slurm/*.key
 
-slurmd -D -Z
+exec tini -g -- slurmd -D -Z
