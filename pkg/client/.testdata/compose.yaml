@@ -12,8 +12,6 @@ services:
     #   - 13306:3306
     environment:
       - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
-    volumes:
-      - mariadb_data:/tmp/mariadb
     networks:
       - default
     healthcheck:
@@ -128,9 +126,6 @@ services:
     depends_on:
       control-plane:
         condition: service_healthy
-volumes:
-  mariadb_data:
-    driver: local
 networks:
   default:
     driver: bridge
