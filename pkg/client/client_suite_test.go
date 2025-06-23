@@ -35,8 +35,10 @@ var _ = BeforeSuite(func() {
 	ctx, cancel = context.WithCancel(context.TODO())
 
 	composeFilePaths := []string{"./.testdata/compose.yaml"}
-	compose, err = tcc.NewDockerComposeWith(tcc.WithStackFiles(composeFilePaths...))
+	compose, err = tcc.NewDockerComposeWith(tcc.WithStackFiles(composeFilePaths...), tcc.StackIdentifier("testdata"))
 	Expect(err).NotTo(HaveOccurred())
+
+	containerCleanup()
 
 	err = compose.Up(ctx, tcc.Wait(true))
 	Expect(err).NotTo(HaveOccurred())
@@ -71,7 +73,11 @@ func demultiplexReader(multiplexedReader io.Reader) (string, string) {
 }
 
 var _ = AfterSuite(func() {
-	err := compose.Down(context.Background(), tcc.RemoveOrphans(true), tcc.RemoveImagesLocal)
-	Expect(err).NotTo(HaveOccurred())
+	containerCleanup()
 	cancel()
 })
+
+func containerCleanup() {
+	err := compose.Down(context.Background(), tcc.RemoveOrphans(true), tcc.RemoveVolumes(true), tcc.RemoveImagesLocal)
+	Expect(err).NotTo(HaveOccurred())
+}
