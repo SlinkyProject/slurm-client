@@ -8,8 +8,8 @@ services:
     container_name: mariadb
     hostname: mariadb
     restart: unless-stopped
-    ports:
-      - 13306:3306
+    # ports:
+    #   - 13306:3306
     environment:
       - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
     volumes:
@@ -28,8 +28,8 @@ services:
     hostname: slurmdbd
     entrypoint: /opt/entrypoint/slurmdbd.sh
     restart: unless-stopped
-    ports:
-      - 6819:6819
+    # ports:
+    #   - 16819:6819
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -44,8 +44,8 @@ services:
     hostname: slurmctld
     entrypoint: /opt/entrypoint/slurmctld.sh
     restart: unless-stopped
-    ports:
-      - 6817:6817
+    # ports:
+    #   - 16817:6817
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -60,8 +60,8 @@ services:
     hostname: slurmd
     entrypoint: /opt/entrypoint/slurmd.sh
     restart: unless-stopped
-    ports:
-      - 6818:6818
+    # ports:
+    #   - 16818:6818
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -79,7 +79,7 @@ services:
     entrypoint: /opt/entrypoint/slurmrestd.sh
     restart: unless-stopped
     ports:
-      - 6820:6820
+      - 16820:6820
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
