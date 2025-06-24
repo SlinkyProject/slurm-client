@@ -30,6 +30,12 @@ services:
     restart: unless-stopped
     # ports:
     #   - 16819:6819
+    healthcheck:
+      test: [CMD-SHELL, bash, sacctmgr, ping]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -46,6 +52,12 @@ services:
     restart: unless-stopped
     # ports:
     #   - 16817:6817
+    healthcheck:
+      test: [CMD-SHELL, bash, scontrol, ping]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -53,7 +65,7 @@ services:
       - default
     depends_on:
       accounting:
-        condition: service_started
+        condition: service_healthy
   compute:
     image: ghcr.io/slinkyproject/slurmd:25.05-ubuntu24.04
     container_name: slurmd
@@ -62,6 +74,12 @@ services:
     restart: unless-stopped
     # ports:
     #   - 16818:6818
+    healthcheck:
+      test: [CMD-SHELL, bash, scontrol, show, slurmd]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -69,7 +87,7 @@ services:
       - default
     depends_on:
       control-plane:
-        condition: service_started
+        condition: service_healthy
   restapi:
     image: ghcr.io/slinkyproject/slurmrestd:25.05-ubuntu24.04
     container_name: slurmrestd
@@ -87,13 +105,21 @@ services:
       - default
     depends_on:
       control-plane:
-        condition: service_started
+        condition: service_healthy
+      accounting:
+        condition: service_healthy
   authcred:
     image: ghcr.io/slinkyproject/sackd:25.05-ubuntu24.04
     container_name: sackd
     hostname: sackd
     entrypoint: /opt/entrypoint/sackd.sh
     restart: unless-stopped
+    healthcheck:
+      test: [CMD-SHELL, bash, scontrol, ping]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./compose/etc/:/opt/etc/slurm/:ro
       - ./compose/entrypoint/:/opt/entrypoint/:ro
@@ -101,7 +127,7 @@ services:
       - default
     depends_on:
       control-plane:
-        condition: service_started
+        condition: service_healthy
 volumes:
   mariadb_data:
     driver: local
