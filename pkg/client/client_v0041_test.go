@@ -4,7 +4,6 @@
 package client
 
 import (
-	"context"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -39,12 +38,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Get", func() {
@@ -84,12 +77,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Create", func() {
@@ -250,12 +237,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Delete", func() {
@@ -325,12 +306,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Get", func() {
@@ -369,12 +344,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Get", func() {
@@ -405,12 +374,6 @@ var _ = Describe("Client", func() {
 			cl, err = NewClient(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
 		})
 
 		Context("Get", func() {

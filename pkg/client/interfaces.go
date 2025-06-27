@@ -64,14 +64,6 @@ type Informers interface {
 	// GetInformer fetches or constructs an informer for the given objectType that corresponds to the
 	// non-list version of the resource.
 	GetInformer(objectType object.ObjectType) InformerCache
-
-	// Start runs all the informers known to this cache until the context is closed.
-	// It blocks.
-	Start(ctx context.Context)
-
-	// Stop runs all the informers known to this cache until the context is closed.
-	// It blocks.
-	Stop()
 }
 
 type InformerCache interface {

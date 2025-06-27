@@ -8,10 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 
+	"k8s.io/klog/v2"
 	"k8s.io/utils/set"
 
 	v0040 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0040"
@@ -106,8 +108,10 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	// create return client object
-	client := &client{
+	c := &client{
 		v0040Client:     v0040Client,
 		v0041Client:     v0041Client,
 		v0042Client:     v0042Client,
@@ -117,16 +121,25 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 		authToken:       config.AuthToken,
 		server:          config.Server,
 		cacheSyncPeriod: options.CacheSyncPeriod,
+
+		ctx:    ctx,
+		cancel: cancel,
 	}
 
 	for _, obj := range options.EnableFor {
-		client.GetInformer(obj.GetType())
+		c.GetInformer(obj.GetType())
 	}
 	for _, obj := range options.DisableFor {
-		client.uncached.Insert(obj.GetType())
+		c.uncached.Insert(obj.GetType())
 	}
 
-	return client, nil
+	runtime.SetFinalizer(c, func(c *client) {
+		klog.FromContext(c.ctx).V(6).Info("Stopping Slurm client")
+		c.cancel()
+	})
+	go c.start()
+
+	return c, nil
 }
 
 // Create implements Client.
@@ -672,14 +685,8 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	return c.informers[objectType]
 }
 
-// Start implements Client.
-func (c *client) Start(ctx context.Context) {
+func (c *client) start() {
 	c.mu.Lock()
-	if c.started || c.stopped || ctx.Err() != nil {
-		defer c.mu.Unlock()
-		return
-	}
-	c.ctx, c.cancel = context.WithCancel(ctx)
 	ticker := time.NewTicker(defaultSyncPeriod)
 	defer ticker.Stop()
 	stopCh := make(chan struct{})
@@ -690,15 +697,7 @@ func (c *client) Start(ctx context.Context) {
 	for {
 		c.mu.Lock()
 		select {
-		case <-ctx.Done():
-			defer c.mu.Unlock()
-			c.started = false
-			c.stopped = true
-			close(stopCh)
-			return
 		case <-c.ctx.Done():
-			// c.ctx is a copy of ctx and technically not the same context for
-			// determining when Done() is emitted.
 			defer c.mu.Unlock()
 			c.started = false
 			c.stopped = true
@@ -718,16 +717,7 @@ func (c *client) Start(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			// wait for tick
-		case <-ctx.Done():
-			c.mu.Lock()
-			defer c.mu.Unlock()
-			c.started = false
-			c.stopped = true
-			close(stopCh)
-			return
 		case <-c.ctx.Done():
-			// c.ctx is a copy of ctx and technically not the same context for
-			// determining when Done() is emitted.
 			c.mu.Lock()
 			defer c.mu.Unlock()
 			c.started = false
@@ -736,17 +726,4 @@ func (c *client) Start(ctx context.Context) {
 			return
 		}
 	}
-}
-
-// Stop implements Client.
-func (c *client) Stop() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.stopped = true
-	if !c.started {
-		return
-	}
-
-	c.cancel()
-	c.started = false
 }

@@ -15,4 +15,6 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Changed client cache start by `New()` instead of by `Start()`.
+
 ### Removed

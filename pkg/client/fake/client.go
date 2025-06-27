@@ -237,9 +237,3 @@ func (c *fakeClient) GetServer() string {
 func (c *fakeClient) GetToken() string {
 	return c.authToken
 }
-
-func (c *fakeClient) Start(ctx context.Context) {
-}
-
-func (c *fakeClient) Stop() {
-}

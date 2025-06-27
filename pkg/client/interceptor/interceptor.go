@@ -20,8 +20,6 @@ type Funcs struct {
 	GetInformer func(obj object.ObjectType) client.InformerCache
 	GetServer   func() string
 	GetToken    func() string
-	Start       func(ctx context.Context)
-	Stop        func()
 }
 
 // NewClient returns a new interceptor client that calls the functions in funcs instead of the underlying client's methods, if they are not nil.
@@ -91,20 +89,6 @@ func (c *interceptor) GetToken() string {
 		return c.funcs.GetToken()
 	}
 	return c.client.GetToken()
-}
-
-func (c *interceptor) Start(ctx context.Context) {
-	if c.funcs.Start != nil {
-		c.funcs.Start(ctx)
-	}
-	c.client.Start(ctx)
-}
-
-func (c *interceptor) Stop() {
-	if c.funcs.Stop != nil {
-		c.funcs.Stop()
-	}
-	c.client.Stop()
 }
 
 var _ client.Client = &interceptor{}
