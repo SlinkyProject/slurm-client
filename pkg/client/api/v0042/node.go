@@ -72,7 +72,9 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 	res, err := c.SlurmV0042GetNodeWithResponse(ctx, nodeName, params)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
@@ -82,9 +84,12 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 			}
 		}
 		return nil, utilerrors.NewAggregate(errs)
-	} else if len(res.JSON200.Nodes) == 0 {
+	}
+
+	if len(res.JSON200.Nodes) == 0 {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
+
 	out := &types.V0042Node{}
 	utils.RemarshalOrDie(res.JSON200.Nodes[0], out)
 	return out, nil

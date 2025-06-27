@@ -31,11 +31,14 @@ func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error
 	if !ok {
 		return nil, errors.New("expected req to be V0043JobSubmitReq")
 	}
+
 	body := api.SlurmV0043PostJobSubmitJSONRequestBody(r)
 	res, err := c.SlurmV0043PostJobSubmitWithResponse(ctx, body)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -46,6 +49,7 @@ func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
+
 	return res.JSON200.JobId, nil
 }
 
@@ -55,11 +59,14 @@ func (c *SlurmClient) CreateJobInfoAlloc(ctx context.Context, req any) (*int32, 
 	if !ok {
 		return nil, errors.New("expected req to be V0043JobAllocReq")
 	}
+
 	body := api.SlurmV0043PostJobAllocateJSONRequestBody(r)
 	res, err := c.SlurmV0043PostJobAllocateWithResponse(ctx, body)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -70,6 +77,7 @@ func (c *SlurmClient) CreateJobInfoAlloc(ctx context.Context, req any) (*int32, 
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
+
 	return res.JSON200.JobId, nil
 }
 
@@ -79,7 +87,9 @@ func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
 	res, err := c.SlurmV0043DeleteJobWithResponse(ctx, jobId, params)
 	if err != nil {
 		return err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -90,6 +100,7 @@ func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
 		}
 		return utilerrors.NewAggregate(errs)
 	}
+
 	return nil
 }
 
@@ -99,11 +110,14 @@ func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) 
 	if !ok {
 		return errors.New("expected req to be V0043JobDescMsg")
 	}
+
 	body := api.SlurmV0043PostJobJSONRequestBody(r)
 	res, err := c.SlurmV0043PostJobWithResponse(ctx, jobId, body)
 	if err != nil {
 		return err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -114,6 +128,7 @@ func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) 
 		}
 		return utilerrors.NewAggregate(errs)
 	}
+
 	return nil
 }
 
@@ -123,7 +138,9 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	res, err := c.SlurmV0043GetJobWithResponse(ctx, jobId, params)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -133,9 +150,12 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 			}
 		}
 		return nil, utilerrors.NewAggregate(errs)
-	} else if len(res.JSON200.Jobs) == 0 {
+	}
+
+	if len(res.JSON200.Jobs) == 0 {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
+
 	out := &types.V0043JobInfo{}
 	utils.RemarshalOrDie(res.JSON200.Jobs[0], out)
 	return out, nil
@@ -147,7 +167,9 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0043JobInfoList,
 	res, err := c.SlurmV0043GetJobsWithResponse(ctx, params)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0043OpenapiError{}) {
@@ -158,6 +180,7 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0043JobInfoList,
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
+
 	list := &types.V0043JobInfoList{
 		Items: make([]types.V0043JobInfo, len(res.JSON200.Jobs)),
 	}

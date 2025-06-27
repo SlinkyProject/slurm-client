@@ -13,7 +13,7 @@ import (
 
 const (
 	headerSlurmUserName  = "X-SLURM-USER-NAME"
-	headerSlurmUserToken = "X-SLURM-USER-TOKEN"
+	headerSlurmUserToken = "X-SLURM-USER-TOKEN" //nolint:gosec // disable G101
 
 	headerContentType     = "Content-Type"
 	headerApplicationJson = "application/json"
@@ -54,7 +54,7 @@ func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterf
 		api.WithRequestEditorFn(headerFunc),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %v", err)
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	return &SlurmClient{client}, nil

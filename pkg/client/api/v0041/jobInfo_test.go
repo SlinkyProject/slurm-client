@@ -478,7 +478,7 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 				ClientWithResponsesInterface: fake.NewFakeClientBuilder().
 					WithInterceptorFuncs(interceptor.Funcs{
 						SlurmV0041GetJobWithResponse: func(ctx context.Context, jobId string, params *api.SlurmV0041GetJobParams, reqEditors ...api.RequestEditorFn) (*api.SlurmV0041GetJobResponse, error) {
-							jid, err := strconv.Atoi(jobId)
+							jid, err := strconv.ParseInt(jobId, 10, 32)
 							if err != nil {
 								t.Fatal(err)
 							}
@@ -486,7 +486,7 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 								HTTPResponse: &fake.HttpSuccess,
 								JSON200: &api.V0041OpenapiJobInfoResp{
 									Jobs: []api.V0041JobInfo{
-										{JobId: ptr.To(int32(jid))},
+										{JobId: ptr.To(int32(jid))}, //nolint:gosec // disable G109
 									},
 								},
 							}

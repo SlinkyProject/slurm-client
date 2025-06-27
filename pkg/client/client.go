@@ -83,22 +83,22 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 
 	v0040Client, err := v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %v", err)
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	v0041Client, err := v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %v", err)
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	v0042Client, err := v0042.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %v", err)
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	v0043Client, err := v0043.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %v", err)
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	// create return client object

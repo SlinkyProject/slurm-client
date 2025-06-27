@@ -486,7 +486,7 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 								HTTPResponse: &fake.HttpSuccess,
 								JSON200: &api.V0043OpenapiJobInfoResp{
 									Jobs: []api.V0043JobInfo{
-										{JobId: ptr.To(int32(jid))},
+										{JobId: ptr.To(int32(jid))}, //nolint:gosec // disable G109
 									},
 								},
 							}

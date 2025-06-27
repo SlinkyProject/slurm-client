@@ -27,7 +27,9 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 	res, err := c.SlurmV0042GetPartitionWithResponse(ctx, name, params)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
@@ -37,9 +39,12 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 			}
 		}
 		return nil, utilerrors.NewAggregate(errs)
-	} else if len(res.JSON200.Partitions) == 0 {
+	}
+
+	if len(res.JSON200.Partitions) == 0 {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
+
 	out := &types.V0042PartitionInfo{}
 	utils.RemarshalOrDie(res.JSON200.Partitions[0], out)
 	return out, nil
@@ -51,7 +56,9 @@ func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0042Partit
 	res, err := c.SlurmV0042GetPartitionsWithResponse(ctx, params)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	}
+
+	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
@@ -62,6 +69,7 @@ func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0042Partit
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
+
 	list := &types.V0042PartitionInfoList{
 		Items: make([]types.V0042PartitionInfo, len(res.JSON200.Partitions)),
 	}
