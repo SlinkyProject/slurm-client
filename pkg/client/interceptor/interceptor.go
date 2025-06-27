@@ -19,7 +19,9 @@ type Funcs struct {
 	Update      func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
 	GetInformer func(obj object.ObjectType) client.InformerCache
 	GetServer   func() string
+	SetServer   func(server string)
 	GetToken    func() string
+	SetToken    func(token string)
 }
 
 // NewClient returns a new interceptor client that calls the functions in funcs instead of the underlying client's methods, if they are not nil.
@@ -84,11 +86,25 @@ func (c *interceptor) GetServer() string {
 	return c.client.GetServer()
 }
 
+func (c *interceptor) SetServer(server string) {
+	if c.funcs.SetServer != nil {
+		c.funcs.SetServer(server)
+	}
+	c.client.SetServer(server)
+}
+
 func (c *interceptor) GetToken() string {
 	if c.funcs.GetToken != nil {
 		return c.funcs.GetToken()
 	}
 	return c.client.GetToken()
+}
+
+func (c *interceptor) SetToken(token string) {
+	if c.funcs.SetToken != nil {
+		c.funcs.SetToken(token)
+	}
+	c.client.SetToken(token)
 }
 
 var _ client.Client = &interceptor{}

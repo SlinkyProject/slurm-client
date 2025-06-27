@@ -234,6 +234,14 @@ func (c *fakeClient) GetServer() string {
 	return c.server
 }
 
+func (c *fakeClient) SetServer(server string) {
+	c.server = server
+}
+
 func (c *fakeClient) GetToken() string {
 	return c.authToken
+}
+
+func (c *fakeClient) SetToken(token string) {
+	c.authToken = token
 }

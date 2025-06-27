@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added v43, v42, v41 Reconfigure object.
+- Added ability to update the server and token used by the client.
 
 ### Fixed
 

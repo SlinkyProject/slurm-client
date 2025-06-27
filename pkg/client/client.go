@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"k8s.io/klog/v2"
+	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
 	v0040 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0040"
@@ -66,8 +67,8 @@ type client struct {
 	v0042Client v0042.ClientInterface
 	v0043Client v0043.ClientInterface
 
-	server          string
-	authToken       string
+	config Config
+
 	cacheSyncPeriod time.Duration
 }
 
@@ -94,15 +95,14 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	c := &client{
 		informers:       make(map[object.ObjectType]InformerCache),
 		uncached:        make(set.Set[object.ObjectType]),
-		authToken:       config.AuthToken,
-		server:          config.Server,
+		config:          ptr.Deref(config, Config{}),
 		cacheSyncPeriod: options.CacheSyncPeriod,
 
 		ctx:    ctx,
 		cancel: cancel,
 	}
 
-	if err := c.createApiClients(config); err != nil {
+	if err := c.createApiClients(); err != nil {
 		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
@@ -122,25 +122,28 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	return c, nil
 }
 
-func (c *client) createApiClients(config *Config) error {
+func (c *client) createApiClients() error {
 	var err error
 
-	c.v0040Client, err = v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.v0040Client, err = v0040.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0041Client, err = v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	c.v0041Client, err = v0041.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0042Client, err = v0042.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	c.v0042Client, err = v0042.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0043Client, err = v0043.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	c.v0043Client, err = v0043.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
@@ -652,12 +655,28 @@ func (c *client) List(
 
 // GetServer returns the client server.
 func (c *client) GetServer() string {
-	return c.server
+	return c.config.Server
+}
+
+// GetServer returns the client server.
+func (c *client) SetServer(server string) {
+	c.config.Server = server
+	if err := c.createApiClients(); err != nil {
+		panic(fmt.Errorf("unable to create client: %w", err))
+	}
 }
 
 // GetToken returns the client token.
 func (c *client) GetToken() string {
-	return c.authToken
+	return c.config.AuthToken
+}
+
+// GetToken returns the client token.
+func (c *client) SetToken(token string) {
+	c.config.AuthToken = token
+	if err := c.createApiClients(); err != nil {
+		panic(fmt.Errorf("unable to create client: %w", err))
+	}
 }
 
 // GetInformer implements Client.

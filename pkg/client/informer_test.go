@@ -279,9 +279,17 @@ func (f *emptyClient) GetServer() string {
 	return ""
 }
 
+// GetServer implements Client.
+func (f *emptyClient) SetServer(server string) {
+}
+
 // GetToken implements Client.
 func (f *emptyClient) GetToken() string {
 	return ""
+}
+
+// GetToken implements Client.
+func (f *emptyClient) SetToken(token string) {
 }
 
 // Start implements Client.

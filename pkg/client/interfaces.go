@@ -54,7 +54,9 @@ type Client interface {
 	Writer
 	Informers
 
+	SetServer(server string)
 	GetServer() string
+	SetToken(token string)
 	GetToken() string
 }
 

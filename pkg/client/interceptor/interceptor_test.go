@@ -182,53 +182,49 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
-	Context("GetServer", func() {
+	Context("SetServer", func() {
 		It("should call the provided function", func() {
 			var called bool
 			client := NewClient(wrappedClient, Funcs{
-				GetServer: func() string {
+				SetServer: func(string) {
 					called = true
-					return ""
 				},
 			})
-			_ = client.GetServer()
+			client.SetServer("")
 			Expect(called).To(BeTrue())
 		})
 		It("should call the underlying client if the provided function is nil", func() {
 			var called bool
 			client1 := NewClient(wrappedClient, Funcs{
-				GetServer: func() string {
+				SetServer: func(string) {
 					called = true
-					return ""
 				},
 			})
 			client2 := NewClient(client1, Funcs{})
-			_ = client2.GetServer()
+			client2.SetServer("")
 			Expect(called).To(BeTrue())
 		})
 	})
-	Context("GetToken", func() {
+	Context("SetToken", func() {
 		It("should call the provided function", func() {
 			var called bool
 			client := NewClient(wrappedClient, Funcs{
-				GetToken: func() string {
+				SetToken: func(string) {
 					called = true
-					return ""
 				},
 			})
-			_ = client.GetToken()
+			client.SetToken("")
 			Expect(called).To(BeTrue())
 		})
 		It("should call the underlying client if the provided function is nil", func() {
 			var called bool
 			client1 := NewClient(wrappedClient, Funcs{
-				GetToken: func() string {
+				SetToken: func(string) {
 					called = true
-					return ""
 				},
 			})
 			client2 := NewClient(client1, Funcs{})
-			_ = client2.GetToken()
+			client2.SetToken("")
 			Expect(called).To(BeTrue())
 		})
 	})
@@ -273,9 +269,17 @@ func (e *emptyClient) GetServer() string {
 	return ""
 }
 
+// SetServer implements client.Client.
+func (e *emptyClient) SetServer(server string) {
+}
+
 // GetToken implements client.Client.
 func (e *emptyClient) GetToken() string {
 	return ""
+}
+
+// SetToken implements client.Client.
+func (e *emptyClient) SetToken(token string) {
 }
 
 var _ client.Client = &emptyClient{}

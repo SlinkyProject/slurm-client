@@ -203,19 +203,21 @@ var _ = Describe("NewFakeClient", func() {
 	// 	})
 	// })
 
-	Context("GetServer", func() {
+	Context("SetServer", func() {
 		It("should return", func() {
+			const server = "server-foo"
 			client := NewFakeClient()
-			server := client.GetServer()
-			Expect(server).To(Not(BeNil()))
+			client.SetServer(server)
+			Expect(client.GetServer()).To(Not(BeNil()))
 		})
 	})
 
-	Context("GetToken", func() {
+	Context("SetToken", func() {
 		It("should return", func() {
+			const token = "token-foo"
 			client := NewFakeClient()
-			server := client.GetToken()
-			Expect(server).NotTo(BeNil())
+			client.SetToken(token)
+			Expect(client.GetToken()).NotTo(BeNil())
 		})
 	})
 })
