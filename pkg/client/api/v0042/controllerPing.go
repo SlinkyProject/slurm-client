@@ -11,7 +11,6 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/utils/ptr"
 
-	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -44,11 +43,7 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0042Contr
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}

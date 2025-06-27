@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -31,11 +30,7 @@ func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return utilerrors.NewAggregate(errs)
 	}
@@ -55,11 +50,7 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) 
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return utilerrors.NewAggregate(errs)
 	}
@@ -77,11 +68,7 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
@@ -104,11 +91,7 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0042NodeList, erro
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0042OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}

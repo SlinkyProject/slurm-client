@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0041"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -38,11 +37,7 @@ func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
@@ -62,11 +57,7 @@ func (c *SlurmClient) CreateJobInfoAlloc(ctx context.Context, req any) (*int32, 
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
@@ -82,11 +73,7 @@ func (c *SlurmClient) DeleteJobInfo(ctx context.Context, jobId string) error {
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return utilerrors.NewAggregate(errs)
 	}
@@ -106,11 +93,7 @@ func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) 
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return utilerrors.NewAggregate(errs)
 	}
@@ -128,11 +111,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
@@ -155,11 +134,7 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0041JobInfoList,
 	} else if res.StatusCode() != 200 {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
-			for _, e := range ptr.Deref(res.JSONDefault.Errors, []api.V0041OpenapiError{}) {
-				if e.Error != nil {
-					errs = append(errs, errors.New(*e.Error))
-				}
-			}
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}

@@ -5,8 +5,11 @@ package v0043
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
+
+	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 )
@@ -59,4 +62,14 @@ func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterf
 	}
 
 	return &SlurmClient{client}, nil
+}
+
+func getOpenapiErrors(oapierrors *api.V0043OpenapiErrors) []error {
+	errs := []error{}
+	for _, err := range ptr.Deref(oapierrors, []api.V0043OpenapiError{}) {
+		if err.Error != nil {
+			errs = append(errs, errors.New(*err.Error))
+		}
+	}
+	return errs
 }
