@@ -88,34 +88,10 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	}
 	options.ApplyOptions(opts)
 
-	v0040Client, err := v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %w", err)
-	}
-
-	v0041Client, err := v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %w", err)
-	}
-
-	v0042Client, err := v0042.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %w", err)
-	}
-
-	v0043Client, err := v0043.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %w", err)
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// create return client object
 	c := &client{
-		v0040Client:     v0040Client,
-		v0041Client:     v0041Client,
-		v0042Client:     v0042Client,
-		v0043Client:     v0043Client,
 		informers:       make(map[object.ObjectType]InformerCache),
 		uncached:        make(set.Set[object.ObjectType]),
 		authToken:       config.AuthToken,
@@ -124,6 +100,10 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 
 		ctx:    ctx,
 		cancel: cancel,
+	}
+
+	if err := c.createApiClients(config); err != nil {
+		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	for _, obj := range options.EnableFor {
@@ -140,6 +120,32 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	go c.start()
 
 	return c, nil
+}
+
+func (c *client) createApiClients(config *Config) error {
+	var err error
+
+	c.v0040Client, err = v0040.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %w", err)
+	}
+
+	c.v0041Client, err = v0041.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %w", err)
+	}
+
+	c.v0042Client, err = v0042.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %w", err)
+	}
+
+	c.v0043Client, err = v0043.NewSlurmClient(config.Server, config.AuthToken, config.HTTPClient)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %w", err)
+	}
+
+	return nil
 }
 
 // Create implements Client.
