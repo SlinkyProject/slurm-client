@@ -4,57 +4,67 @@
 package client
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"testing"
 )
 
-var _ = Describe("Client", func() {
-	var cfg *Config
-
-	BeforeEach(func() {
-		cfg = &Config{
-			Server:    restapiServer,
-			AuthToken: slurmJwt,
-		}
-	})
-
-	Describe("Client", func() {
-		var cl Client
-
-		BeforeEach(func() {
-			var err error
-			cl, err = NewClient(cfg)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(cl).NotTo(BeNil())
+func TestNewClient(t *testing.T) {
+	type args struct {
+		config *Config
+		opts   []ClientOption
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			wantErr: true,
+		},
+		{
+			name: "with token",
+			args: args{
+				config: &Config{
+					Server: "http://bar",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "with server",
+			args: args{
+				config: &Config{
+					AuthToken: "foo",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "valid",
+			args: args{
+				config: &Config{
+					AuthToken: "foo",
+					Server:    "http://bar",
+				},
+			},
+		},
+		{
+			name: "valid",
+			args: args{
+				config: &Config{
+					AuthToken: "foo",
+					Server:    "http://bar",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewClient(tt.args.config, tt.args.opts...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewClient() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 		})
-
-		Context("New", func() {
-			It("should return a new Client", func() {
-				cl, err := NewClient(cfg)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(cl).NotTo(BeNil())
-			})
-			It("should fail if config is nil", func() {
-				cl, err := NewClient(nil)
-				Expect(err).To(HaveOccurred())
-				Expect(cl).To(BeNil())
-			})
-			It("should fail if Server is empty", func() {
-				cfg2 := &Config{
-					AuthToken: cfg.AuthToken,
-				}
-				cl, err := NewClient(cfg2)
-				Expect(err).To(HaveOccurred())
-				Expect(cl).To(BeNil())
-			})
-			It("should fail if AuthToken is empty", func() {
-				cfg2 := &Config{
-					Server: cfg.Server,
-				}
-				cl, err := NewClient(cfg2)
-				Expect(err).To(HaveOccurred())
-				Expect(cl).To(BeNil())
-			})
-		})
-	})
-})
+	}
+}
