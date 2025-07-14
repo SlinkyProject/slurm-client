@@ -220,4 +220,34 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(client.GetToken()).NotTo(BeNil())
 		})
 	})
+
+	Context("Start", func() {
+		It("should return", func() {
+			var called bool
+			client := NewClientBuilder().
+				WithInterceptorFuncs(interceptor.Funcs{
+					Start: func(ctx context.Context) {
+						called = true
+					},
+				}).
+				Build()
+			client.Start(context.Background())
+			Expect(called).To(BeTrue())
+		})
+	})
+
+	Context("Stop", func() {
+		It("should return", func() {
+			var called bool
+			client := NewClientBuilder().
+				WithInterceptorFuncs(interceptor.Funcs{
+					Stop: func() {
+						called = true
+					},
+				}).
+				Build()
+			client.Stop()
+			Expect(called).To(BeTrue())
+		})
+	})
 })

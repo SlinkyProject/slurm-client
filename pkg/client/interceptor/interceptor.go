@@ -22,6 +22,8 @@ type Funcs struct {
 	SetServer   func(server string)
 	GetToken    func() string
 	SetToken    func(token string)
+	Start       func(ctx context.Context)
+	Stop        func()
 }
 
 // NewClient returns a new interceptor client that calls the functions in funcs instead of the underlying client's methods, if they are not nil.
@@ -105,6 +107,20 @@ func (c *interceptor) SetToken(token string) {
 		c.funcs.SetToken(token)
 	}
 	c.client.SetToken(token)
+}
+
+func (c *interceptor) Start(ctx context.Context) {
+	if c.funcs.Start != nil {
+		c.funcs.Start(ctx)
+	}
+	c.client.Start(ctx)
+}
+
+func (c *interceptor) Stop() {
+	if c.funcs.Stop != nil {
+		c.funcs.Stop()
+	}
+	c.client.Stop()
 }
 
 var _ client.Client = &interceptor{}

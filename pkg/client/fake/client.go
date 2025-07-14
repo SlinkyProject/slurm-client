@@ -245,3 +245,9 @@ func (c *fakeClient) GetToken() string {
 func (c *fakeClient) SetToken(token string) {
 	c.authToken = token
 }
+
+func (c *fakeClient) Start(ctx context.Context) {
+}
+
+func (c *fakeClient) Stop() {
+}

@@ -228,6 +228,52 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
+	Context("Start", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				Start: func(ctx context.Context) {
+					called = true
+				},
+			})
+			client.Start(ctx)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				Start: func(ctx context.Context) {
+					called = true
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			client2.Start(ctx)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("Stop", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				Stop: func() {
+					called = true
+				},
+			})
+			client.Stop()
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				Stop: func() {
+					called = true
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			client2.Stop()
+			Expect(called).To(BeTrue())
+		})
+	})
 })
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +326,14 @@ func (e *emptyClient) GetToken() string {
 
 // SetToken implements client.Client.
 func (e *emptyClient) SetToken(token string) {
+}
+
+// Start implements client.Client.
+func (e *emptyClient) Start(ctx context.Context) {
+}
+
+// Stop implements client.Client.
+func (e *emptyClient) Stop() {
 }
 
 var _ client.Client = &emptyClient{}
