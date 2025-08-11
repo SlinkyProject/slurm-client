@@ -30,6 +30,7 @@ project.
       - [Update](#update)
   - [Upgrades](#upgrades)
     - [0.X Releases](#0x-releases)
+  - [Support and Development](#support-and-development)
   - [License](#license)
 
 <!-- mdformat-toc end -->
@@ -284,6 +285,17 @@ go get -u github.com/SlinkyProject/slurm-client
 The source tree may evolve more aggressively during these release versions, so
 upgrades may require updated paths in addition to the version.
 
+## Support and Development
+
+Feature requests, code contributions, and bug reports are welcome!
+
+Github/Gitlab submitted issues and PRs/MRs are handled on a best effort basis.
+
+The SchedMD official issue tracker is at <https://support.schedmd.com/>.
+
+To schedule a demo or simply to reach out, please
+[contact SchedMD][contact-schedmd].
+
 ## License
 
 Copyright (C) SchedMD LLC.
@@ -299,6 +311,7 @@ specific language governing permissions and limitations under the License.
 
 <!-- Links -->
 
+[contact-schedmd]: https://www.schedmd.com/slurm-resources/contact-schedmd/
 [controller-runtime]: https://github.com/kubernetes-sigs/controller-runtime
 [openapi]: https://www.openapis.org/
 [rest-api]: https://slurm.schedmd.com/rest_api.html
