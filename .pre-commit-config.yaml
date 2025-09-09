@@ -20,7 +20,7 @@ repos:
         pass_filenames: false
         stages: [commit-msg]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
@@ -64,13 +64,13 @@ repos:
           - -s
           - -l
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         args:
           - --severity=warning
   - repo: https://github.com/tekwizely/pre-commit-golang
-    rev: v1.0.0-rc.1
+    rev: v1.0.0-rc.2
     hooks:
       - id: go-fmt
       - id: go-mod-tidy
