@@ -12083,7 +12083,7 @@
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-24.11.5&openapi\/slurmdbd&openapi\/slurmctld"
+    "version": "Slurm-24.11.6&openapi\/slurmdbd&openapi\/slurmctld"
   },
   "servers": [
     {
