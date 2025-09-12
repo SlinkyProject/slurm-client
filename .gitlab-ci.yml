@@ -16,7 +16,7 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ''
   DOCKER_DRIVER: overlay2
-  VERSION: 0.3.0
+  VERSION: 0.4.0
 
 .docker:
   image: docker:27.5.0
