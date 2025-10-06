@@ -12,6 +12,16 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
+## v0.4.1
+
+### Added
+
+### Fixed
+
+### Changed
+
+### Removed
+
 ## v0.4.0
 
 ### Added
