@@ -75,12 +75,13 @@ govulncheck-bin: $(GOVULNCHECK) ## Download govulncheck locally if necessary.
 $(GOVULNCHECK): $(LOCALBIN)
 	$(call go-install-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck,$(GOVULNCHECK_VERSION))
 
-
 .PHONY: golangci-lint-bin
 golangci-lint-bin: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
-	wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION)
-	mv $(LOCALBIN)/golangci-lint $(GOLANGCI_LINT)
+	@if ! [ -f "$(GOLANGCI_LINT)" ]; then \
+		wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION) ;\
+		mv $(LOCALBIN)/golangci-lint $(GOLANGCI_LINT) ;\
+	fi
 
 ##@ Development
 
