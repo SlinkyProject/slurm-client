@@ -15,7 +15,6 @@ import (
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
-	v0040 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0040"
 	v0041 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0041"
 	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
@@ -60,7 +59,6 @@ type client struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
 
-	v0040Client v0040.ClientInterface
 	v0041Client v0041.ClientInterface
 	v0042Client v0042.ClientInterface
 	v0043Client v0043.ClientInterface
@@ -117,11 +115,6 @@ func (c *client) createApiClients() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.v0040Client, err = v0040.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
-	if err != nil {
-		return fmt.Errorf("unable to create client: %w", err)
-	}
-
 	c.v0041Client, err = v0041.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
@@ -152,14 +145,6 @@ func (c *client) Create(
 	options.ApplyOptions(opts)
 
 	switch o := obj.(type) {
-	case *types.V0040JobInfo:
-		jobId, err := c.v0040Client.CreateJobInfo(ctx, req)
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o)
-
 	case *types.V0041JobInfo:
 		var jobId *int32
 		var err error
@@ -219,11 +204,6 @@ func (c *client) Delete(
 
 	key := string(obj.GetKey())
 	switch obj.(type) {
-	case *types.V0040JobInfo:
-		return c.v0040Client.DeleteJobInfo(ctx, key)
-	case *types.V0040Node:
-		return c.v0040Client.DeleteNode(ctx, key)
-
 	case *types.V0041JobInfo:
 		return c.v0041Client.DeleteJobInfo(ctx, key)
 	case *types.V0041Node:
@@ -257,19 +237,6 @@ func (c *client) Update(
 
 	key := string(obj.GetKey())
 	switch o := obj.(type) {
-	case *types.V0040JobInfo:
-		err := c.v0040Client.UpdateJobInfo(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o)
-	case *types.V0040Node:
-		err := c.v0040Client.UpdateNode(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o)
-
 	case *types.V0041JobInfo:
 		err := c.v0041Client.UpdateJobInfo(ctx, key, req)
 		if err != nil {
@@ -335,31 +302,6 @@ func (c *client) Get(
 	}
 
 	switch o := obj.(type) {
-	case *types.V0040ControllerPing:
-		out, err := c.v0040Client.GetControllerPing(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0040JobInfo:
-		out, err := c.v0040Client.GetJobInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0040Node:
-		out, err := c.v0040Client.GetNode(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0040PartitionInfo:
-		out, err := c.v0040Client.GetPartitionInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-
 	case *types.V0041ControllerPing:
 		out, err := c.v0041Client.GetControllerPing(ctx, string(key))
 		if err != nil {
@@ -499,31 +441,6 @@ func (c *client) List(
 
 	// Determine ObjectList type
 	switch objList := list.(type) {
-	case *types.V0040ControllerPingList:
-		out, err := c.v0040Client.ListControllerPing(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0040JobInfoList:
-		out, err := c.v0040Client.ListJobInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0040NodeList:
-		out, err := c.v0040Client.ListNodes(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0040PartitionInfoList:
-		out, err := c.v0040Client.ListPartitionInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-
 	case *types.V0041ControllerPingList:
 		out, err := c.v0041Client.ListControllerPing(ctx)
 		if err != nil {

@@ -114,9 +114,6 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		return errors.New(http.StatusText(http.StatusNotFound))
 	}
 	switch o := obj.(type) {
-	case *types.V0040ControllerPing:
-		cache := entry.(*types.V0040ControllerPing)
-		*o = *cache
 	case *types.V0041ControllerPing:
 		cache := entry.(*types.V0041ControllerPing)
 		*o = *cache
@@ -125,9 +122,6 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		*o = *cache
 	case *types.V0043ControllerPing:
 		cache := entry.(*types.V0043ControllerPing)
-		*o = *cache
-	case *types.V0040JobInfo:
-		cache := entry.(*types.V0040JobInfo)
 		*o = *cache
 	case *types.V0041JobInfo:
 		cache := entry.(*types.V0041JobInfo)
@@ -138,9 +132,6 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0043JobInfo:
 		cache := entry.(*types.V0043JobInfo)
 		*o = *cache
-	case *types.V0040Node:
-		cache := entry.(*types.V0040Node)
-		*o = *cache
 	case *types.V0041Node:
 		cache := entry.(*types.V0041Node)
 		*o = *cache
@@ -149,9 +140,6 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		*o = *cache
 	case *types.V0043Node:
 		cache := entry.(*types.V0043Node)
-		*o = *cache
-	case *types.V0040PartitionInfo:
-		cache := entry.(*types.V0040PartitionInfo)
 		*o = *cache
 	case *types.V0041PartitionInfo:
 		cache := entry.(*types.V0041PartitionInfo)

@@ -121,23 +121,6 @@ if err := slurmClient.Create(ctx, jobInfo, req); err != nil {
 }
 ```
 
-```golang
-// Create job via V0040 endpoint
-jobInfo := &types.V0040JobInfo{}
-req := v0040.V0040JobSubmitReq{
-	Job: &v0040.V0040JobDescMsg{
-		CurrentWorkingDirectory: ptr.To("/tmp"),
-		Environment: &v0040.V0040StringArray{
-			"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
-		},
-		Script: ptr.To("#!/usr/bin/env bash\nsleep 30"),
-	},
-}
-if err := slurmClient.Create(ctx, jobInfo, req); err != nil {
-	return err
-}
-```
-
 #### Delete
 
 Delete Slurm resource via client handle.
@@ -158,18 +141,6 @@ if err := slurmClient.Delete(ctx, jobInfo); err != nil {
 // Delete job via V0041 endpoint
 jobInfo := &types.V0041JobInfo{
 	V0041JobInfo: v0041.V0041JobInfo{
-		JobId: ptr.To("1"),
-	},
-}
-if err := slurmClient.Delete(ctx, jobInfo); err != nil {
-	return err
-}
-```
-
-```golang
-// Delete job via V0040 endpoint
-jobInfo := &types.V0040JobInfo{
-	V0040JobInfo: v0040.V0040JobInfo{
 		JobId: ptr.To("1"),
 	},
 }
@@ -200,15 +171,6 @@ if err := slurmClient.Get(ctx, key, node); err != nil {
 }
 ```
 
-```golang
-// Fetch node via V0040 endpoint
-node := &types.V0040Node{}
-key := object.ObjectKey("node-0")
-if err := slurmClient.Get(ctx, key, node); err != nil {
-	return err
-}
-```
-
 #### List
 
 List Slurm resources via client handle.
@@ -224,14 +186,6 @@ if err := slurmClient.List(ctx, nodeList); err != nil {
 ```golang
 // Fetch list of nodes via V0041 endpoint
 nodeList := &types.V0041NodeList{}
-if err := slurmClient.List(ctx, nodeList); err != nil {
-	return err
-}
-```
-
-```golang
-// Fetch list of nodes via V0040 endpoint
-nodeList := &types.V0040NodeList{}
 if err := slurmClient.List(ctx, nodeList); err != nil {
 	return err
 }
@@ -256,17 +210,6 @@ if err := slurmClient.Update(ctx, jobInfo, req); err != nil {
 // Update job via V0041 endpoint
 jobInfo := &types.V0041JobInfo{}
 req := &v0041.V0041JobDescMsg{
-	Comment: ptr.To("updated comment")
-}
-if err := slurmClient.Update(ctx, jobInfo, req); err != nil {
-	return err
-}
-```
-
-```golang
-// Update job via V0040 endpoint
-jobInfo := &types.V0040JobInfo{}
-req := &v0040.V0040JobDescMsg{
 	Comment: ptr.To("updated comment")
 }
 if err := slurmClient.Update(ctx, jobInfo, req); err != nil {

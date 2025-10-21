@@ -111,15 +111,6 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 	for {
 		var list object.ObjectList
 		switch i.objectType {
-		case types.ObjectTypeV0040ControllerPing:
-			list = &types.V0040ControllerPingList{}
-		case types.ObjectTypeV0040JobInfo:
-			list = &types.V0040JobInfoList{}
-		case types.ObjectTypeV0040Node:
-			list = &types.V0040NodeList{}
-		case types.ObjectTypeV0040PartitionInfo:
-			list = &types.V0040PartitionInfoList{}
-
 		case types.ObjectTypeV0041ControllerPing:
 			list = &types.V0041ControllerPingList{}
 		case types.ObjectTypeV0041JobInfo:
@@ -208,15 +199,6 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 
 		var obj object.Object
 		switch i.objectType {
-		case types.ObjectTypeV0040ControllerPing:
-			obj = &types.V0040ControllerPing{}
-		case types.ObjectTypeV0040JobInfo:
-			obj = &types.V0040JobInfo{}
-		case types.ObjectTypeV0040Node:
-			obj = &types.V0040Node{}
-		case types.ObjectTypeV0040PartitionInfo:
-			obj = &types.V0040PartitionInfo{}
-
 		case types.ObjectTypeV0041ControllerPing:
 			obj = &types.V0041ControllerPing{}
 		case types.ObjectTypeV0041JobInfo:
@@ -483,19 +465,6 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	}
 
 	switch o := obj.(type) {
-	case *types.V0040ControllerPing:
-		cache := entry.object.(*types.V0040ControllerPing)
-		*o = *cache
-	case *types.V0040JobInfo:
-		cache := entry.object.(*types.V0040JobInfo)
-		*o = *cache
-	case *types.V0040Node:
-		cache := entry.object.(*types.V0040Node)
-		*o = *cache
-	case *types.V0040PartitionInfo:
-		cache := entry.object.(*types.V0040PartitionInfo)
-		*o = *cache
-
 	case *types.V0041ControllerPing:
 		cache := entry.object.(*types.V0041ControllerPing)
 		*o = *cache
