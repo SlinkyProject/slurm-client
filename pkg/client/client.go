@@ -145,6 +145,8 @@ func (c *client) Create(
 	options.ApplyOptions(opts)
 
 	switch o := obj.(type) {
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0041JobInfo:
 		var jobId *int32
 		var err error
@@ -158,6 +160,8 @@ func (c *client) Create(
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
 		var jobId *int32
@@ -173,6 +177,8 @@ func (c *client) Create(
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043JobInfo:
 		var jobId *int32
 		var err error
@@ -186,6 +192,8 @@ func (c *client) Create(
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
 		return c.Get(ctx, key, o)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -204,20 +212,28 @@ func (c *client) Delete(
 
 	key := string(obj.GetKey())
 	switch obj.(type) {
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0041JobInfo:
 		return c.v0041Client.DeleteJobInfo(ctx, key)
 	case *types.V0041Node:
 		return c.v0041Client.DeleteNode(ctx, key)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
 		return c.v0042Client.DeleteJobInfo(ctx, key)
 	case *types.V0042Node:
 		return c.v0042Client.DeleteNode(ctx, key)
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043JobInfo:
 		return c.v0043Client.DeleteJobInfo(ctx, key)
 	case *types.V0043Node:
 		return c.v0043Client.DeleteNode(ctx, key)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -237,6 +253,8 @@ func (c *client) Update(
 
 	key := string(obj.GetKey())
 	switch o := obj.(type) {
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0041JobInfo:
 		err := c.v0041Client.UpdateJobInfo(ctx, key, req)
 		if err != nil {
@@ -249,6 +267,8 @@ func (c *client) Update(
 			return err
 		}
 		return c.Get(ctx, obj.GetKey(), o)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
 		err := c.v0042Client.UpdateJobInfo(ctx, key, req)
@@ -263,6 +283,8 @@ func (c *client) Update(
 		}
 		return c.Get(ctx, obj.GetKey(), o)
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043JobInfo:
 		err := c.v0043Client.UpdateJobInfo(ctx, key, req)
 		if err != nil {
@@ -275,6 +297,8 @@ func (c *client) Update(
 			return err
 		}
 		return c.Get(ctx, obj.GetKey(), o)
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
@@ -302,6 +326,8 @@ func (c *client) Get(
 	}
 
 	switch o := obj.(type) {
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0041ControllerPing:
 		out, err := c.v0041Client.GetControllerPing(ctx, string(key))
 		if err != nil {
@@ -338,6 +364,8 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042ControllerPing:
 		out, err := c.v0042Client.GetControllerPing(ctx, string(key))
@@ -376,6 +404,8 @@ func (c *client) Get(
 		}
 		*o = *out
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043ControllerPing:
 		out, err := c.v0043Client.GetControllerPing(ctx, string(key))
 		if err != nil {
@@ -413,6 +443,8 @@ func (c *client) Get(
 		}
 		*o = *out
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -441,6 +473,8 @@ func (c *client) List(
 
 	// Determine ObjectList type
 	switch objList := list.(type) {
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0041ControllerPingList:
 		out, err := c.v0041Client.ListControllerPing(ctx)
 		if err != nil {
@@ -477,6 +511,8 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042ControllerPingList:
 		out, err := c.v0042Client.ListControllerPing(ctx)
@@ -515,6 +551,8 @@ func (c *client) List(
 		}
 		*objList = *out
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043ControllerPingList:
 		out, err := c.v0043Client.ListControllerPing(ctx)
 		if err != nil {
@@ -551,6 +589,8 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
