@@ -105,7 +105,8 @@ SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.0-ubuntu24.04
 SLURM_DATA_PARSER_OPTS ?= +inline_enums
 
 TEMPLATES_DIR = api/.template
-OAPI_CODEGEN_VERSION ?= v2.4.1
+# https://github.com/oapi-codegen/oapi-codegen/tags
+OAPI_CODEGEN_VERSION ?= v2.5.0
 
 .PHONY: generate-api
 generate-api: ## Generate Slurm OpenAPI spec file.
