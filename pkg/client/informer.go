@@ -217,8 +217,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0041Node{}
 		case types.ObjectTypeV0041PartitionInfo:
 			obj = &types.V0041PartitionInfo{}
-		// case types.ObjectTypeV0041Reconfigure:
-		// 	obj = &types.V0041Reconfigure{}
+		case types.ObjectTypeV0041Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0041Stats:
 			obj = &types.V0041Stats{}
 
@@ -232,8 +232,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0042Node{}
 		case types.ObjectTypeV0042PartitionInfo:
 			obj = &types.V0042PartitionInfo{}
-		// case types.ObjectTypeV0042Reconfigure:
-		// 	obj = &types.V0042Reconfigure{}
+		case types.ObjectTypeV0042Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0042Stats:
 			obj = &types.V0042Stats{}
 
@@ -247,8 +247,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0043Node{}
 		case types.ObjectTypeV0043PartitionInfo:
 			obj = &types.V0043PartitionInfo{}
-		// case types.ObjectTypeV0043Reconfigure:
-		// 	obj = &types.V0043Reconfigure{}
+		case types.ObjectTypeV0043Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0043Stats:
 			obj = &types.V0043Stats{}
 
