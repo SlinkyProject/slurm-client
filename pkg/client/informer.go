@@ -158,6 +158,21 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 
 		/////////////////////////////////////////////////////////////////////////////////
 
+		case types.ObjectTypeV0044ControllerPing:
+			list = &types.V0044ControllerPingList{}
+		case types.ObjectTypeV0044JobInfo:
+			list = &types.V0044JobInfoList{}
+		case types.ObjectTypeV0044Node:
+			list = &types.V0044NodeList{}
+		case types.ObjectTypeV0044PartitionInfo:
+			list = &types.V0044PartitionInfoList{}
+		case types.ObjectTypeV0044Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044Stats:
+			list = &types.V0044StatsList{}
+
+		/////////////////////////////////////////////////////////////////////////////////
+
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
 			// We cannot recover from here because the informer has started a
@@ -251,6 +266,21 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0043Stats:
 			obj = &types.V0043Stats{}
+
+		/////////////////////////////////////////////////////////////////////////////////
+
+		case types.ObjectTypeV0044ControllerPing:
+			obj = &types.V0044ControllerPing{}
+		case types.ObjectTypeV0044JobInfo:
+			obj = &types.V0044JobInfo{}
+		case types.ObjectTypeV0044Node:
+			obj = &types.V0044Node{}
+		case types.ObjectTypeV0044PartitionInfo:
+			obj = &types.V0044PartitionInfo{}
+		case types.ObjectTypeV0044Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044Stats:
+			obj = &types.V0044Stats{}
 
 		/////////////////////////////////////////////////////////////////////////////////
 
@@ -533,6 +563,24 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0043Stats:
 		cache := entry.object.(*types.V0043Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0044ControllerPing:
+		cache := entry.object.(*types.V0044ControllerPing)
+		*o = *cache
+	case *types.V0044JobInfo:
+		cache := entry.object.(*types.V0044JobInfo)
+		*o = *cache
+	case *types.V0044Node:
+		cache := entry.object.(*types.V0044Node)
+		*o = *cache
+	case *types.V0044PartitionInfo:
+		cache := entry.object.(*types.V0044PartitionInfo)
+		*o = *cache
+	case *types.V0044Stats:
+		cache := entry.object.(*types.V0044Stats)
 		*o = *cache
 
 	/////////////////////////////////////////////////////////////////////////////////

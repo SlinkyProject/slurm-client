@@ -21,7 +21,7 @@ services:
       timeout: 5s
       retries: 3
   accounting:
-    image: ghcr.io/slinkyproject/slurmdbd:25.05-ubuntu24.04
+    image: ghcr.io/slinkyproject/slurmdbd:25.11.0-0rc1-ubuntu24.04
     container_name: slurmdbd
     hostname: slurmdbd
     entrypoint: /opt/entrypoint/slurmdbd.sh
@@ -43,7 +43,7 @@ services:
       database:
         condition: service_healthy
   control-plane:
-    image: ghcr.io/slinkyproject/slurmctld:25.05-ubuntu24.04
+    image: ghcr.io/slinkyproject/slurmctld:25.11.0-0rc1-ubuntu24.04
     container_name: slurmctld
     hostname: slurmctld
     entrypoint: /opt/entrypoint/slurmctld.sh
@@ -65,7 +65,7 @@ services:
       accounting:
         condition: service_healthy
   compute:
-    image: ghcr.io/slinkyproject/slurmd:25.05-ubuntu24.04
+    image: ghcr.io/slinkyproject/slurmd:25.11.0-0rc1-ubuntu24.04
     container_name: slurmd
     hostname: slurmd
     entrypoint: /opt/entrypoint/slurmd.sh
@@ -87,7 +87,7 @@ services:
       control-plane:
         condition: service_healthy
   restapi:
-    image: ghcr.io/slinkyproject/slurmrestd:25.05-ubuntu24.04
+    image: ghcr.io/slinkyproject/slurmrestd:25.11.0-0rc1-ubuntu24.04
     container_name: slurmrestd
     hostname: slurmrestd
     environment:
@@ -107,7 +107,7 @@ services:
       accounting:
         condition: service_healthy
   authcred:
-    image: ghcr.io/slinkyproject/sackd:25.05-ubuntu24.04
+    image: ghcr.io/slinkyproject/sackd:25.11.0-0rc1-ubuntu24.04
     container_name: sackd
     hostname: sackd
     entrypoint: /opt/entrypoint/sackd.sh
