@@ -111,14 +111,7 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 	for {
 		var list object.ObjectList
 		switch i.objectType {
-		case types.ObjectTypeV0040ControllerPing:
-			list = &types.V0040ControllerPingList{}
-		case types.ObjectTypeV0040JobInfo:
-			list = &types.V0040JobInfoList{}
-		case types.ObjectTypeV0040Node:
-			list = &types.V0040NodeList{}
-		case types.ObjectTypeV0040PartitionInfo:
-			list = &types.V0040PartitionInfoList{}
+		/////////////////////////////////////////////////////////////////////////////////
 
 		case types.ObjectTypeV0041ControllerPing:
 			list = &types.V0041ControllerPingList{}
@@ -133,6 +126,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 		case types.ObjectTypeV0041Stats:
 			list = &types.V0041StatsList{}
 
+		/////////////////////////////////////////////////////////////////////////////////
+
 		case types.ObjectTypeV0042ControllerPing:
 			list = &types.V0042ControllerPingList{}
 		case types.ObjectTypeV0042JobInfo:
@@ -146,6 +141,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 		case types.ObjectTypeV0042Stats:
 			list = &types.V0042StatsList{}
 
+		/////////////////////////////////////////////////////////////////////////////////
+
 		case types.ObjectTypeV0043ControllerPing:
 			list = &types.V0043ControllerPingList{}
 		case types.ObjectTypeV0043JobInfo:
@@ -158,6 +155,23 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0043Stats:
 			list = &types.V0043StatsList{}
+
+		/////////////////////////////////////////////////////////////////////////////////
+
+		case types.ObjectTypeV0044ControllerPing:
+			list = &types.V0044ControllerPingList{}
+		case types.ObjectTypeV0044JobInfo:
+			list = &types.V0044JobInfoList{}
+		case types.ObjectTypeV0044Node:
+			list = &types.V0044NodeList{}
+		case types.ObjectTypeV0044PartitionInfo:
+			list = &types.V0044PartitionInfoList{}
+		case types.ObjectTypeV0044Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044Stats:
+			list = &types.V0044StatsList{}
+
+		/////////////////////////////////////////////////////////////////////////////////
 
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
@@ -208,14 +222,7 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 
 		var obj object.Object
 		switch i.objectType {
-		case types.ObjectTypeV0040ControllerPing:
-			obj = &types.V0040ControllerPing{}
-		case types.ObjectTypeV0040JobInfo:
-			obj = &types.V0040JobInfo{}
-		case types.ObjectTypeV0040Node:
-			obj = &types.V0040Node{}
-		case types.ObjectTypeV0040PartitionInfo:
-			obj = &types.V0040PartitionInfo{}
+		/////////////////////////////////////////////////////////////////////////////////
 
 		case types.ObjectTypeV0041ControllerPing:
 			obj = &types.V0041ControllerPing{}
@@ -225,10 +232,12 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0041Node{}
 		case types.ObjectTypeV0041PartitionInfo:
 			obj = &types.V0041PartitionInfo{}
-		// case types.ObjectTypeV0041Reconfigure:
-		// 	obj = &types.V0041Reconfigure{}
+		case types.ObjectTypeV0041Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0041Stats:
 			obj = &types.V0041Stats{}
+
+		/////////////////////////////////////////////////////////////////////////////////
 
 		case types.ObjectTypeV0042ControllerPing:
 			obj = &types.V0042ControllerPing{}
@@ -238,10 +247,12 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0042Node{}
 		case types.ObjectTypeV0042PartitionInfo:
 			obj = &types.V0042PartitionInfo{}
-		// case types.ObjectTypeV0042Reconfigure:
-		// 	obj = &types.V0042Reconfigure{}
+		case types.ObjectTypeV0042Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0042Stats:
 			obj = &types.V0042Stats{}
+
+		/////////////////////////////////////////////////////////////////////////////////
 
 		case types.ObjectTypeV0043ControllerPing:
 			obj = &types.V0043ControllerPing{}
@@ -251,10 +262,27 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0043Node{}
 		case types.ObjectTypeV0043PartitionInfo:
 			obj = &types.V0043PartitionInfo{}
-		// case types.ObjectTypeV0043Reconfigure:
-		// 	obj = &types.V0043Reconfigure{}
+		case types.ObjectTypeV0043Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0043Stats:
 			obj = &types.V0043Stats{}
+
+		/////////////////////////////////////////////////////////////////////////////////
+
+		case types.ObjectTypeV0044ControllerPing:
+			obj = &types.V0044ControllerPing{}
+		case types.ObjectTypeV0044JobInfo:
+			obj = &types.V0044JobInfo{}
+		case types.ObjectTypeV0044Node:
+			obj = &types.V0044Node{}
+		case types.ObjectTypeV0044PartitionInfo:
+			obj = &types.V0044PartitionInfo{}
+		case types.ObjectTypeV0044Reconfigure:
+			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044Stats:
+			obj = &types.V0044Stats{}
+
+		/////////////////////////////////////////////////////////////////////////////////
 
 		default:
 			// NOTE: We must handle every Slurm type otherwise panic.
@@ -483,18 +511,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	}
 
 	switch o := obj.(type) {
-	case *types.V0040ControllerPing:
-		cache := entry.object.(*types.V0040ControllerPing)
-		*o = *cache
-	case *types.V0040JobInfo:
-		cache := entry.object.(*types.V0040JobInfo)
-		*o = *cache
-	case *types.V0040Node:
-		cache := entry.object.(*types.V0040Node)
-		*o = *cache
-	case *types.V0040PartitionInfo:
-		cache := entry.object.(*types.V0040PartitionInfo)
-		*o = *cache
+	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0041ControllerPing:
 		cache := entry.object.(*types.V0041ControllerPing)
@@ -512,6 +529,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		cache := entry.object.(*types.V0041Stats)
 		*o = *cache
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0042ControllerPing:
 		cache := entry.object.(*types.V0042ControllerPing)
 		*o = *cache
@@ -528,6 +547,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		cache := entry.object.(*types.V0042Stats)
 		*o = *cache
 
+	/////////////////////////////////////////////////////////////////////////////////
+
 	case *types.V0043ControllerPing:
 		cache := entry.object.(*types.V0043ControllerPing)
 		*o = *cache
@@ -543,6 +564,26 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	case *types.V0043Stats:
 		cache := entry.object.(*types.V0043Stats)
 		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0044ControllerPing:
+		cache := entry.object.(*types.V0044ControllerPing)
+		*o = *cache
+	case *types.V0044JobInfo:
+		cache := entry.object.(*types.V0044JobInfo)
+		*o = *cache
+	case *types.V0044Node:
+		cache := entry.object.(*types.V0044Node)
+		*o = *cache
+	case *types.V0044PartitionInfo:
+		cache := entry.object.(*types.V0044PartitionInfo)
+		*o = *cache
+	case *types.V0044Stats:
+		cache := entry.object.(*types.V0044Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))

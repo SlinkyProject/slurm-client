@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
 // SPDX-License-Identifier: Apache-2.0
 
-package v0043
+package v0044
 
 // Ref: https://slurm.schedmd.com/rest_api.html
 

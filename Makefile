@@ -75,12 +75,13 @@ govulncheck-bin: $(GOVULNCHECK) ## Download govulncheck locally if necessary.
 $(GOVULNCHECK): $(LOCALBIN)
 	$(call go-install-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck,$(GOVULNCHECK_VERSION))
 
-
 .PHONY: golangci-lint-bin
 golangci-lint-bin: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
-	wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION)
-	mv $(LOCALBIN)/golangci-lint $(GOLANGCI_LINT)
+	@if ! [ -f "$(GOLANGCI_LINT)" ]; then \
+		wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION) ;\
+		mv $(LOCALBIN)/golangci-lint $(GOLANGCI_LINT) ;\
+	fi
 
 ##@ Development
 
@@ -92,9 +93,9 @@ generate: ## Run all generate targets.
 .PHONY: generate-api-matrix
 generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	declare -A VERSION_MATRIX=( \
-		["ghcr.io/slinkyproject/slurmrestd:25.05.3-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:25.11.0-0rc1-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:25.05.4-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \
-		["ghcr.io/slinkyproject/slurmrestd:24.05.8-ubuntu24.04"]="+prefer_refs" \
 	); \
 	for key in $${!VERSION_MATRIX[@]}; do \
 		$(MAKE) generate-api SLURM_IMAGE=$${key} SLURM_DATA_PARSER_OPTS=$${VERSION_MATRIX[$${key}]} ; \
@@ -105,7 +106,8 @@ SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.0-ubuntu24.04
 SLURM_DATA_PARSER_OPTS ?= +inline_enums
 
 TEMPLATES_DIR = api/.template
-OAPI_CODEGEN_VERSION ?= v2.4.1
+# https://github.com/oapi-codegen/oapi-codegen/tags
+OAPI_CODEGEN_VERSION ?= v2.5.0
 
 .PHONY: generate-api
 generate-api: ## Generate Slurm OpenAPI spec file.

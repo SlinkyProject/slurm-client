@@ -41,10 +41,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 				opts: []ClientOption{
 					&ClientOptions{
 						EnableFor: []object.Object{
-							&types.V0041Node{},
+							&types.V0043Node{},
 						},
 						DisableFor: []object.Object{
-							&types.V0040Node{},
+							&types.V0042Node{},
 						},
 						CacheSyncPeriod: 2 * time.Second,
 					},
@@ -52,10 +52,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 			},
 			want: &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0041Node{},
+					&types.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0040Node{},
+					&types.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},
@@ -64,10 +64,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 			name: "Overwrite existing options",
 			fields: fields{
 				EnableFor: []object.Object{
-					&types.V0041Node{},
+					&types.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0040Node{},
+					&types.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},
@@ -75,22 +75,22 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 				opts: []ClientOption{
 					&ClientOptions{
 						EnableFor: []object.Object{
-							&types.V0041Node{},
+							&types.V0043Node{},
 						},
 						DisableFor: []object.Object{
-							&types.V0040Node{},
+							&types.V0042Node{},
 						},
 						CacheSyncPeriod: 2 * time.Second},
 				},
 			},
 			want: &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0041Node{},
-					&types.V0041Node{},
+					&types.V0043Node{},
+					&types.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0040Node{},
-					&types.V0040Node{},
+					&types.V0042Node{},
+					&types.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},

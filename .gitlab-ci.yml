@@ -18,6 +18,10 @@ variables:
   DOCKER_DRIVER: overlay2
   VERSION: 1.0.0
 
+default:
+  tags:
+    - schedmd-runners
+
 .docker:
   image: docker:27.5.0
   services:
