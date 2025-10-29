@@ -106,13 +106,13 @@ var _ = Describe("Client", func() {
 				By("writing the result back to the go struct")
 				Expect(equality.Semantic.DeepEqual(obj, actual)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
-			/*It("should fail if the object request is invalid", func(ctx SpecContext) {
+			It("should fail if the object request is invalid", func(ctx SpecContext) {
 				By("creating the object")
 				obj := &types.V0041JobInfo{}
 				req := v0041.V0041JobSubmitReq{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
-			}, SpecTimeout(testTimeout))*/
+			}, SpecTimeout(testTimeout))
 		})
 
 		// Context("Create With Allocation", func() {
