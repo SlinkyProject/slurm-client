@@ -17,6 +17,7 @@ variables:
   DOCKER_TLS_CERTDIR: ''
   DOCKER_DRIVER: overlay2
   VERSION: 1.0.0
+  DOCKER_OPTS: ${DOCKER_OPTS} --registry-mirror=https://mirror.gcr.io
 
 default:
   tags:
@@ -33,7 +34,7 @@ default:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - apk update && apk upgrade
     - apk add --no-cache bash git make
-    - wget -O go.tgz https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
+    - wget -O go.tgz https://go.dev/dl/go1.25.3.linux-amd64.tar.gz
     - tar -C /usr/local -xzf go.tgz
     - export PATH=$PATH:$HOME/go/bin/
     - export PATH=$PATH:/usr/local/go/bin
@@ -41,6 +42,8 @@ default:
 
 test:
   stage: test
+  tags:
+    - schedmd-slc
   extends: .docker
   script:
     - apk update && apk upgrade
