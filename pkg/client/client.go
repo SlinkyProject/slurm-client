@@ -80,6 +80,7 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	options := &ClientOptions{
 		CacheSyncPeriod: defaultSyncPeriod,
 		DisableFor: []object.Object{
+			&types.V0044NodeResourceLayout{},
 			&types.V0044Reconfigure{},
 			&types.V0043Reconfigure{},
 			&types.V0042Reconfigure{},
@@ -499,6 +500,12 @@ func (c *client) Get(
 		*o = *out
 	case *types.V0044JobInfo:
 		out, err := c.v0044Client.GetJobInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0044NodeResourceLayout:
+		out, err := c.v0044Client.GetNodeResourceLayout(ctx, string(key))
 		if err != nil {
 			return err
 		}

@@ -27,6 +27,7 @@ type ClientInterface interface {
 	ControllerPingInfoInterface
 	JobInfoInterface
 	NodeInterface
+	NodeResourceLayoutInterface
 	PartitionInterface
 	ReconfigureInterface
 	StatsInterface

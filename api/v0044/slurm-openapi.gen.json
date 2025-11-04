@@ -5518,6 +5518,52 @@
           "description": "node create request"
         }
       }
+    },
+    "\/slurm\/v0.0.44\/resources\/{job_id}": {
+      "get": {
+        "tags": [
+          "slurm"
+        ],
+        "summary": "get resource layout info",
+        "operationId": "slurm_v0044_get_resources",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "style": "simple",
+            "explode": false,
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "description": "Job ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application\/json": {
+                "schema": {
+                  "$ref": "#\/components\/schemas\/v0.0.44_openapi_resource_layout_resp"
+                }
+              }
+            },
+            "description": "resource layout information"
+          },
+          "default": {
+            "content": {
+              "application\/json": {
+                "schema": {
+                  "$ref": "#\/components\/schemas\/v0.0.44_openapi_resource_layout_resp"
+                }
+              }
+            },
+            "description": "resource layout information"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -12786,6 +12832,106 @@
         "required": [
           "node_conf"
         ]
+      },
+      "v0.0.44_openapi_resource_layout_resp": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "$ref": "#\/components\/schemas\/v0.0.44_node_resource_layout_list",
+            "description": "Node resource layouts"
+          },
+          "meta": {
+            "$ref": "#\/components\/schemas\/v0.0.44_openapi_meta",
+            "description": "Slurm meta values"
+          },
+          "errors": {
+            "$ref": "#\/components\/schemas\/v0.0.44_openapi_errors",
+            "description": "Query errors"
+          },
+          "warnings": {
+            "$ref": "#\/components\/schemas\/v0.0.44_openapi_warnings",
+            "description": "Query warnings"
+          }
+        },
+        "required": [
+          "nodes"
+        ]
+      },
+      "v0.0.44_node_resource_layout_list": {
+        "type": "array",
+        "items": {
+          "$ref": "#\/components\/schemas\/v0.0.44_node_resource_layout"
+        }
+      },
+      "v0.0.44_node_resource_layout": {
+        "type": "object",
+        "properties": {
+          "node": {
+            "type": "string",
+            "description": "Node name"
+          },
+          "sockets_per_node": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Sockets per node"
+          },
+          "cores_per_socket": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Cores per socket"
+          },
+          "mem_alloc": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Allocated memory"
+          },
+          "core_bitmap": {
+            "type": "string",
+            "description": "Abstract core bitmap"
+          },
+          "channel": {
+            "$ref": "#\/components\/schemas\/v0.0.44_uint32_no_val_struct",
+            "description": "IMEX channel (32 bit integer number with flags)"
+          },
+          "gres": {
+            "$ref": "#\/components\/schemas\/v0.0.44_node_gres_layout_list",
+            "description": "Allocated GRES"
+          }
+        },
+        "required": [
+          "node"
+        ]
+      },
+      "v0.0.44_node_gres_layout_list": {
+        "type": "array",
+        "items": {
+          "$ref": "#\/components\/schemas\/v0.0.44_node_gres_layout"
+        }
+      },
+      "v0.0.44_node_gres_layout": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "GRES name"
+          },
+          "type": {
+            "type": "string",
+            "description": "GRES type (optional)"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Count"
+          },
+          "index": {
+            "type": "string",
+            "description": "Index"
+          }
+        },
+        "required": [
+          "name"
+        ]
       }
     },
     "securitySchemes": {
@@ -12837,12 +12983,12 @@
         "micro": "0",
         "minor": "11"
       },
-      "release": "25.11.0-0rc1"
+      "release": "25.11.0-0rc2"
     },
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-25.11.0-0rc1"
+    "version": "Slurm-25.11.0-0rc2"
   },
   "servers": [
     {

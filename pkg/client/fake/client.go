@@ -176,6 +176,9 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0044JobInfo:
 		cache := entry.(*types.V0044JobInfo)
 		*o = *cache
+	case *types.V0044NodeResourceLayout:
+		cache := entry.(*types.V0044NodeResourceLayout)
+		*o = *cache
 	case *types.V0044Node:
 		cache := entry.(*types.V0044Node)
 		*o = *cache
