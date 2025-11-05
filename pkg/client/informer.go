@@ -168,6 +168,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 			list = &types.V0044PartitionInfoList{}
 		case types.ObjectTypeV0044Reconfigure:
 			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044NodeResourceLayout:
+			panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0044Stats:
 			list = &types.V0044StatsList{}
 

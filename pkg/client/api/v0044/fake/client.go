@@ -219,6 +219,15 @@ func (f *fakeClient) SlurmV0044PostReservationsWithResponse(ctx context.Context,
 	return res, nil
 }
 
+// SlurmV0044GetResourcesWithResponse implements v0044.ClientWithResponsesInterface.
+func (f *fakeClient) SlurmV0044GetResourcesWithResponse(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error) {
+	res := &api.SlurmV0044GetResourcesResponse{
+		HTTPResponse: &HttpSuccess,
+		JSON200:      &api.V0044OpenapiResourceLayoutResp{},
+	}
+	return res, nil
+}
+
 // SlurmV0044GetSharesWithResponse implements v0044.ClientWithResponsesInterface.
 func (f *fakeClient) SlurmV0044GetSharesWithResponse(ctx context.Context, params *api.SlurmV0044GetSharesParams, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetSharesResponse, error) {
 	res := &api.SlurmV0044GetSharesResponse{

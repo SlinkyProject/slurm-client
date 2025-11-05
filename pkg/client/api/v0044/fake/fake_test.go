@@ -190,6 +190,14 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(res).To(Not(BeNil()))
 		})
 	})
+	Context("SlurmV0044GetResourcesWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0044GetResourcesWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
 	Context("SlurmV0044GetSharesWithResponse", func() {
 		It("should call the provided function", func() {
 			client := NewFakeClient()

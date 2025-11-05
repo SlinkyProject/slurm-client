@@ -566,6 +566,31 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
+	Context("SlurmV0044GetResourcesWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0044GetResourcesWithResponse: func(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			_, _ = client.SlurmV0044GetResourcesWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0044GetResourcesWithResponse: func(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0044GetResourcesWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
 	Context("SlurmV0044GetSharesWithResponse", func() {
 		It("should call the provided function", func() {
 			var called bool
@@ -2069,6 +2094,11 @@ func (e *emptyClient) SlurmV0044PostReservationsWithBodyWithResponse(ctx context
 
 // SlurmV0044GetReservationsWithResponse implements V0044.ClientWithResponsesInterface.
 func (e *emptyClient) SlurmV0044PostReservationsWithResponse(ctx context.Context, body api.SlurmV0044PostReservationsJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostReservationsResponse, error) {
+	return nil, nil //nolint:nilnil
+}
+
+// SlurmV0044GetResourcesWithResponse implements V0044.ClientWithResponsesInterface.
+func (e *emptyClient) SlurmV0044GetResourcesWithResponse(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error) {
 	return nil, nil //nolint:nilnil
 }
 

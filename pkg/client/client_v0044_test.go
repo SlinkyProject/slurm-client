@@ -242,6 +242,52 @@ var _ = Describe("Client v0044", func() {
 		})
 	})
 
+	Describe("V0044NodeResourceLayout", func() {
+		var cl Client
+		req := api.V0044JobSubmitReq{
+			Job: &api.V0044JobDescMsg{
+				Partition: ptr.To("runner"),
+				Environment: &api.V0044StringArray{
+					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+				},
+				CurrentWorkingDirectory: ptr.To("/tmp"),
+				Script:                  ptr.To("#!/usr/bin/bash\n/usr/bin/sleep infinity"),
+			},
+		}
+
+		BeforeEach(func() {
+			var err error
+			cl, err = NewClient(cfg)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cl).NotTo(BeNil())
+
+			go cl.Start(context.TODO())
+
+			DeferCleanup(func() {
+				cl.Stop()
+			})
+		})
+
+		Context("Get", func() {
+			It("should fetch an existing object for a go struct", func(ctx SpecContext) {
+				By("creating the job object")
+				job := &types.V0044JobInfo{}
+				err := cl.Create(ctx, job, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("fetching the job resource layout")
+				layout := &types.V0044NodeResourceLayout{}
+				Eventually(func(g Gomega) {
+					// Job must be running otherwise Get() will always return an error.
+					g.Expect(cl.Get(ctx, job.GetKey(), layout)).To(Succeed())
+				}, testTimeout, 2*time.Second).Should(Succeed())
+
+				By("checking the layout is not empty")
+				Expect(equality.Semantic.DeepEqual(layout, &types.V0044NodeResourceLayout{})).NotTo(BeTrue())
+			}, SpecTimeout(testTimeout))
+		})
+	})
+
 	Describe("V0044Node", func() {
 		var cl Client
 

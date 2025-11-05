@@ -33,6 +33,7 @@ type Funcs struct {
 	SlurmV0044GetReservationsWithResponse                   func(ctx context.Context, params *api.SlurmV0044GetReservationsParams, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetReservationsResponse, error)
 	SlurmV0044PostReservationsWithBodyWithResponse          func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostReservationsResponse, error)
 	SlurmV0044PostReservationsWithResponse                  func(ctx context.Context, body api.SlurmV0044PostReservationsJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostReservationsResponse, error)
+	SlurmV0044GetResourcesWithResponse                      func(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error)
 	SlurmV0044GetSharesWithResponse                         func(ctx context.Context, params *api.SlurmV0044GetSharesParams, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetSharesResponse, error)
 	SlurmV0044PostJobAllocateWithBodyWithResponse           func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostJobAllocateResponse, error)
 	SlurmV0044PostJobAllocateWithResponse                   func(ctx context.Context, body api.V0044JobAllocReq, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostJobAllocateResponse, error)
@@ -278,6 +279,14 @@ func (i *interceptor) SlurmV0044PostReservationsWithResponse(ctx context.Context
 		return i.funcs.SlurmV0044PostReservationsWithResponse(ctx, body, reqEditors...)
 	}
 	return i.client.SlurmV0044PostReservationsWithResponse(ctx, body, reqEditors...)
+}
+
+// SlurmV0044GetResourcesWithResponse implements V0044.ClientWithResponsesInterface.
+func (i *interceptor) SlurmV0044GetResourcesWithResponse(ctx context.Context, jobId string, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044GetResourcesResponse, error) {
+	if i.funcs.SlurmV0044GetResourcesWithResponse != nil {
+		return i.funcs.SlurmV0044GetResourcesWithResponse(ctx, jobId, reqEditors...)
+	}
+	return i.client.SlurmV0044GetResourcesWithResponse(ctx, jobId, reqEditors...)
 }
 
 // SlurmV0044GetSharesWithResponse implements V0044.ClientWithResponsesInterface.
