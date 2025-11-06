@@ -15,7 +15,7 @@
     - git remote set-url origin ${CI_PROJECT_URL/gitlab.com/oauth2:${CI_AUTH_TOKEN}@gitlab.com}.git
     - git remote -v
     - |
-      if [ -z "$(echo "$VERSION" | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+$")" ]; then
+      if [ -z "$(echo "$VERSION" | grep -Eo "^[0-9]+\.[0-9]+\.[0-9](-[[:alpha:]][[:alnum:]]*(\.[0-9]+)?)?$")" ]; then
         echo "VERSION is not semver: `$VERSION`"
         exit 1
       fi
@@ -25,26 +25,10 @@ release-tag:
   extends: .git
   script:
     - set -euo pipefail
-    - commit_date="$(git show -s --pretty="format:%ad" --date="format:%Y%m%d%H%M%S" HEAD)"
-    - commit_hash="$(git rev-parse --short=12 HEAD)"
-    - tag_version="v${VERSION}-${commit_date}-${commit_hash}"
+    - tag_version="v${VERSION}"
     - echo "tag_version=${tag_version}"
     - git tag ${tag_version}
     - git push origin ${tag_version}
   rules:
     - if: $CI_COMMIT_REF_PROTECTED == "true"
-      when: manual
-
-release-branch:
-  stage: release
-  extends: .git
-  script:
-    - set -euo pipefail
-    - major_minor="$(echo ${VERSION} | grep -Eo "^[0-9]+\.[0-9]+")"
-    - branch_name="release-${major_minor}"
-    - echo "branch_name=${branch_name}"
-    - git branch ${branch_name}
-    - git push --set-upstream origin ${branch_name}
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
