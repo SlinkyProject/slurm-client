@@ -76,6 +76,7 @@ var _ = Describe("Client v0044", func() {
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
 				Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+				Hold:                    ptr.To(true),
 			},
 		}
 
@@ -124,6 +125,7 @@ var _ = Describe("Client v0044", func() {
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
 		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+		// 			Hold:                    ptr.To(true),
 		// 		},
 		// 	}
 
@@ -246,7 +248,6 @@ var _ = Describe("Client v0044", func() {
 		var cl Client
 		req := api.V0044JobSubmitReq{
 			Job: &api.V0044JobDescMsg{
-				Partition: ptr.To("runner"),
 				Environment: &api.V0044StringArray{
 					"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},

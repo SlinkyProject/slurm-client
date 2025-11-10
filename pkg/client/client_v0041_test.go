@@ -76,6 +76,7 @@ var _ = Describe("Client", func() {
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
 				Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+				Hold:                    ptr.To(true),
 			},
 		}
 
@@ -124,6 +125,7 @@ var _ = Describe("Client", func() {
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
 		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+		// 			Hold:                    ptr.To(true),
 		// 		},
 		// 	}
 
