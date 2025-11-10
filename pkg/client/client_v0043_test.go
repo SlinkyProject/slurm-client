@@ -120,7 +120,7 @@ var _ = Describe("Client v0043", func() {
 		// 	req := api.V0043JobAllocReq{
 		// 		Job: &api.V0043JobDescMsg{
 		// 			Environment: &api.V0043StringArray{
-		// 				"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
 		// 			Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),

@@ -94,7 +94,7 @@ req := v0042.V0042JobSubmitReq{
 	Job: &v0042.V0042JobDescMsg{
 		CurrentWorkingDirectory: ptr.To("/tmp"),
 		Environment: &v0042.V0042StringArray{
-			"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+			"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		},
 		Script: ptr.To("#!/usr/bin/env bash\nsleep 30"),
 	},
@@ -111,7 +111,7 @@ req := v0041.V0041JobSubmitReq{
 	Job: &v0041.V0041JobDescMsg{
 		CurrentWorkingDirectory: ptr.To("/tmp"),
 		Environment: &v0041.V0041StringArray{
-			"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+			"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		},
 		Script: ptr.To("#!/usr/bin/env bash\nsleep 30"),
 	},

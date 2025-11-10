@@ -72,7 +72,7 @@ var _ = Describe("Client v0044", func() {
 		req := api.V0044JobSubmitReq{
 			Job: &api.V0044JobDescMsg{
 				Environment: &api.V0044StringArray{
-					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+					"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
 				Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
@@ -120,7 +120,7 @@ var _ = Describe("Client v0044", func() {
 		// 	req := api.V0044JobAllocReq{
 		// 		Job: &api.V0044JobDescMsg{
 		// 			Environment: &api.V0044StringArray{
-		// 				"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
 		// 			Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
@@ -248,10 +248,10 @@ var _ = Describe("Client v0044", func() {
 			Job: &api.V0044JobDescMsg{
 				Partition: ptr.To("runner"),
 				Environment: &api.V0044StringArray{
-					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+					"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
-				Script:                  ptr.To("#!/usr/bin/bash\n/usr/bin/sleep infinity"),
+				Script:                  ptr.To("#!/usr/bin/bash\nsleep infinity"),
 			},
 		}
 
