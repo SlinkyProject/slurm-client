@@ -275,6 +275,10 @@ var _ = Describe("Client v0044", func() {
 				job := &types.V0044JobInfo{}
 				err := cl.Create(ctx, job, req)
 				Expect(err).NotTo(HaveOccurred())
+				defer func() {
+					By("cleanup the job object")
+					_ = cl.Delete(ctx, job)
+				}()
 
 				By("fetching the job resource layout")
 				layout := &types.V0044NodeResourceLayout{}
