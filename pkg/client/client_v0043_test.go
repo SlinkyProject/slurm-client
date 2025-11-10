@@ -75,7 +75,7 @@ var _ = Describe("Client v0043", func() {
 					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
-				Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+				Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
 			},
 		}
 
@@ -123,7 +123,7 @@ var _ = Describe("Client v0043", func() {
 		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
-		// 			Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
 		// 		},
 		// 	}
 
