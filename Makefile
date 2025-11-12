@@ -33,6 +33,13 @@ VERSION = $(shell cat ./VERSION)
 version: ## Show current version.
 	@echo VERSION=$(VERSION)
 
+.PHONY: version-match
+version-match: version ## Check if versions are consistent.
+	@if [ -z "$$(echo $(VERSION) | grep -Eo "^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]](-[[:alpha:]][[:alnum:]]*(\.[[:digit:]]+)?)?$$")" ]; then \
+		echo "VERSION is not semver: $(VERSION)" ;\
+		exit 1 ;\
+	fi
+
 ##@ Build
 
 .PHONY: all
