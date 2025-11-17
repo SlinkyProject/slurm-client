@@ -75,7 +75,8 @@ var _ = Describe("Client v0042", func() {
 					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
-				Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+				Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+				Hold:                    ptr.To(true),
 			},
 		}
 
@@ -120,10 +121,11 @@ var _ = Describe("Client v0042", func() {
 		// 	req := api.V0042JobAllocReq{
 		// 		Job: &api.V0042JobDescMsg{
 		// 			Environment: &api.V0042StringArray{
-		// 				"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
-		// 			Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+		// 			Hold:                    ptr.To(true),
 		// 		},
 		// 	}
 

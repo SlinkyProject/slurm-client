@@ -72,10 +72,11 @@ var _ = Describe("Client v0044", func() {
 		req := api.V0044JobSubmitReq{
 			Job: &api.V0044JobDescMsg{
 				Environment: &api.V0044StringArray{
-					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+					"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
-				Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+				Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+				Hold:                    ptr.To(true),
 			},
 		}
 
@@ -120,10 +121,11 @@ var _ = Describe("Client v0044", func() {
 		// 	req := api.V0044JobAllocReq{
 		// 		Job: &api.V0044JobDescMsg{
 		// 			Environment: &api.V0044StringArray{
-		// 				"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 		// 			},
 		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
-		// 			Script:                  ptr.To("#!/usr/bin/bash\nexit 0"),
+		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
+		// 			Hold:                    ptr.To(true),
 		// 		},
 		// 	}
 
@@ -246,12 +248,11 @@ var _ = Describe("Client v0044", func() {
 		var cl Client
 		req := api.V0044JobSubmitReq{
 			Job: &api.V0044JobDescMsg{
-				Partition: ptr.To("runner"),
 				Environment: &api.V0044StringArray{
-					"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+					"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
 				},
 				CurrentWorkingDirectory: ptr.To("/tmp"),
-				Script:                  ptr.To("#!/usr/bin/bash\n/usr/bin/sleep infinity"),
+				Script:                  ptr.To("#!/usr/bin/bash\nsleep infinity"),
 			},
 		}
 
@@ -274,6 +275,10 @@ var _ = Describe("Client v0044", func() {
 				job := &types.V0044JobInfo{}
 				err := cl.Create(ctx, job, req)
 				Expect(err).NotTo(HaveOccurred())
+				defer func() {
+					By("cleanup the job object")
+					_ = cl.Delete(ctx, job)
+				}()
 
 				By("fetching the job resource layout")
 				layout := &types.V0044NodeResourceLayout{}
