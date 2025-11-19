@@ -78,6 +78,12 @@ repos:
       - id: go-build-mod
   - repo: local
     hooks:
+      - id: version-match
+        name: Version Match
+        entry: make version-match
+        language: system
+        require_serial: true
+        pass_filenames: false
       # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
       - id: make-golangci-lint
         name: make-golangci-lint
@@ -93,10 +99,4 @@ repos:
         types: [go]
         language: system
         require_serial: true
-        pass_filenames: false
-      - id: make-tests
-        name: Make Tests
-        entry: make test
-        types: [go]
-        language: system
         pass_filenames: false
