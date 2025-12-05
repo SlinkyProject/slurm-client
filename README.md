@@ -1,14 +1,5 @@
 # Slurm Client
 
-<div align="center">
-
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](./LICENSES/Apache-2.0.txt)
-[![Tag](https://img.shields.io/github/v/tag/SlinkyProject/slurm-client?style=for-the-badge)](https://github.com/SlinkyProject/slurm-client/tags/)
-[![Go-Version](https://img.shields.io/github/go-mod/go-version/SlinkyProject/slurm-client?style=for-the-badge)](./go.mod)
-[![Last-Commit](https://img.shields.io/github/last-commit/SlinkyProject/slurm-client?style=for-the-badge)](https://github.com/SlinkyProject/slurm-client/commits/)
-
-</div>
-
 [OpenAPI] Golang client library for [Slurm REST API][rest-api]. A [Slinky]
 project.
 
