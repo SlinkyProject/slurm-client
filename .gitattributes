@@ -1,1 +1,21 @@
-*.gen.* linguist-generated=true
+# General
+* text=auto
+
+# Custom
+*.gen.* linguist-generated merge=ours
+
+# Golang
+go.mod linguist-generated merge=union
+go.sum linguist-generated merge=ours
+*.pb.go linguist-generated merge=ours
+vendor/* linguist-vendored
+
+# Read The Docs
+docs/**/*.rst linguist-documentation
+docs/**/*.md linguist-documentation
+docs/index.rst linguist-generated
+
+# Images
+*.svg binary
+*.png binary
+*.jpg binary
