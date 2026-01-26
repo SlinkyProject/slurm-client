@@ -30,6 +30,7 @@ type ClientInterface interface {
 	NodeResourceLayoutInterface
 	PartitionInterface
 	ReconfigureInterface
+	ReservationInterface
 	StatsInterface
 }
 
