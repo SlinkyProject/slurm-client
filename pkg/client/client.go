@@ -225,6 +225,14 @@ func (c *client) Create(
 		key := object.ObjectKey(reservationName)
 		return c.Get(ctx, key, o)
 
+	case *types.V0044Node:
+		nodeName, err := c.v0044Client.CreateNewNode(ctx, req)
+		if err != nil {
+			return err
+		}
+		key := object.ObjectKey(*nodeName)
+		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:

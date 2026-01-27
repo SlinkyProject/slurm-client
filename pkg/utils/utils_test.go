@@ -123,3 +123,55 @@ func TestRemarshalOrDie(t *testing.T) {
 		})
 	}
 }
+
+func TestParseNodeName(t *testing.T) {
+	tests := []struct {
+		name     string
+		nodeConf string
+		want     string
+		wantErr  bool
+	}{
+		{
+			name:     "Valid node configuration",
+			nodeConf: "NodeName=node-0 CPUs=4 State=EXTERNAL",
+			want:     "node-0",
+			wantErr:  false,
+		},
+		{
+			name:     "Missing NodeName",
+			nodeConf: "CPUs=4 State=EXTERNAL",
+			want:     "",
+			wantErr:  true,
+		},
+		{
+			name:     "Empty string",
+			nodeConf: "",
+			want:     "",
+			wantErr:  true,
+		},
+		{
+			name:     "Lowercase nodename",
+			nodeConf: "nodename=node-0 CPUs=4 State=EXTERNAL",
+			want:     "node-0",
+			wantErr:  false,
+		},
+		{
+			name:     "Uppercase NODENAME",
+			nodeConf: "NODENAME=compute-01 CPUs=8 RealMemory=16384",
+			want:     "compute-01",
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseNodeName(tt.nodeConf)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseNodeName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ParseNodeName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

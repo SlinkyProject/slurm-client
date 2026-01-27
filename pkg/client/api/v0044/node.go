@@ -16,10 +16,39 @@ import (
 )
 
 type NodeInterface interface {
+	CreateNewNode(ctx context.Context, req any) (*string, error)
 	DeleteNode(ctx context.Context, nodeName string) error
 	UpdateNode(ctx context.Context, nodeName string, req any) error
 	GetNode(ctx context.Context, nodeName string) (*types.V0044Node, error)
 	ListNodes(ctx context.Context) (*types.V0044NodeList, error)
+}
+
+// CreateNewNode implements ClientInterface
+func (c *SlurmClient) CreateNewNode(ctx context.Context, req any) (*string, error) {
+	r, ok := req.(api.V0044OpenapiCreateNodeReq)
+	if !ok {
+		return nil, errors.New("expected req to be V0044OpenapiCreateNodeReq")
+	}
+	body := api.SlurmV0044PostNewNodeJSONRequestBody(r)
+	res, err := c.SlurmV0044PostNewNodeWithResponse(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode() != 200 {
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
+		}
+		return nil, utilerrors.NewAggregate(errs)
+	}
+
+	nodeName, err := utils.ParseNodeName(r.NodeConf)
+	if err != nil {
+		return nil, err
+	}
+
+	return &nodeName, nil
 }
 
 // DeleteNode implements ClientInterface
