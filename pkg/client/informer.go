@@ -168,6 +168,8 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 			list = &types.V0044PartitionInfoList{}
 		case types.ObjectTypeV0044Reconfigure:
 			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044ReservationInfo:
+			list = &types.V0044ReservationInfoList{}
 		case types.ObjectTypeV0044NodeResourceLayout:
 			panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
 		case types.ObjectTypeV0044Stats:
@@ -281,6 +283,8 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			obj = &types.V0044PartitionInfo{}
 		case types.ObjectTypeV0044Reconfigure:
 			panic("Reconfigure is not supported, this scenario should have been avoided.")
+		case types.ObjectTypeV0044ReservationInfo:
+			obj = &types.V0044ReservationInfo{}
 		case types.ObjectTypeV0044Stats:
 			obj = &types.V0044Stats{}
 
@@ -580,6 +584,9 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0044PartitionInfo:
 		cache := entry.object.(*types.V0044PartitionInfo)
+		*o = *cache
+	case *types.V0044ReservationInfo:
+		cache := entry.object.(*types.V0044ReservationInfo)
 		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.object.(*types.V0044Stats)

@@ -448,6 +448,174 @@ var _ = Describe("Client v0044", func() {
 		})
 	})
 
+	Describe("V0044ReservationInfo", func() {
+		var cl Client
+
+		nodeList := api.V0044HostlistString{}
+		nodeList = append(nodeList, "slurmd")
+		users := api.V0044CsvString{"slurm"}
+		startTime := api.V0044Uint64NoValStruct{Number: ptr.To(time.Now().Unix()), Set: ptr.To(true)}
+		duration := api.V0044Uint32NoValStruct{Number: ptr.To(int32(10000)), Set: ptr.To(true)}
+
+		req := api.V0044ReservationDescMsg{
+			Name:      ptr.To("test"),
+			NodeList:  &nodeList,
+			Users:     &users,
+			StartTime: &startTime,
+			Duration:  &duration,
+		}
+
+		BeforeEach(func() {
+			var err error
+			cl, err = NewClient(cfg)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cl).NotTo(BeNil())
+
+			go cl.Start(context.TODO())
+
+			DeferCleanup(func() {
+				cl.Stop()
+			})
+		})
+
+		Context("Create", func() {
+			It("should create a new object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				actual := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("deleting the object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Delete(ctx, obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should fail if the object request is invalid", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{}
+				req := api.V0044ReservationDescMsg{}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("Delete", func() {
+			It("should fail if the object does not exist", func(ctx SpecContext) {
+				By("deleting the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test2")}}
+				err := cl.Delete(ctx, obj)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should delete an existing object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				actual := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("deleting the object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Delete(ctx, obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("Update", func() {
+			users := api.V0044CsvString{"slurm,root"}
+			updateReq := api.V0044ReservationDescMsg{
+				Name:     ptr.To("test"),
+				NodeList: &nodeList,
+				Users:    &users,
+			}
+			It("should fail if the object does not exist", func(ctx SpecContext) {
+				By("update the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Update(ctx, obj, updateReq)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should update the existing object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("update the object")
+				err = cl.Update(ctx, obj, updateReq)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("deleting the object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Delete(ctx, obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("Get", func() {
+			It("should create a new object", func(ctx SpecContext) {
+
+			}, SpecTimeout(testTimeout))
+			It("should fail if the object does not exist", func(ctx SpecContext) {
+				By("fetching non-existent object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("")}}
+				actual := &types.V0044ReservationInfo{}
+				err := cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).To(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+			It("should return existing object", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				actual := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("fetching existent object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				actual = &types.V0044ReservationInfo{}
+				err = cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("deleting the object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Delete(ctx, obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+
+		Context("List", func() {
+			It("should return a list", func(ctx SpecContext) {
+				By("creating the object")
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err := cl.Create(ctx, obj, req)
+				Expect(err).NotTo(HaveOccurred())
+
+				actual := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Get(ctx, obj.GetKey(), actual)
+				Expect(err).NotTo(HaveOccurred())
+
+				By("listing all objects")
+				list := &types.V0044ReservationInfoList{}
+				err = cl.List(ctx, list)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(list.Items).NotTo(BeEmpty())
+
+				By("deleting the object")
+				obj = &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("test")}}
+				err = cl.Delete(ctx, obj)
+				Expect(err).NotTo(HaveOccurred())
+			}, SpecTimeout(testTimeout))
+		})
+	})
+
 	Describe("V0044Stats", func() {
 		var cl Client
 

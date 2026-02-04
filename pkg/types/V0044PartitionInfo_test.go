@@ -33,9 +33,9 @@ func TestV0044PartitionInfo_GetKey(t *testing.T) {
 		{
 			name: "key",
 			fields: fields{
-				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")},
+				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")},
 			},
-			want: "node-0",
+			want: "test_0",
 		},
 	}
 	for _, tt := range tests {
@@ -98,9 +98,9 @@ func TestV0044PartitionInfo_DeepCopyObject(t *testing.T) {
 		{
 			name: "id",
 			fields: fields{
-				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")},
+				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")},
 			},
-			want: &V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+			want: &V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 		},
 	}
 	for _, tt := range tests {
@@ -134,9 +134,9 @@ func TestV0044PartitionInfo_DeepCopy(t *testing.T) {
 		{
 			name: "id",
 			fields: fields{
-				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")},
+				V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")},
 			},
-			want: &V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+			want: &V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 		},
 	}
 	for _, tt := range tests {
@@ -255,12 +255,12 @@ func TestV0044PartitionInfoList_GetItems(t *testing.T) {
 			name: "items",
 			fields: fields{
 				Items: []V0044PartitionInfo{
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-1")}},
 				},
 			},
 			want: []object.Object{
-				&V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+				&V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 				&V0044PartitionInfo{api.V0044PartitionInfo{Name: ptr.To("node-1")}},
 			},
 		},
@@ -314,7 +314,7 @@ func TestV0044PartitionInfoList_AppendItem(t *testing.T) {
 			name: "existing",
 			fields: fields{
 				Items: []V0044PartitionInfo{
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-1")}},
 				},
 			},
@@ -364,13 +364,13 @@ func TestV0044PartitionInfoList_DeepCopyObjectList(t *testing.T) {
 			name: "existing",
 			fields: fields{
 				Items: []V0044PartitionInfo{
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("node-1")}},
 				},
 			},
 			want: &V0044PartitionInfoList{
 				Items: []V0044PartitionInfo{
-					{api.V0044PartitionInfo{Name: ptr.To("node-0")}},
+					{api.V0044PartitionInfo{Name: ptr.To("test_0")}},
 					{api.V0044PartitionInfo{Name: ptr.To("node-1")}},
 				},
 			},
