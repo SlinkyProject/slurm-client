@@ -816,6 +816,106 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
+	Context("SlurmV0044PostNodesWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNodesWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNodesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			_, _ = client.SlurmV0044PostNodesWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNodesWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNodesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0044PostNodesWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0044PostNodesWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNodesWithResponse: func(ctx context.Context, body api.SlurmV0044PostNodesJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNodesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			_, _ = client.SlurmV0044PostNodesWithResponse(ctx, api.V0044UpdateNodeMsg{})
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNodesWithResponse: func(ctx context.Context, body api.SlurmV0044PostNodesJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNodesResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0044PostNodesWithResponse(ctx, api.V0044UpdateNodeMsg{})
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0044PostNewNodeWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNewNodeWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			_, _ = client.SlurmV0044PostNewNodeWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNewNodeWithBodyWithResponse: func(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0044PostNewNodeWithBodyWithResponse(ctx, "", nil)
+			Expect(called).To(BeTrue())
+		})
+	})
+	Context("SlurmV0044PostNewNodeWithResponse", func() {
+		It("should call the provided function", func() {
+			var called bool
+			client := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNewNodeWithResponse: func(ctx context.Context, body api.SlurmV0044PostNewNodeJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			_, _ = client.SlurmV0044PostNewNodeWithResponse(ctx, api.V0044OpenapiCreateNodeReq{})
+			Expect(called).To(BeTrue())
+		})
+		It("should call the underlying client if the provided function is nil", func() {
+			var called bool
+			client1 := NewClient(wrappedClient, Funcs{
+				SlurmV0044PostNewNodeWithResponse: func(ctx context.Context, body api.SlurmV0044PostNewNodeJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+					called = true
+					return nil, nil //nolint:nilnil
+				},
+			})
+			client2 := NewClient(client1, Funcs{})
+			_, _ = client2.SlurmV0044PostNewNodeWithResponse(ctx, api.V0044OpenapiCreateNodeReq{})
+			Expect(called).To(BeTrue())
+		})
+	})
 	Context("SlurmdbV0044DeleteAccountWithResponse", func() {
 		It("should call the provided function", func() {
 			var called bool

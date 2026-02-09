@@ -270,6 +270,38 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(res).To(Not(BeNil()))
 		})
 	})
+	Context("SlurmV0044PostNodesWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0044PostNodesWithBodyWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0044PostNodesWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0044PostNodesWithResponse(ctx, api.V0044UpdateNodeMsg{})
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0044PostNewNodeWithBodyWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0044PostNewNodeWithBodyWithResponse(ctx, "", nil)
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
+	Context("SlurmV0044PostNewNodeWithResponse", func() {
+		It("should call the provided function", func() {
+			client := NewFakeClient()
+			res, err := client.SlurmV0044PostNewNodeWithResponse(ctx, api.V0044OpenapiCreateNodeReq{})
+			Expect(err).To(BeNil())
+			Expect(res).To(Not(BeNil()))
+		})
+	})
 	Context("SlurmdbV0044DeleteAccountWithResponse", func() {
 		It("should call the provided function", func() {
 			client := NewFakeClient()

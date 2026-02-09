@@ -379,7 +379,7 @@ func (i *interceptor) SlurmV0044PostNodesWithResponse(ctx context.Context, body 
 
 // SlurmV0044PostNewNodeWithBodyWithResponse implements v0044.ClientWithResponsesInterface.
 func (i *interceptor) SlurmV0044PostNewNodeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
-	if i.funcs.SlurmV0044PostNodesWithResponse != nil {
+	if i.funcs.SlurmV0044PostNewNodeWithBodyWithResponse != nil {
 		return i.funcs.SlurmV0044PostNewNodeWithBodyWithResponse(ctx, contentType, body, reqEditors...)
 	}
 	return i.client.SlurmV0044PostNewNodeWithBodyWithResponse(ctx, contentType, body, reqEditors...)
@@ -387,7 +387,7 @@ func (i *interceptor) SlurmV0044PostNewNodeWithBodyWithResponse(ctx context.Cont
 
 // SlurmV0044PostNewNodeWithResponse implements v0044.ClientWithResponsesInterface.
 func (i *interceptor) SlurmV0044PostNewNodeWithResponse(ctx context.Context, body api.SlurmV0044PostNewNodeJSONRequestBody, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
-	if i.funcs.SlurmV0044PostNodesWithResponse != nil {
+	if i.funcs.SlurmV0044PostNewNodeWithResponse != nil {
 		return i.funcs.SlurmV0044PostNewNodeWithResponse(ctx, body, reqEditors...)
 	}
 	return i.client.SlurmV0044PostNewNodeWithResponse(ctx, body, reqEditors...)

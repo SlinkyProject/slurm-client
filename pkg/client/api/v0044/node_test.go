@@ -18,6 +18,118 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
+func TestSlurmClient_CreateNewNode(t *testing.T) {
+	type fields struct {
+		ClientWithResponsesInterface api.ClientWithResponsesInterface
+	}
+	type args struct {
+		ctx context.Context
+		req any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *string
+		wantErr bool
+	}{
+		{
+			name: "Create new node",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClient(),
+			},
+			args: args{
+				ctx: context.Background(),
+				req: api.V0044OpenapiCreateNodeReq{
+					NodeConf: "NodeName=node-0 CPUs=4 State=EXTERNAL",
+				},
+			},
+			want:    ptr.To("node-0"),
+			wantErr: false,
+		},
+		{
+			name: "HTTP Status != 200",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClientBuilder().
+					WithInterceptorFuncs(interceptor.Funcs{
+						SlurmV0044PostNewNodeWithResponse: func(ctx context.Context, body api.V0044OpenapiCreateNodeReq, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+							res := &api.SlurmV0044PostNewNodeResponse{
+								HTTPResponse: &http.Response{
+									Status:     http.StatusText(http.StatusInternalServerError),
+									StatusCode: http.StatusInternalServerError,
+								},
+								JSONDefault: &api.V0044OpenapiResp{
+									Errors: &[]api.V0044OpenapiError{
+										{Error: ptr.To("error 1")},
+										{Error: ptr.To("error 2")},
+									},
+								},
+							}
+							return res, nil
+						},
+					}).
+					Build(),
+			},
+			args: args{
+				ctx: context.Background(),
+				req: api.V0044OpenapiCreateNodeReq{
+					NodeConf: "NodeName=node-0 CPUs=4 State=EXTERNAL",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "HTTP Error",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClientBuilder().
+					WithInterceptorFuncs(interceptor.Funcs{
+						SlurmV0044PostNewNodeWithResponse: func(ctx context.Context, body api.V0044OpenapiCreateNodeReq, reqEditors ...api.RequestEditorFn) (*api.SlurmV0044PostNewNodeResponse, error) {
+							return nil, errors.New(http.StatusText(http.StatusBadGateway))
+						},
+					}).
+					Build(),
+			},
+			args: args{
+				ctx: context.Background(),
+				req: api.V0044OpenapiCreateNodeReq{
+					NodeConf: "NodeName=node-0 CPUs=4 State=EXTERNAL",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid request type",
+			fields: fields{
+				ClientWithResponsesInterface: fake.NewFakeClient(),
+			},
+			args: args{
+				ctx: context.Background(),
+				req: "invalid",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &SlurmClient{
+				ClientWithResponsesInterface: tt.fields.ClientWithResponsesInterface,
+			}
+			got, err := c.CreateNewNode(tt.args.ctx, tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SlurmClient.CreateNewNode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr {
+				if got == nil {
+					t.Errorf("SlurmClient.CreateNewNode() returned nil, want %v", *tt.want)
+				} else if *got != *tt.want {
+					t.Errorf("SlurmClient.CreateNewNode() = %v, want %v", *got, *tt.want)
+				}
+			}
+		})
+	}
+}
+
 func TestSlurmClient_DeleteNode(t *testing.T) {
 	type fields struct {
 		ClientWithResponsesInterface api.ClientWithResponsesInterface
