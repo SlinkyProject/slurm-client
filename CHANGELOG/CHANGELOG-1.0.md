@@ -1,3 +1,10 @@
+## v1.0.2
+
+### Fixed
+
+- Use SkipCache when returning objects that have been created or updated to
+  ensure data coherency.
+
 ## v1.0.1
 
 ### Fixed
