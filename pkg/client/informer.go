@@ -97,111 +97,24 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 	i.started = true
 	i.mu.Unlock()
 
-	go i.runInformer(stopCh)
+	go i.runListInformer(stopCh)
 	go i.runGetInformer(stopCh)
 	go i.runHandler(stopCh)
 }
 
-func (i *informerCache) runInformer(stopCh <-chan struct{}) {
+func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 	i.mu.RLock()
 	ticker := time.NewTicker(i.syncPeriod)
 	defer ticker.Stop()
 	i.mu.RUnlock()
 
 	for {
-		var list object.ObjectList
-		switch i.objectType {
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0041ControllerPing:
-			list = &types.V0041ControllerPingList{}
-		case types.ObjectTypeV0041JobInfo:
-			list = &types.V0041JobInfoList{}
-		case types.ObjectTypeV0041Node:
-			list = &types.V0041NodeList{}
-		case types.ObjectTypeV0041PartitionInfo:
-			list = &types.V0041PartitionInfoList{}
-		case types.ObjectTypeV0041Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0041Stats:
-			list = &types.V0041StatsList{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0042ControllerPing:
-			list = &types.V0042ControllerPingList{}
-		case types.ObjectTypeV0042JobInfo:
-			list = &types.V0042JobInfoList{}
-		case types.ObjectTypeV0042Node:
-			list = &types.V0042NodeList{}
-		case types.ObjectTypeV0042PartitionInfo:
-			list = &types.V0042PartitionInfoList{}
-		case types.ObjectTypeV0042Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0042Stats:
-			list = &types.V0042StatsList{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0043ControllerPing:
-			list = &types.V0043ControllerPingList{}
-		case types.ObjectTypeV0043JobInfo:
-			list = &types.V0043JobInfoList{}
-		case types.ObjectTypeV0043Node:
-			list = &types.V0043NodeList{}
-		case types.ObjectTypeV0043PartitionInfo:
-			list = &types.V0043PartitionInfoList{}
-		case types.ObjectTypeV0043Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0043Stats:
-			list = &types.V0043StatsList{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0044ControllerPing:
-			list = &types.V0044ControllerPingList{}
-		case types.ObjectTypeV0044JobInfo:
-			list = &types.V0044JobInfoList{}
-		case types.ObjectTypeV0044Node:
-			list = &types.V0044NodeList{}
-		case types.ObjectTypeV0044PartitionInfo:
-			list = &types.V0044PartitionInfoList{}
-		case types.ObjectTypeV0044Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0044ReservationInfo:
-			list = &types.V0044ReservationInfoList{}
-		case types.ObjectTypeV0044NodeResourceLayout:
-			panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0044Stats:
-			list = &types.V0044StatsList{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		default:
-			// NOTE: We must handle every Slurm type otherwise panic.
-			// We cannot recover from here because the informer has started a
-			// number of go-routines that must all start and stop together.
-			panic(errors.New(http.StatusText(http.StatusNotImplemented)))
-		}
-
-		opts := &ListOptions{SkipCache: true}
-		err := i.reader.List(context.TODO(), list, opts)
-		i.mu.Lock()
-		i.syncErrorList = err
-		if err == nil {
-			i.processObjects(list)
-			i.hasSynced = true
-		}
-		i.mu.Unlock()
-
 		select {
 		case <-i.syncCh:
 			// wait for sync request
-			i.mu.Lock()
-			i.hasSynced = false
-			i.mu.Unlock()
+			go i.doListInformer()
 		case <-ticker.C:
-			// wait for tick
+			i.syncCh <- struct{}{}
 		case <-stopCh:
 			i.mu.Lock()
 			defer i.mu.Unlock()
@@ -211,103 +124,197 @@ func (i *informerCache) runInformer(stopCh <-chan struct{}) {
 	}
 }
 
+func (i *informerCache) doListInformer() {
+	i.mu.Lock()
+	i.hasSynced = false
+	i.mu.Unlock()
+
+	var list object.ObjectList
+	switch i.objectType {
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0041ControllerPing:
+		list = &types.V0041ControllerPingList{}
+	case types.ObjectTypeV0041JobInfo:
+		list = &types.V0041JobInfoList{}
+	case types.ObjectTypeV0041Node:
+		list = &types.V0041NodeList{}
+	case types.ObjectTypeV0041PartitionInfo:
+		list = &types.V0041PartitionInfoList{}
+	case types.ObjectTypeV0041Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0041Stats:
+		list = &types.V0041StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0042ControllerPing:
+		list = &types.V0042ControllerPingList{}
+	case types.ObjectTypeV0042JobInfo:
+		list = &types.V0042JobInfoList{}
+	case types.ObjectTypeV0042Node:
+		list = &types.V0042NodeList{}
+	case types.ObjectTypeV0042PartitionInfo:
+		list = &types.V0042PartitionInfoList{}
+	case types.ObjectTypeV0042Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0042Stats:
+		list = &types.V0042StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0043ControllerPing:
+		list = &types.V0043ControllerPingList{}
+	case types.ObjectTypeV0043JobInfo:
+		list = &types.V0043JobInfoList{}
+	case types.ObjectTypeV0043Node:
+		list = &types.V0043NodeList{}
+	case types.ObjectTypeV0043PartitionInfo:
+		list = &types.V0043PartitionInfoList{}
+	case types.ObjectTypeV0043Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0043Stats:
+		list = &types.V0043StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0044ControllerPing:
+		list = &types.V0044ControllerPingList{}
+	case types.ObjectTypeV0044JobInfo:
+		list = &types.V0044JobInfoList{}
+	case types.ObjectTypeV0044Node:
+		list = &types.V0044NodeList{}
+	case types.ObjectTypeV0044PartitionInfo:
+		list = &types.V0044PartitionInfoList{}
+	case types.ObjectTypeV0044Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0044ReservationInfo:
+		list = &types.V0044ReservationInfoList{}
+	case types.ObjectTypeV0044NodeResourceLayout:
+		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0044Stats:
+		list = &types.V0044StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	default:
+		// NOTE: We must handle every Slurm type otherwise panic.
+		// We cannot recover from here because the informer has started a
+		// number of go-routines that must all start and stop together.
+		panic(errors.New(http.StatusText(http.StatusNotImplemented)))
+	}
+
+	opts := &ListOptions{SkipCache: true}
+	err := i.reader.List(context.TODO(), list, opts)
+	i.mu.Lock()
+	i.syncErrorList = err
+	if err == nil {
+		i.processObjects(list)
+		i.hasSynced = true
+	}
+	i.mu.Unlock()
+}
+
 func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 	for {
-		var key object.ObjectKey
 		select {
-		case key = <-i.syncObjCh:
+		case key := <-i.syncObjCh:
 			// wait for sync request
-			i.mu.Lock()
-			i.hasSynced = false
-			i.mu.Unlock()
+			go i.doGetInformer(key)
 		case <-stopCh:
 			return
 		}
-
-		var obj object.Object
-		switch i.objectType {
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0041ControllerPing:
-			obj = &types.V0041ControllerPing{}
-		case types.ObjectTypeV0041JobInfo:
-			obj = &types.V0041JobInfo{}
-		case types.ObjectTypeV0041Node:
-			obj = &types.V0041Node{}
-		case types.ObjectTypeV0041PartitionInfo:
-			obj = &types.V0041PartitionInfo{}
-		case types.ObjectTypeV0041Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0041Stats:
-			obj = &types.V0041Stats{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0042ControllerPing:
-			obj = &types.V0042ControllerPing{}
-		case types.ObjectTypeV0042JobInfo:
-			obj = &types.V0042JobInfo{}
-		case types.ObjectTypeV0042Node:
-			obj = &types.V0042Node{}
-		case types.ObjectTypeV0042PartitionInfo:
-			obj = &types.V0042PartitionInfo{}
-		case types.ObjectTypeV0042Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0042Stats:
-			obj = &types.V0042Stats{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0043ControllerPing:
-			obj = &types.V0043ControllerPing{}
-		case types.ObjectTypeV0043JobInfo:
-			obj = &types.V0043JobInfo{}
-		case types.ObjectTypeV0043Node:
-			obj = &types.V0043Node{}
-		case types.ObjectTypeV0043PartitionInfo:
-			obj = &types.V0043PartitionInfo{}
-		case types.ObjectTypeV0043Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0043Stats:
-			obj = &types.V0043Stats{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		case types.ObjectTypeV0044ControllerPing:
-			obj = &types.V0044ControllerPing{}
-		case types.ObjectTypeV0044JobInfo:
-			obj = &types.V0044JobInfo{}
-		case types.ObjectTypeV0044Node:
-			obj = &types.V0044Node{}
-		case types.ObjectTypeV0044PartitionInfo:
-			obj = &types.V0044PartitionInfo{}
-		case types.ObjectTypeV0044Reconfigure:
-			panic("Reconfigure is not supported, this scenario should have been avoided.")
-		case types.ObjectTypeV0044ReservationInfo:
-			obj = &types.V0044ReservationInfo{}
-		case types.ObjectTypeV0044Stats:
-			obj = &types.V0044Stats{}
-
-		/////////////////////////////////////////////////////////////////////////////////
-
-		default:
-			// NOTE: We must handle every Slurm type otherwise panic.
-			// We cannot recover from here because the informer has started a
-			// number of go-routines that must all start and stop together.
-			panic("unhandled object type")
-		}
-
-		opts := &GetOptions{SkipCache: true}
-		err := i.reader.Get(context.TODO(), key, obj, opts)
-
-		i.mu.Lock()
-		i.syncErrorGet = err
-		if err == nil {
-			i.processObject(obj)
-			i.hasSynced = true
-		}
-		i.mu.Unlock()
 	}
+}
+
+func (i *informerCache) doGetInformer(key object.ObjectKey) {
+	i.mu.Lock()
+	i.hasSynced = false
+	i.mu.Unlock()
+
+	var obj object.Object
+	switch i.objectType {
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0041ControllerPing:
+		obj = &types.V0041ControllerPing{}
+	case types.ObjectTypeV0041JobInfo:
+		obj = &types.V0041JobInfo{}
+	case types.ObjectTypeV0041Node:
+		obj = &types.V0041Node{}
+	case types.ObjectTypeV0041PartitionInfo:
+		obj = &types.V0041PartitionInfo{}
+	case types.ObjectTypeV0041Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0041Stats:
+		obj = &types.V0041Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0042ControllerPing:
+		obj = &types.V0042ControllerPing{}
+	case types.ObjectTypeV0042JobInfo:
+		obj = &types.V0042JobInfo{}
+	case types.ObjectTypeV0042Node:
+		obj = &types.V0042Node{}
+	case types.ObjectTypeV0042PartitionInfo:
+		obj = &types.V0042PartitionInfo{}
+	case types.ObjectTypeV0042Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0042Stats:
+		obj = &types.V0042Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0043ControllerPing:
+		obj = &types.V0043ControllerPing{}
+	case types.ObjectTypeV0043JobInfo:
+		obj = &types.V0043JobInfo{}
+	case types.ObjectTypeV0043Node:
+		obj = &types.V0043Node{}
+	case types.ObjectTypeV0043PartitionInfo:
+		obj = &types.V0043PartitionInfo{}
+	case types.ObjectTypeV0043Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0043Stats:
+		obj = &types.V0043Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0044ControllerPing:
+		obj = &types.V0044ControllerPing{}
+	case types.ObjectTypeV0044JobInfo:
+		obj = &types.V0044JobInfo{}
+	case types.ObjectTypeV0044Node:
+		obj = &types.V0044Node{}
+	case types.ObjectTypeV0044PartitionInfo:
+		obj = &types.V0044PartitionInfo{}
+	case types.ObjectTypeV0044Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0044ReservationInfo:
+		obj = &types.V0044ReservationInfo{}
+	case types.ObjectTypeV0044Stats:
+		obj = &types.V0044Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	default:
+		// NOTE: We must handle every Slurm type otherwise panic.
+		// We cannot recover from here because the informer has started a
+		// number of go-routines that must all start and stop together.
+		panic("unhandled object type")
+	}
+
+	opts := &GetOptions{SkipCache: true}
+	err := i.reader.Get(context.TODO(), key, obj, opts)
+
+	i.mu.Lock()
+	i.syncErrorGet = err
+	if err == nil {
+		i.processObject(obj)
+		i.hasSynced = true
+	}
+	i.mu.Unlock()
 }
 
 func (i *informerCache) runHandler(stopCh <-chan struct{}) {
@@ -317,20 +324,24 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 			if i.handler == nil {
 				continue
 			}
-			switch e.Type {
-			case event.Added:
-				i.handler.OnAdd(e.Object, i.hasSynced)
-			case event.Modified:
-				i.handler.OnUpdate(e.Object, e.ObjectOld)
-			case event.Deleted:
-				i.handler.OnDelete(e.Object)
-			}
+			go i.doHandler(e)
 		case <-stopCh:
 			i.mu.Lock()
 			defer i.mu.Unlock()
 			i.started = false
 			return
 		}
+	}
+}
+
+func (i *informerCache) doHandler(evt event.Event) {
+	switch evt.Type {
+	case event.Added:
+		i.handler.OnAdd(evt.Object, i.hasSynced)
+	case event.Modified:
+		i.handler.OnUpdate(evt.Object, evt.ObjectOld)
+	case event.Deleted:
+		i.handler.OnDelete(evt.Object)
 	}
 }
 
