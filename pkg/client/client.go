@@ -164,7 +164,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -176,7 +176,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +188,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -200,7 +200,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	case *types.V0044ReservationInfo:
 		reservationName, err := c.v0044Client.CreateReservationInfo(ctx, req)
@@ -208,7 +208,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(reservationName)
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	case *types.V0044Node:
 		nodeName, err := c.v0044Client.CreateNewNode(ctx, req)
@@ -216,7 +216,7 @@ func (c *client) Create(
 			return err
 		}
 		key := object.ObjectKey(*nodeName)
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, key, o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -294,13 +294,13 @@ func (c *client) Update(
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 	case *types.V0041Node:
 		err := c.v0041Client.UpdateNode(ctx, key, req)
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -309,13 +309,13 @@ func (c *client) Update(
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 	case *types.V0042Node:
 		err := c.v0042Client.UpdateNode(ctx, key, req)
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -324,13 +324,13 @@ func (c *client) Update(
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 	case *types.V0043Node:
 		err := c.v0043Client.UpdateNode(ctx, key, req)
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -339,19 +339,19 @@ func (c *client) Update(
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 	case *types.V0044Node:
 		err := c.v0044Client.UpdateNode(ctx, key, req)
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 	case *types.V0044ReservationInfo:
 		err := c.v0044Client.UpdateReservationInfo(ctx, req)
 		if err != nil {
 			return err
 		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		return c.Get(ctx, obj.GetKey(), o, &GetOptions{RefreshCache: true})
 
 	/////////////////////////////////////////////////////////////////////////////////
 
