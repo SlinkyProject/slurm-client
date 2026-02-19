@@ -260,6 +260,16 @@ func (c *client) Delete(
 		return err
 	}
 
+	err = c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
+	if err != nil {
+		// We expect the error to always be NotFound because we deleted the
+		// object from Slurm then attempted to Get the deleted object with
+		// refreshed cache.
+		if err.Error() != http.StatusText(http.StatusNotFound) {
+			return err
+		}
+	}
+
 	return nil
 }
 
