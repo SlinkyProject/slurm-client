@@ -116,41 +116,6 @@ var _ = Describe("Client", func() {
 			}, SpecTimeout(testTimeout))
 		})
 
-		// Context("Create With Allocation", func() {
-		// 	opts := &CreateOptions{Allocation: true}
-		// 	req := v0041.V0041JobAllocReq{
-		// 		Job: &v0041.V0041JobDescMsg{
-		// 			Environment: &v0041.V0041StringArray{
-		// 				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
-		// 			},
-		// 			CurrentWorkingDirectory: ptr.To("/tmp"),
-		// 			Script:                  ptr.To("#!/usr/bin/sh\nexit 0"),
-		// 			Hold:                    ptr.To(true),
-		// 		},
-		// 	}
-
-		// 	It("should create a new object", func(ctx SpecContext) {
-		// 		By("creating the object")
-		// 		obj := &types.V0041JobInfo{}
-		// 		err := cl.Create(ctx, obj, req, opts)
-		// 		Expect(err).NotTo(HaveOccurred())
-
-		// 		actual := &types.V0041JobInfo{}
-		// 		err = cl.Get(ctx, obj.GetKey(), actual)
-		// 		Expect(err).NotTo(HaveOccurred())
-
-		// 		By("writing the result back to the go struct")
-		// 		Expect(obj).To(Equal(actual))
-		// 	}, SpecTimeout(testTimeout))
-		// 	It("should fail if the object request is invalid", func(ctx SpecContext) {
-		// 		By("creating the object")
-		// 		obj := &types.V0041JobInfo{}
-		// 		req := v0041.V0041JobSubmitReq{}
-		// 		err := cl.Create(ctx, obj, req, opts)
-		// 		Expect(err).To(HaveOccurred())
-		// 	}, SpecTimeout(testTimeout))
-		// })
-
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")

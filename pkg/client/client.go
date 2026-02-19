@@ -159,11 +159,7 @@ func (c *client) Create(
 	case *types.V0041JobInfo:
 		var jobId *int32
 		var err error
-		if options.Allocation {
-			jobId, err = c.v0041Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0041Client.CreateJobInfo(ctx, req)
-		}
+		jobId, err = c.v0041Client.CreateJobInfo(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -175,11 +171,7 @@ func (c *client) Create(
 	case *types.V0042JobInfo:
 		var jobId *int32
 		var err error
-		if options.Allocation {
-			jobId, err = c.v0042Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
-		}
+		jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -191,11 +183,7 @@ func (c *client) Create(
 	case *types.V0043JobInfo:
 		var jobId *int32
 		var err error
-		if options.Allocation {
-			jobId, err = c.v0043Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
-		}
+		jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -207,11 +195,7 @@ func (c *client) Create(
 	case *types.V0044JobInfo:
 		var jobId *int32
 		var err error
-		if options.Allocation {
-			jobId, err = c.v0044Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
-		}
+		jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
 		if err != nil {
 			return err
 		}

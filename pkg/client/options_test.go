@@ -129,41 +129,10 @@ func TestCreateOptions_ApplyOptions(t *testing.T) {
 			args:   args{},
 			want:   &CreateOptions{},
 		},
-		{
-			name:   "From options",
-			fields: fields{},
-			args: args{
-				opts: []CreateOption{
-					&CreateOptions{
-						Allocation: true,
-					},
-				},
-			},
-			want: &CreateOptions{
-				Allocation: true,
-			},
-		},
-		{
-			name: "Overwrite existing options",
-			fields: fields{
-				Allocation: true,
-			},
-			args: args{
-				opts: []CreateOption{
-					&CreateOptions{
-						Allocation: false,
-					}},
-			},
-			want: &CreateOptions{
-				Allocation: false,
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := &CreateOptions{
-				Allocation: tt.fields.Allocation,
-			}
+			o := &CreateOptions{}
 			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("CreateOptions.ApplyOptions() = %v, want %v", got, tt.want)
 			}
