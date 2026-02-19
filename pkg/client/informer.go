@@ -50,8 +50,8 @@ type informerCache struct {
 	// started is true if the informers have been started.
 	started bool
 
-	// hasSynced is true if the informers have run at least once and the cache is not dirty.
-	hasSynced bool
+	// dirty indicates if the informer cache as a whole should be considered dirty.
+	dirty bool
 
 	// eventCh holds events for handler.
 	eventCh chan event.Event
@@ -125,7 +125,7 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 
 func (i *informerCache) doListInformer() {
 	i.mu.Lock()
-	i.hasSynced = false
+	i.dirty = true
 	i.mu.Unlock()
 
 	var list object.ObjectList
@@ -209,7 +209,7 @@ func (i *informerCache) doListInformer() {
 	i.syncErrorList = err
 	if err == nil {
 		i.processObjects(list)
-		i.hasSynced = true
+		i.dirty = false
 	}
 	i.mu.Unlock()
 }
@@ -343,7 +343,7 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 func (i *informerCache) doHandler(evt event.Event) {
 	switch evt.Type {
 	case event.Added:
-		i.handler.OnAdd(evt.Object, i.hasSynced)
+		i.handler.OnAdd(evt.Object, !i.dirty)
 	case event.Modified:
 		i.handler.OnUpdate(evt.Object, evt.ObjectOld)
 	case event.Deleted:
@@ -432,13 +432,13 @@ func (i *informerCache) processObject(obj object.Object) {
 func (i *informerCache) HasSynced() (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
-	return i.hasSynced, i.syncErrorList
+	return !i.dirty, i.syncErrorList
 }
 
 func (i *informerCache) hasSyncedList() (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
-	return i.hasSynced, i.syncErrorList
+	return !i.dirty, i.syncErrorList
 }
 
 func (i *informerCache) hasSyncedGet(key object.ObjectKey) (bool, error) {
@@ -447,7 +447,7 @@ func (i *informerCache) hasSyncedGet(key object.ObjectKey) (bool, error) {
 	if obj := i.cache[key]; obj != nil {
 		return !obj.dirty, i.syncErrorGet[key]
 	}
-	return i.hasSynced, i.syncErrorList
+	return !i.dirty, i.syncErrorList
 }
 
 // HasStarted implements InformerCache.
@@ -603,12 +603,12 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 
 	if options.RefreshCache {
 		i.mu.Lock()
-		i.hasSynced = false
+		i.dirty = true
 		i.syncCh <- struct{}{}
 		i.mu.Unlock()
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
-		i.hasSynced = false
+		i.dirty = true
 		i.mu.Unlock()
 	}
 
