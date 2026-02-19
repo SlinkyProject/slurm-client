@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"sync"
@@ -436,7 +437,7 @@ func (i *informerCache) HasStarted() bool {
 
 // WaitForSyncList implements InformerCache.
 func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Duration) error {
-	err := wait.PollUntilContextCancel(ctx, interval, true,
+	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
 		func(_ context.Context) (bool, error) {
 			return i.hasSyncedList()
 		})
@@ -445,7 +446,7 @@ func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Durat
 
 // WaitForSyncGet implements InformerCache.
 func (i *informerCache) WaitForSyncGet(ctx context.Context, interval time.Duration) error {
-	err := wait.PollUntilContextCancel(ctx, interval, true,
+	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
 		func(_ context.Context) (bool, error) {
 			return i.hasSyncedGet()
 		})
@@ -469,7 +470,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	}
 
 	if err := i.WaitForSyncGet(ctx, waitSyncPeriod); err != nil {
-		return err
+		return fmt.Errorf("failed to wait on type %s object %s cache sync: %w", obj.GetType(), key, err)
 	}
 
 	i.mu.RLock()
@@ -582,7 +583,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	}
 
 	if err := i.WaitForSyncList(ctx, waitSyncPeriod); err != nil {
-		return err
+		return fmt.Errorf("failed to wait on type %s cache sync: %w", list.GetType(), err)
 	}
 
 	i.mu.RLock()
