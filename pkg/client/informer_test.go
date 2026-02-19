@@ -22,7 +22,6 @@ func Test_informerCache_processObjects(t *testing.T) {
 	f := &emptyClient{}
 	type fields struct {
 		reader        Reader
-		writer        Writer
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		started       bool
@@ -47,7 +46,6 @@ func Test_informerCache_processObjects(t *testing.T) {
 			name: "V0041Node",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041Node,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
@@ -81,7 +79,6 @@ func Test_informerCache_processObjects(t *testing.T) {
 			name: "V0041JobInfo",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041JobInfo,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
@@ -116,7 +113,6 @@ func Test_informerCache_processObjects(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			i := &informerCache{
 				reader:        tt.fields.reader,
-				writer:        tt.fields.writer,
 				objectType:    tt.fields.objectType,
 				mu:            sync.RWMutex{},
 				cache:         tt.fields.cache,
@@ -142,7 +138,6 @@ func Test_informerCache_processObject(t *testing.T) {
 	f := &emptyClient{}
 	type fields struct {
 		reader        Reader
-		writer        Writer
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		started       bool
@@ -167,7 +162,6 @@ func Test_informerCache_processObject(t *testing.T) {
 			name: "V0041Node",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041Node,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
@@ -192,7 +186,6 @@ func Test_informerCache_processObject(t *testing.T) {
 			name: "V0041JobInfo",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041JobInfo,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
@@ -218,7 +211,6 @@ func Test_informerCache_processObject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			i := &informerCache{
 				reader:        tt.fields.reader,
-				writer:        tt.fields.writer,
 				objectType:    tt.fields.objectType,
 				mu:            sync.RWMutex{},
 				cache:         tt.fields.cache,

@@ -79,7 +79,6 @@ type Informers interface {
 type InformerCache interface {
 	Informer
 	Reader
-	Writer
 }
 
 // Informer - informer allows you interact with the underlying informer.

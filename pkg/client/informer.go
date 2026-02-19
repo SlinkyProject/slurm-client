@@ -36,9 +36,6 @@ type informerCache struct {
 	// reader knows how to read from remote.
 	reader Reader
 
-	// writer knows how to write to the remote.
-	writer Writer
-
 	// objectType tracks the object type this informer backs.
 	objectType object.ObjectType
 
@@ -452,41 +449,6 @@ func (i *informerCache) WaitForSyncGet(ctx context.Context, interval time.Durati
 		func(_ context.Context) (bool, error) {
 			return i.hasSyncedGet()
 		})
-	return err
-}
-
-// Create implements Client.
-func (i *informerCache) Create(
-	ctx context.Context,
-	obj object.Object,
-	req any,
-	opts ...CreateOption,
-) error {
-	err := i.writer.Create(ctx, obj, req, opts...)
-	i.syncCh <- struct{}{}
-	return err
-}
-
-// Delete implements Client.
-func (i *informerCache) Delete(
-	ctx context.Context,
-	obj object.Object,
-	opts ...DeleteOption,
-) error {
-	err := i.writer.Delete(ctx, obj, opts...)
-	i.syncCh <- struct{}{}
-	return err
-}
-
-// Update implements InformerCache.
-func (i *informerCache) Update(
-	ctx context.Context,
-	obj object.Object,
-	req any,
-	opts ...UpdateOption,
-) error {
-	err := i.writer.Update(ctx, obj, req, opts...)
-	i.syncObjCh <- obj.GetKey()
 	return err
 }
 

@@ -812,7 +812,6 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	// Ensure informer cache exists
 	c.informers[objectType] = &informerCache{
 		reader:     c,
-		writer:     c,
 		objectType: objectType,
 		cache:      make(map[object.ObjectKey]*cacheEntry),
 		syncPeriod: c.cacheSyncPeriod,
