@@ -58,7 +58,7 @@ type informerCache struct {
 	eventCh chan event.Event
 
 	// syncCh holds sync requests.
-	syncCh chan bool
+	syncCh chan struct{}
 
 	// syncObjCh holds sync requests by ObjectKey.
 	syncObjCh chan object.ObjectKey
@@ -463,7 +463,7 @@ func (i *informerCache) Create(
 	opts ...CreateOption,
 ) error {
 	err := i.writer.Create(ctx, obj, req, opts...)
-	i.syncCh <- true
+	i.syncCh <- struct{}{}
 	return err
 }
 
@@ -474,7 +474,7 @@ func (i *informerCache) Delete(
 	opts ...DeleteOption,
 ) error {
 	err := i.writer.Delete(ctx, obj, opts...)
-	i.syncCh <- true
+	i.syncCh <- struct{}{}
 	return err
 }
 
@@ -612,7 +612,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.mu.Lock()
 		i.hasSynced = false
 		i.mu.Unlock()
-		i.syncCh <- true
+		i.syncCh <- struct{}{}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		i.hasSynced = false

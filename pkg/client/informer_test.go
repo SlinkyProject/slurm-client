@@ -28,7 +28,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 		started       bool
 		hasSynced     bool
 		eventCh       chan event.Event
-		syncCh        chan bool
+		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
 		syncErrorGet  error
@@ -148,7 +148,7 @@ func Test_informerCache_processObject(t *testing.T) {
 		started       bool
 		hasSynced     bool
 		eventCh       chan event.Event
-		syncCh        chan bool
+		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
 		syncErrorGet  error
