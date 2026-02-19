@@ -30,7 +30,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
-		syncErrorGet  error
+		syncErrorGet  map[object.ObjectKey]error
 		handler       cache.ResourceEventHandler
 		syncPeriod    time.Duration
 	}
@@ -146,7 +146,7 @@ func Test_informerCache_processObject(t *testing.T) {
 		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
-		syncErrorGet  error
+		syncErrorGet  map[object.ObjectKey]error
 		handler       cache.ResourceEventHandler
 		syncPeriod    time.Duration
 	}

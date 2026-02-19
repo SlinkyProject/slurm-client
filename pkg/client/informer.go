@@ -29,6 +29,7 @@ const (
 type cacheEntry struct {
 	lastUpdate time.Time
 	object     object.Object
+	dirty      bool
 }
 
 var _ InformerCache = &informerCache{}
@@ -64,8 +65,8 @@ type informerCache struct {
 	// syncError is the last List sync error
 	syncErrorList error
 
-	// syncErrorGet is the last Get sync error
-	syncErrorGet error
+	// syncErrorGet is the last Get sync error per object
+	syncErrorGet map[object.ObjectKey]error
 
 	// handler runs for each read event from eventCh.
 	handler cache.ResourceEventHandler
@@ -227,7 +228,11 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 
 func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	i.mu.Lock()
-	i.hasSynced = false
+	if obj := i.cache[key]; obj != nil {
+		obj.dirty = true
+	} else {
+		i.cache[key] = &cacheEntry{dirty: true}
+	}
 	i.mu.Unlock()
 
 	var obj object.Object
@@ -307,10 +312,13 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	err := i.reader.Get(context.TODO(), key, obj, opts)
 
 	i.mu.Lock()
-	i.syncErrorGet = err
-	if err == nil {
+	if err != nil && err.Error() != http.StatusText(http.StatusNotFound) {
+		i.syncErrorGet[key] = err
+	} else {
+		i.syncErrorGet[key] = nil
+	}
+	if i.syncErrorGet[key] == nil {
 		i.processObject(obj)
-		i.hasSynced = true
 	}
 	i.mu.Unlock()
 }
@@ -360,10 +368,10 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 
 		e := event.Event{}
 		entry, ok := i.cache[key]
-		if !ok {
+		if !ok || entry.object == nil {
 			insert = true
 			e.Type = event.Added
-		} else if ok && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, item) {
+		} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, item) {
 			insert = true
 			e.Type = event.Modified
 			e.ObjectOld = entry.object.DeepCopyObject()
@@ -373,6 +381,7 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 			i.cache[key] = &cacheEntry{
 				lastUpdate: now,
 				object:     item,
+				dirty:      false,
 			}
 			e.Object = item.DeepCopyObject()
 			i.pushEvent(e)
@@ -399,10 +408,10 @@ func (i *informerCache) processObject(obj object.Object) {
 
 	e := event.Event{}
 	entry, ok := i.cache[key]
-	if !ok {
+	if !ok || entry.object == nil {
 		insert = true
 		e.Type = event.Added
-	} else if ok && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, obj) {
+	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, obj) {
 		insert = true
 		e.Type = event.Modified
 		e.ObjectOld = entry.object.DeepCopyObject()
@@ -412,6 +421,7 @@ func (i *informerCache) processObject(obj object.Object) {
 		i.cache[key] = &cacheEntry{
 			lastUpdate: now,
 			object:     obj,
+			dirty:      false,
 		}
 		e.Object = obj.DeepCopyObject()
 		i.pushEvent(e)
@@ -431,10 +441,13 @@ func (i *informerCache) hasSyncedList() (bool, error) {
 	return i.hasSynced, i.syncErrorList
 }
 
-func (i *informerCache) hasSyncedGet() (bool, error) {
+func (i *informerCache) hasSyncedGet(key object.ObjectKey) (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
-	return i.hasSynced, i.syncErrorGet
+	if obj := i.cache[key]; obj != nil {
+		return !obj.dirty, i.syncErrorGet[key]
+	}
+	return i.hasSynced, i.syncErrorList
 }
 
 // HasStarted implements InformerCache.
@@ -454,10 +467,10 @@ func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Durat
 }
 
 // WaitForSyncGet implements InformerCache.
-func (i *informerCache) WaitForSyncGet(ctx context.Context, interval time.Duration) error {
+func (i *informerCache) WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
 	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
 		func(_ context.Context) (bool, error) {
-			return i.hasSyncedGet()
+			return i.hasSyncedGet(key)
 		})
 	return err
 }
@@ -469,16 +482,24 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 
 	if options.RefreshCache {
 		i.mu.Lock()
-		i.hasSynced = false
+		if obj := i.cache[key]; obj != nil {
+			obj.dirty = true
+		} else {
+			i.cache[key] = &cacheEntry{dirty: true}
+		}
 		i.syncObjCh <- key
 		i.mu.Unlock()
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
-		i.hasSynced = false
+		if obj := i.cache[key]; obj != nil {
+			obj.dirty = true
+		} else {
+			i.cache[key] = &cacheEntry{dirty: true}
+		}
 		i.mu.Unlock()
 	}
 
-	if err := i.WaitForSyncGet(ctx, waitSyncPeriod); err != nil {
+	if err := i.WaitForSyncGet(ctx, key, waitSyncPeriod); err != nil {
 		return fmt.Errorf("failed to wait on type %s object %s cache sync: %w", obj.GetType(), key, err)
 	}
 
@@ -486,7 +507,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	defer i.mu.RUnlock()
 
 	entry, ok := i.cache[key]
-	if !ok {
+	if !ok || entry.object == nil {
 		return errors.New(http.StatusText(http.StatusNotFound))
 	}
 
@@ -599,6 +620,9 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	defer i.mu.RUnlock()
 
 	for _, entry := range i.cache {
+		if entry.object == nil {
+			continue
+		}
 		list.AppendItem(entry.object)
 	}
 

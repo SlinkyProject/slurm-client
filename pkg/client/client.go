@@ -795,13 +795,14 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	}
 	// Ensure informer cache exists
 	c.informers[objectType] = &informerCache{
-		reader:     c,
-		objectType: objectType,
-		cache:      make(map[object.ObjectKey]*cacheEntry),
-		syncPeriod: c.cacheSyncPeriod,
-		eventCh:    make(chan event.Event),
-		syncCh:     make(chan struct{}),
-		syncObjCh:  make(chan object.ObjectKey),
+		reader:       c,
+		objectType:   objectType,
+		cache:        make(map[object.ObjectKey]*cacheEntry),
+		syncErrorGet: make(map[object.ObjectKey]error),
+		syncPeriod:   c.cacheSyncPeriod,
+		eventCh:      make(chan event.Event),
+		syncCh:       make(chan struct{}),
+		syncObjCh:    make(chan object.ObjectKey),
 	}
 	return c.informers[objectType]
 }
