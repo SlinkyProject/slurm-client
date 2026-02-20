@@ -801,9 +801,9 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 		dirty:        true,
 		syncErrorGet: make(map[object.ObjectKey]error),
 		syncPeriod:   c.cacheSyncPeriod,
-		eventCh:      make(chan event.Event),
-		syncCh:       make(chan struct{}),
-		syncObjCh:    make(chan object.ObjectKey),
+		eventCh:      make(chan event.Event, 8),
+		syncCh:       make(chan struct{}, 8),
+		syncObjCh:    make(chan object.ObjectKey, 8),
 	}
 	return c.informers[objectType]
 }
