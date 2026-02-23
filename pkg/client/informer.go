@@ -30,6 +30,8 @@ type cacheEntry struct {
 	object     object.Object
 }
 
+var _ InformerCache = &informerCache{}
+
 type informerCache struct {
 	// reader knows how to read from remote.
 	reader Reader
