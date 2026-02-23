@@ -103,10 +103,8 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 }
 
 func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
-	i.mu.RLock()
 	ticker := time.NewTicker(i.syncPeriod)
 	defer ticker.Stop()
-	i.mu.RUnlock()
 
 	for {
 		select {
