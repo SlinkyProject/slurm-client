@@ -24,6 +24,7 @@ import (
 const (
 	defaultSyncPeriod = 30 * time.Second
 	waitSyncPeriod    = 1 * time.Second
+	batchPeriod       = 1 * time.Second
 )
 
 type cacheEntry struct {
@@ -107,11 +108,27 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 	ticker := time.NewTicker(i.syncPeriod)
 	defer ticker.Stop()
 
+	batchTimer := time.NewTimer(batchPeriod)
+	defer batchTimer.Stop()
+
+	requestSync := false
 	for {
 		select {
-		case <-i.syncCh:
-			// wait for sync request
-			go i.doListInformer()
+		case _, ok := <-i.syncCh:
+			if !ok {
+				// syncCh was closed!
+				return
+			}
+			i.mu.Lock()
+			i.dirty = true
+			i.mu.Unlock()
+			requestSync = true
+		case <-batchTimer.C:
+			if requestSync {
+				go i.doListInformer()
+				requestSync = false
+			}
+			batchTimer.Reset(batchPeriod)
 		case <-ticker.C:
 			i.syncCh <- struct{}{}
 		case <-stopCh:
@@ -215,11 +232,33 @@ func (i *informerCache) doListInformer() {
 }
 
 func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
+	batchTimer := time.NewTimer(batchPeriod)
+	defer batchTimer.Stop()
+
+	requestSync := make(map[object.ObjectKey]struct{})
 	for {
 		select {
-		case key := <-i.syncObjCh:
-			// wait for sync request
-			go i.doGetInformer(key)
+		case key, ok := <-i.syncObjCh:
+			if !ok {
+				// syncObjCh was closed!
+				return
+			}
+			i.mu.Lock()
+			if obj := i.cache[key]; obj != nil {
+				obj.dirty = true
+			} else {
+				i.cache[key] = &cacheEntry{dirty: true}
+			}
+			i.mu.Unlock()
+			requestSync[key] = struct{}{}
+		case <-batchTimer.C:
+			if len(requestSync) > 0 {
+				for key := range requestSync {
+					go i.doGetInformer(key)
+				}
+				requestSync = make(map[object.ObjectKey]struct{})
+			}
+			batchTimer.Reset(batchPeriod)
 		case <-stopCh:
 			return
 		}
@@ -481,6 +520,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	options.ApplyOptions(opts)
 
 	if options.RefreshCache {
+		// Mark dirty before sync request to avoid lock race between channel
+		// receiver and WaitForSyncGet().
 		i.mu.Lock()
 		if obj := i.cache[key]; obj != nil {
 			obj.dirty = true
@@ -602,6 +643,8 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	options.ApplyOptions(opts)
 
 	if options.RefreshCache {
+		// Mark dirty before sync request to avoid lock race between channel
+		// receiver and WaitForSyncList().
 		i.mu.Lock()
 		i.dirty = true
 		i.syncCh <- struct{}{}
