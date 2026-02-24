@@ -470,8 +470,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	if options.RefreshCache {
 		i.mu.Lock()
 		i.hasSynced = false
-		i.mu.Unlock()
 		i.syncObjCh <- key
+		i.mu.Unlock()
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		i.hasSynced = false
@@ -583,8 +583,8 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	if options.RefreshCache {
 		i.mu.Lock()
 		i.hasSynced = false
-		i.mu.Unlock()
 		i.syncCh <- struct{}{}
+		i.mu.Unlock()
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		i.hasSynced = false
