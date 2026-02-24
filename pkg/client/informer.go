@@ -102,6 +102,16 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 	go i.runListInformer(stopCh)
 	go i.runGetInformer(stopCh)
 	go i.runHandler(stopCh)
+
+	for {
+		_, ok := <-stopCh
+		if !ok {
+			i.mu.Lock()
+			i.started = false
+			i.mu.Unlock()
+			break
+		}
+	}
 }
 
 func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
@@ -132,9 +142,6 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 		case <-ticker.C:
 			i.syncCh <- struct{}{}
 		case <-stopCh:
-			i.mu.Lock()
-			defer i.mu.Unlock()
-			i.started = false
 			return
 		}
 	}
@@ -371,9 +378,6 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 			}
 			go i.doHandler(e)
 		case <-stopCh:
-			i.mu.Lock()
-			defer i.mu.Unlock()
-			i.started = false
 			return
 		}
 	}

@@ -814,7 +814,7 @@ func (c *client) Start(ctx context.Context) {
 			// do not block
 		}
 		for objectType, ic := range c.informers {
-			if c.uncached.Has(objectType) {
+			if c.uncached.Has(objectType) || ic.HasStarted() {
 				continue
 			}
 			go ic.Run(stopCh)
