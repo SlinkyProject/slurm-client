@@ -475,18 +475,27 @@ func (i *informerCache) processObject(obj object.Object) {
 func (i *informerCache) HasSynced() (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
+	if !i.started {
+		return false, fmt.Errorf("informer cache %s has not started, cannot sync", i.objectType)
+	}
 	return !i.dirty, i.syncErrorList
 }
 
 func (i *informerCache) hasSyncedList() (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
+	if !i.started {
+		return true, fmt.Errorf("informer cache %s has not started, cannot sync", i.objectType)
+	}
 	return !i.dirty, i.syncErrorList
 }
 
 func (i *informerCache) hasSyncedGet(key object.ObjectKey) (bool, error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
+	if !i.started {
+		return true, fmt.Errorf("informer cache %s has not started, cannot sync", i.objectType)
+	}
 	if obj := i.cache[key]; obj != nil {
 		return !obj.dirty, i.syncErrorGet[key]
 	}
