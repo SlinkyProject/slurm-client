@@ -8,10 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"sync"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/utils/set"
@@ -414,7 +414,7 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 		if !ok || entry.object == nil {
 			insert = true
 			e.Type = event.Added
-		} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, item) {
+		} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, item) {
 			insert = true
 			e.Type = event.Modified
 			e.ObjectOld = entry.object.DeepCopyObject()
@@ -454,7 +454,7 @@ func (i *informerCache) processObject(obj object.Object) {
 	if !ok || entry.object == nil {
 		insert = true
 		e.Type = event.Added
-	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !reflect.DeepEqual(entry.object, obj) {
+	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, obj) {
 		insert = true
 		e.Type = event.Modified
 		e.ObjectOld = entry.object.DeepCopyObject()
