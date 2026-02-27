@@ -22,16 +22,15 @@ func Test_informerCache_processObjects(t *testing.T) {
 	f := &emptyClient{}
 	type fields struct {
 		reader        Reader
-		writer        Writer
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		started       bool
-		hasSynced     bool
+		dirty         bool
 		eventCh       chan event.Event
-		syncCh        chan bool
+		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
-		syncErrorGet  error
+		syncErrorGet  map[object.ObjectKey]error
 		handler       cache.ResourceEventHandler
 		syncPeriod    time.Duration
 	}
@@ -47,11 +46,10 @@ func Test_informerCache_processObjects(t *testing.T) {
 			name: "V0041Node",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041Node,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
-				hasSynced:     false,
+				dirty:         true,
 				eventCh:       nil,
 				syncCh:        nil,
 				syncObjCh:     nil,
@@ -81,11 +79,10 @@ func Test_informerCache_processObjects(t *testing.T) {
 			name: "V0041JobInfo",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041JobInfo,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
-				hasSynced:     false,
+				dirty:         true,
 				eventCh:       nil,
 				syncCh:        nil,
 				syncObjCh:     nil,
@@ -116,12 +113,11 @@ func Test_informerCache_processObjects(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			i := &informerCache{
 				reader:        tt.fields.reader,
-				writer:        tt.fields.writer,
 				objectType:    tt.fields.objectType,
 				mu:            sync.RWMutex{},
 				cache:         tt.fields.cache,
 				started:       tt.fields.started,
-				hasSynced:     tt.fields.hasSynced,
+				dirty:         tt.fields.dirty,
 				eventCh:       tt.fields.eventCh,
 				syncCh:        tt.fields.syncCh,
 				syncObjCh:     tt.fields.syncObjCh,
@@ -142,16 +138,15 @@ func Test_informerCache_processObject(t *testing.T) {
 	f := &emptyClient{}
 	type fields struct {
 		reader        Reader
-		writer        Writer
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		started       bool
-		hasSynced     bool
+		dirty         bool
 		eventCh       chan event.Event
-		syncCh        chan bool
+		syncCh        chan struct{}
 		syncObjCh     chan object.ObjectKey
 		syncErrorList error
-		syncErrorGet  error
+		syncErrorGet  map[object.ObjectKey]error
 		handler       cache.ResourceEventHandler
 		syncPeriod    time.Duration
 	}
@@ -167,11 +162,10 @@ func Test_informerCache_processObject(t *testing.T) {
 			name: "V0041Node",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041Node,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
-				hasSynced:     false,
+				dirty:         true,
 				eventCh:       nil,
 				syncCh:        nil,
 				syncObjCh:     nil,
@@ -192,11 +186,10 @@ func Test_informerCache_processObject(t *testing.T) {
 			name: "V0041JobInfo",
 			fields: fields{
 				reader:        f,
-				writer:        f,
 				objectType:    types.ObjectTypeV0041JobInfo,
 				cache:         make(map[object.ObjectKey]*cacheEntry),
 				started:       false,
-				hasSynced:     false,
+				dirty:         true,
 				eventCh:       nil,
 				syncCh:        nil,
 				syncObjCh:     nil,
@@ -218,12 +211,11 @@ func Test_informerCache_processObject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			i := &informerCache{
 				reader:        tt.fields.reader,
-				writer:        tt.fields.writer,
 				objectType:    tt.fields.objectType,
 				mu:            sync.RWMutex{},
 				cache:         tt.fields.cache,
 				started:       tt.fields.started,
-				hasSynced:     tt.fields.hasSynced,
+				dirty:         tt.fields.dirty,
 				eventCh:       tt.fields.eventCh,
 				syncCh:        tt.fields.syncCh,
 				syncObjCh:     tt.fields.syncObjCh,

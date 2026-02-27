@@ -96,8 +96,6 @@ var _ ClientOption = &ClientOptions{}
 // CreateOptions contains options for create requests. It's generally a subset
 // of metav1.CreateOptions.
 type CreateOptions struct {
-	// Allocation indicates the creation is an allocation instead.
-	Allocation bool
 }
 
 // ApplyOptions applies the given create options on these options,
@@ -111,7 +109,6 @@ func (o *CreateOptions) ApplyOptions(opts []CreateOption) *CreateOptions {
 
 // ApplyToCreate implements CreateOption.
 func (o *CreateOptions) ApplyToCreate(co *CreateOptions) {
-	co.Allocation = o.Allocation
 }
 
 var _ CreateOption = &CreateOptions{}

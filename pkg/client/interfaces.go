@@ -79,7 +79,6 @@ type Informers interface {
 type InformerCache interface {
 	Informer
 	Reader
-	Writer
 }
 
 // Informer - informer allows you interact with the underlying informer.
@@ -101,7 +100,7 @@ type Informer interface {
 	WaitForSyncList(ctx context.Context, interval time.Duration) error
 
 	// WaitForSyncGet return nil if the informer was able to sync.
-	WaitForSyncGet(ctx context.Context, interval time.Duration) error
+	WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error
 
 	// Run starts and runs the informer, returning after it stops.
 	// The informer will be stopped when stopCh is closed.

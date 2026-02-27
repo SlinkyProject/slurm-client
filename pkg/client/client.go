@@ -153,92 +153,58 @@ func (c *client) Create(
 	options := &CreateOptions{}
 	options.ApplyOptions(opts)
 
-	switch o := obj.(type) {
+	var err error
+	var key object.ObjectKey
+	switch obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0041JobInfo:
 		var jobId *int32
-		var err error
-		if options.Allocation {
-			jobId, err = c.v0041Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0041Client.CreateJobInfo(ctx, req)
-		}
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		jobId, err = c.v0041Client.CreateJobInfo(ctx, req)
+		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
 		var jobId *int32
-		var err error
-		if options.Allocation {
-			jobId, err = c.v0042Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
-		}
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
+		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0043JobInfo:
 		var jobId *int32
-		var err error
-		if options.Allocation {
-			jobId, err = c.v0043Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
-		}
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
+		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0044JobInfo:
 		var jobId *int32
-		var err error
-		if options.Allocation {
-			jobId, err = c.v0044Client.CreateJobInfoAlloc(ctx, req)
-		} else {
-			jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
-		}
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(fmt.Sprintf("%d", *jobId))
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
+		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
 	case *types.V0044ReservationInfo:
-		reservationName, err := c.v0044Client.CreateReservationInfo(ctx, req)
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(reservationName)
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		var reservationName string
+		reservationName, err = c.v0044Client.CreateReservationInfo(ctx, req)
+		key = object.ObjectKey(reservationName)
 
 	case *types.V0044Node:
-		nodeName, err := c.v0044Client.CreateNewNode(ctx, req)
-		if err != nil {
-			return err
-		}
-		key := object.ObjectKey(*nodeName)
-		return c.Get(ctx, key, o, &GetOptions{SkipCache: true})
+		var nodeName *string
+		nodeName, err = c.v0044Client.CreateNewNode(ctx, req)
+		key = object.ObjectKey(ptr.Deref(nodeName, ""))
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
+
+	if err != nil {
+		return err
+	}
+
+	return c.Get(ctx, key, obj, &GetOptions{RefreshCache: true})
 }
 
 // Delete implements Client.
@@ -251,43 +217,60 @@ func (c *client) Delete(
 	options := &DeleteOptions{}
 	options.ApplyOptions(opts)
 
+	var err error
 	key := string(obj.GetKey())
 	switch obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0041JobInfo:
-		return c.v0041Client.DeleteJobInfo(ctx, key)
+		err = c.v0041Client.DeleteJobInfo(ctx, key)
 	case *types.V0041Node:
-		return c.v0041Client.DeleteNode(ctx, key)
+		err = c.v0041Client.DeleteNode(ctx, key)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
-		return c.v0042Client.DeleteJobInfo(ctx, key)
+		err = c.v0042Client.DeleteJobInfo(ctx, key)
 	case *types.V0042Node:
-		return c.v0042Client.DeleteNode(ctx, key)
+		err = c.v0042Client.DeleteNode(ctx, key)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0043JobInfo:
-		return c.v0043Client.DeleteJobInfo(ctx, key)
+		err = c.v0043Client.DeleteJobInfo(ctx, key)
 	case *types.V0043Node:
-		return c.v0043Client.DeleteNode(ctx, key)
+		err = c.v0043Client.DeleteNode(ctx, key)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0044JobInfo:
-		return c.v0044Client.DeleteJobInfo(ctx, key)
+		err = c.v0044Client.DeleteJobInfo(ctx, key)
 	case *types.V0044Node:
-		return c.v0044Client.DeleteNode(ctx, key)
+		err = c.v0044Client.DeleteNode(ctx, key)
 	case *types.V0044ReservationInfo:
-		return c.v0044Client.DeleteReservationInfo(ctx, key)
+		err = c.v0044Client.DeleteReservationInfo(ctx, key)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
+
+	if err != nil {
+		return err
+	}
+
+	err = c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
+	if err != nil {
+		// We expect the error to always be NotFound because we deleted the
+		// object from Slurm then attempted to Get the deleted object with
+		// refreshed cache.
+		if err.Error() != http.StatusText(http.StatusNotFound) {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Update implements Client.
@@ -301,79 +284,50 @@ func (c *client) Update(
 	options := &UpdateOptions{}
 	options.ApplyOptions(opts)
 
+	var err error
 	key := string(obj.GetKey())
-	switch o := obj.(type) {
+	switch obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0041JobInfo:
-		err := c.v0041Client.UpdateJobInfo(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0041Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0041Node:
-		err := c.v0041Client.UpdateNode(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0041Client.UpdateNode(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
-		err := c.v0042Client.UpdateJobInfo(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0042Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0042Node:
-		err := c.v0042Client.UpdateNode(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0042Client.UpdateNode(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0043JobInfo:
-		err := c.v0043Client.UpdateJobInfo(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0043Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0043Node:
-		err := c.v0043Client.UpdateNode(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0043Client.UpdateNode(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0044JobInfo:
-		err := c.v0044Client.UpdateJobInfo(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0044Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0044Node:
-		err := c.v0044Client.UpdateNode(ctx, key, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0044Client.UpdateNode(ctx, key, req)
 	case *types.V0044ReservationInfo:
-		err := c.v0044Client.UpdateReservationInfo(ctx, req)
-		if err != nil {
-			return err
-		}
-		return c.Get(ctx, obj.GetKey(), o, &GetOptions{SkipCache: true})
+		err = c.v0044Client.UpdateReservationInfo(ctx, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
+
+	if err != nil {
+		return err
+	}
+
+	return c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
 }
 
 // Get implements Client.
@@ -811,14 +765,15 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	}
 	// Ensure informer cache exists
 	c.informers[objectType] = &informerCache{
-		reader:     c,
-		writer:     c,
-		objectType: objectType,
-		cache:      make(map[object.ObjectKey]*cacheEntry),
-		syncPeriod: c.cacheSyncPeriod,
-		eventCh:    make(chan event.Event),
-		syncCh:     make(chan bool),
-		syncObjCh:  make(chan object.ObjectKey),
+		reader:       c,
+		objectType:   objectType,
+		cache:        make(map[object.ObjectKey]*cacheEntry),
+		dirty:        true,
+		syncErrorGet: make(map[object.ObjectKey]error),
+		syncPeriod:   c.cacheSyncPeriod,
+		eventCh:      make(chan event.Event, 8),
+		syncCh:       make(chan struct{}, 8),
+		syncObjCh:    make(chan object.ObjectKey, 8),
 	}
 	return c.informers[objectType]
 }
@@ -859,7 +814,7 @@ func (c *client) Start(ctx context.Context) {
 			// do not block
 		}
 		for objectType, ic := range c.informers {
-			if c.uncached.Has(objectType) {
+			if c.uncached.Has(objectType) || ic.HasStarted() {
 				continue
 			}
 			go ic.Run(stopCh)
