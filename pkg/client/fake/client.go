@@ -247,7 +247,7 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 }
 
 func (c *fakeClient) GetInformer(obj object.ObjectType) client.InformerCache {
-	return nil
+	return newInformer(obj, c, client.DefaultWatchInterval)
 }
 
 func (c *fakeClient) GetServer() string {
