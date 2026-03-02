@@ -684,3 +684,17 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 
 	return nil
 }
+
+func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Duration) InformerCache {
+	return &informerCache{
+		reader:       reader,
+		objectType:   objectType,
+		cache:        make(map[object.ObjectKey]*cacheEntry),
+		dirty:        true,
+		syncErrorGet: make(map[object.ObjectKey]error),
+		syncPeriod:   syncPeriod,
+		eventCh:      make(chan event.Event, 8),
+		syncCh:       make(chan struct{}, 8),
+		syncObjCh:    make(chan object.ObjectKey, 8),
+	}
+}
