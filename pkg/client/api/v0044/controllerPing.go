@@ -20,6 +20,8 @@ type ControllerPingInfoInterface interface {
 	ListControllerPing(ctx context.Context) (*types.V0044ControllerPingList, error)
 }
 
+var _ ControllerPingInfoInterface = &SlurmClient{}
+
 // GetControllerPing implements ClientInterface
 func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*types.V0044ControllerPing, error) {
 	list, err := c.ListControllerPing(ctx)

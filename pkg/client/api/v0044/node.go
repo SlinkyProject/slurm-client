@@ -23,6 +23,8 @@ type NodeInterface interface {
 	ListNodes(ctx context.Context) (*types.V0044NodeList, error)
 }
 
+var _ NodeInterface = &SlurmClient{}
+
 // CreateNewNode implements ClientInterface
 func (c *SlurmClient) CreateNewNode(ctx context.Context, req any) (*string, error) {
 	r, ok := req.(api.V0044OpenapiCreateNodeReq)

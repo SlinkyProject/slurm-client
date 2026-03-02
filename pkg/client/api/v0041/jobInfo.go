@@ -23,6 +23,8 @@ type JobInfoInterface interface {
 	ListJobInfo(ctx context.Context) (*types.V0041JobInfoList, error)
 }
 
+var _ JobInfoInterface = &SlurmClient{}
+
 // CreateJobInfo implements ClientInterface
 func (c *SlurmClient) CreateJobInfo(ctx context.Context, req any) (*int32, error) {
 	r, ok := req.(api.V0041JobSubmitReq)

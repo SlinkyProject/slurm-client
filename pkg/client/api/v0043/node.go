@@ -22,6 +22,8 @@ type NodeInterface interface {
 	ListNodes(ctx context.Context) (*types.V0043NodeList, error)
 }
 
+var _ NodeInterface = &SlurmClient{}
+
 // DeleteNode implements ClientInterface
 func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 	res, err := c.SlurmV0043DeleteNodeWithResponse(ctx, nodeName)

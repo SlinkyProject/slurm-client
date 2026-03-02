@@ -23,6 +23,8 @@ type ReservationInterface interface {
 	ListReservationInfo(ctx context.Context) (*types.V0044ReservationInfoList, error)
 }
 
+var _ ReservationInterface = &SlurmClient{}
+
 // CreateReservationInfo implements ClientInterface
 func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (string, error) {
 	r, ok := req.(api.V0044ReservationDescMsg)

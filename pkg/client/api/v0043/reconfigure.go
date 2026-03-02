@@ -18,6 +18,8 @@ type ReconfigureInterface interface {
 	ListReconfigure(ctx context.Context) (*types.V0043ReconfigureList, error)
 }
 
+var _ ReconfigureInterface = &SlurmClient{}
+
 // GetReconfigure implements ClientInterface
 func (c *SlurmClient) GetReconfigure(ctx context.Context) (*types.V0043Reconfigure, error) {
 	res, err := c.SlurmV0043GetReconfigureWithResponse(ctx)

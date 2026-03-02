@@ -20,6 +20,8 @@ type PartitionInterface interface {
 	ListPartitionInfo(ctx context.Context) (*types.V0044PartitionInfoList, error)
 }
 
+var _ PartitionInterface = &SlurmClient{}
+
 // GetPartitionInfo implements ClientInterface
 func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types.V0044PartitionInfo, error) {
 	params := &api.SlurmV0044GetPartitionParams{}

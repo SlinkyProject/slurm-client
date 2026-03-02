@@ -19,6 +19,8 @@ type StatsInterface interface {
 	ListStats(ctx context.Context) (*types.V0044StatsList, error)
 }
 
+var _ StatsInterface = &SlurmClient{}
+
 // GetStats implements ClientInterface
 func (c *SlurmClient) GetStats(ctx context.Context) (*types.V0044Stats, error) {
 	res, err := c.SlurmV0044GetDiagWithResponse(ctx)
