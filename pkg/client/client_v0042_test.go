@@ -19,6 +19,7 @@ import (
 
 var _ = Describe("Client v0042", func() {
 	const testTimeout = 30 * time.Second
+	const cacheSyncPeriod = 5 * time.Second
 	const comment = "v0042"
 	var cfg *Config
 
@@ -36,7 +37,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042ControllerPing{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -82,7 +88,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042JobInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -214,7 +225,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042Node{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -289,7 +305,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042PartitionInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -333,7 +354,9 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -369,7 +392,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042Stats{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 

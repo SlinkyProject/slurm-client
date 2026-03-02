@@ -19,6 +19,7 @@ import (
 
 var _ = Describe("Client v0044", func() {
 	const testTimeout = 30 * time.Second
+	const cacheSyncPeriod = 5 * time.Second
 	const comment = "v0044"
 	var cfg *Config
 
@@ -36,7 +37,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044ControllerPing{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -82,7 +88,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044JobInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -223,7 +234,9 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -263,7 +276,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044Node{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -338,7 +356,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044PartitionInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -382,7 +405,9 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -434,7 +459,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044ReservationInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -577,7 +607,12 @@ var _ = Describe("Client v0044", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0044Stats{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
