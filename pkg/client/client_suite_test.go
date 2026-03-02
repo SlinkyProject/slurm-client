@@ -50,11 +50,11 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(restapiServer).NotTo(BeEmpty())
 
-	authcredC, err := compose.ServiceContainer(ctx, "authcred")
+	controlPlaneC, err := compose.ServiceContainer(ctx, "control-plane")
 	Expect(err).NotTo(HaveOccurred())
 
 	cmd := "scontrol token username=slurm lifespan=infinite"
-	rc, reader, err := authcredC.Exec(ctx, strings.Split(cmd, " "))
+	rc, reader, err := controlPlaneC.Exec(ctx, strings.Split(cmd, " "))
 	Expect(err).NotTo(HaveOccurred())
 	stdout, _ := demultiplexReader(reader)
 	Expect(rc).To(Equal(0))
