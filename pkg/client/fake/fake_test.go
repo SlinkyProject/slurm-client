@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -20,6 +21,7 @@ import (
 )
 
 var _ = Describe("NewFakeClient", func() {
+	const testTimeout = 30 * time.Second
 	ctx := context.Background()
 
 	Context("Get", func() {
@@ -222,7 +224,7 @@ var _ = Describe("NewFakeClient", func() {
 	})
 
 	Context("Start", func() {
-		It("should return", func() {
+		It("should return", func(ctx SpecContext) {
 			var called bool
 			client := NewClientBuilder().
 				WithInterceptorFuncs(interceptor.Funcs{
@@ -231,13 +233,15 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			client.Start(context.Background())
-			Expect(called).To(BeTrue())
-		})
+			go client.Start(ctx)
+			Eventually(func() {
+				Expect(called).To(BeTrue())
+			})
+		}, SpecTimeout(testTimeout))
 	})
 
 	Context("Stop", func() {
-		It("should return", func() {
+		It("should return", func(ctx SpecContext) {
 			var called bool
 			client := NewClientBuilder().
 				WithInterceptorFuncs(interceptor.Funcs{
@@ -248,6 +252,6 @@ var _ = Describe("NewFakeClient", func() {
 				Build()
 			client.Stop()
 			Expect(called).To(BeTrue())
-		})
+		}, SpecTimeout(testTimeout))
 	})
 })

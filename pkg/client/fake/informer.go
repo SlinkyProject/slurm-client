@@ -43,6 +43,7 @@ func (f *fakeInformer) Run(stopCh <-chan struct{}) {
 			break
 		}
 	}
+	f.started = false
 }
 
 // HasStarted implements [client.InformerCache].
