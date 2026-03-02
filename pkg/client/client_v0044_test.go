@@ -277,7 +277,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("")}}
+				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -290,7 +290,7 @@ var _ = Describe("Client v0044", func() {
 
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("")}}
+				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Update(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -308,7 +308,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("")}}
+				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0044Node{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
@@ -352,7 +352,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044PartitionInfo{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("")}}
+				obj := &types.V0044PartitionInfo{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0044PartitionInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
@@ -528,7 +528,7 @@ var _ = Describe("Client v0044", func() {
 			}, SpecTimeout(testTimeout))
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("")}}
+				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0044ReservationInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())

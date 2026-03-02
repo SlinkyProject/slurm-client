@@ -228,7 +228,7 @@ var _ = Describe("Client", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("")}}
+				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -241,7 +241,7 @@ var _ = Describe("Client", func() {
 
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("")}}
+				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Update(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -259,7 +259,7 @@ var _ = Describe("Client", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("")}}
+				obj := &types.V0041Node{V0041Node: v0041.V0041Node{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0041Node{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
@@ -303,7 +303,7 @@ var _ = Describe("Client", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0041PartitionInfo{V0041PartitionInfo: v0041.V0041PartitionInfo{Name: ptr.To("")}}
+				obj := &types.V0041PartitionInfo{V0041PartitionInfo: v0041.V0041PartitionInfo{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0041PartitionInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
