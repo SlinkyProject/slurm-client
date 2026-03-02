@@ -103,15 +103,10 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 	go i.runGetInformer(stopCh)
 	go i.runHandler(stopCh)
 
-	for {
-		_, ok := <-stopCh
-		if !ok {
-			i.mu.Lock()
-			i.started = false
-			i.mu.Unlock()
-			break
-		}
-	}
+	<-stopCh
+	i.mu.Lock()
+	i.started = false
+	i.mu.Unlock()
 }
 
 func (i *informerCache) runListInformer(stopCh <-chan struct{}) {

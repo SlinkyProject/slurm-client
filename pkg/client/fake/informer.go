@@ -37,12 +37,7 @@ func (f *fakeInformer) List(ctx context.Context, list object.ObjectList, opts ..
 // Run implements [client.InformerCache].
 func (f *fakeInformer) Run(stopCh <-chan struct{}) {
 	f.started = true
-	for {
-		_, ok := <-stopCh
-		if !ok {
-			break
-		}
-	}
+	<-stopCh
 	f.started = false
 }
 
