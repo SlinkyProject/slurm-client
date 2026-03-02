@@ -23,7 +23,6 @@ import (
 
 const (
 	defaultSyncPeriod = 30 * time.Second
-	waitSyncPeriod    = 1 * time.Second
 	batchPeriod       = 1 * time.Second
 )
 
@@ -504,20 +503,22 @@ func (i *informerCache) HasStarted() bool {
 	return i.started
 }
 
-func (i *informerCache) waitForSyncList(ctx context.Context, interval time.Duration) error {
-	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
-		func(_ context.Context) (bool, error) {
-			return i.hasSyncedList()
-		})
-	return err
+func (i *informerCache) waitForSyncList(ctx context.Context) error {
+	timeout := 2 * i.syncPeriod
+	interval := time.Duration(timeout / 60)
+	conditionFn := func(ctx context.Context) (bool, error) {
+		return i.hasSyncedList()
+	}
+	return wait.PollUntilContextTimeout(ctx, interval, timeout, true, conditionFn)
 }
 
-func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
-	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
-		func(_ context.Context) (bool, error) {
-			return i.hasSyncedGet(key)
-		})
-	return err
+func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey) error {
+	timeout := 2 * i.syncPeriod
+	interval := time.Duration(timeout / 60)
+	conditionFn := func(ctx context.Context) (bool, error) {
+		return i.hasSyncedGet(key)
+	}
+	return wait.PollUntilContextTimeout(ctx, interval, timeout, true, conditionFn)
 }
 
 // Get implements InformerCache.
@@ -546,7 +547,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		i.mu.Unlock()
 	}
 
-	if err := i.waitForSyncGet(ctx, key, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncGet(ctx, key); err != nil {
 		return fmt.Errorf("failed to wait on type %s object %s cache sync: %w", obj.GetType(), key, err)
 	}
 
@@ -661,7 +662,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.mu.Unlock()
 	}
 
-	if err := i.waitForSyncList(ctx, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncList(ctx); err != nil {
 		return fmt.Errorf("failed to wait on type %s cache sync: %w", list.GetType(), err)
 	}
 
