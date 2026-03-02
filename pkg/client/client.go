@@ -314,7 +314,7 @@ func (c *client) Update(
 	case *types.V0044Node:
 		err = c.v0044Client.UpdateNode(ctx, key, req)
 	case *types.V0044ReservationInfo:
-		err = c.v0044Client.UpdateReservationInfo(ctx, req)
+		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
