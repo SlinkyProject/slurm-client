@@ -65,16 +65,6 @@ func (f *fakeInformer) UnsetEventHandler() {
 	f.handler = nil
 }
 
-// WaitForSyncGet implements [client.InformerCache].
-func (f *fakeInformer) WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
-	return nil
-}
-
-// WaitForSyncList implements [client.InformerCache].
-func (f *fakeInformer) WaitForSyncList(ctx context.Context, interval time.Duration) error {
-	return nil
-}
-
 func newInformer(objectType object.ObjectType, reader client.Reader, syncPeriod time.Duration) client.InformerCache {
 	return &fakeInformer{
 		objectType: objectType,

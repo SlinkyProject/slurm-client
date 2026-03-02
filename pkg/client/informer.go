@@ -509,8 +509,7 @@ func (i *informerCache) HasStarted() bool {
 	return i.started
 }
 
-// WaitForSyncList implements InformerCache.
-func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Duration) error {
+func (i *informerCache) waitForSyncList(ctx context.Context, interval time.Duration) error {
 	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
 		func(_ context.Context) (bool, error) {
 			return i.hasSyncedList()
@@ -518,8 +517,7 @@ func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Durat
 	return err
 }
 
-// WaitForSyncGet implements InformerCache.
-func (i *informerCache) WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
+func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
 	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
 		func(_ context.Context) (bool, error) {
 			return i.hasSyncedGet(key)
@@ -534,7 +532,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 
 	if options.RefreshCache {
 		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and WaitForSyncGet().
+		// receiver and waitForSyncGet().
 		i.mu.Lock()
 		if obj := i.cache[key]; obj != nil {
 			obj.dirty = true
@@ -553,7 +551,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		i.mu.Unlock()
 	}
 
-	if err := i.WaitForSyncGet(ctx, key, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncGet(ctx, key, waitSyncPeriod); err != nil {
 		return fmt.Errorf("failed to wait on type %s object %s cache sync: %w", obj.GetType(), key, err)
 	}
 
@@ -657,7 +655,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 
 	if options.RefreshCache {
 		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and WaitForSyncList().
+		// receiver and waitForSyncList().
 		i.mu.Lock()
 		i.dirty = true
 		i.syncCh <- struct{}{}
@@ -668,7 +666,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.mu.Unlock()
 	}
 
-	if err := i.WaitForSyncList(ctx, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncList(ctx, waitSyncPeriod); err != nil {
 		return fmt.Errorf("failed to wait on type %s cache sync: %w", list.GetType(), err)
 	}
 
