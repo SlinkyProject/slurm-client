@@ -18,7 +18,7 @@ import (
 type ReservationInterface interface {
 	CreateReservationInfo(ctx context.Context, req any) (string, error)
 	UpdateReservationInfo(ctx context.Context, req any) error
-	DeleteReservationInfo(ctx context.Context, reservationName string) error
+	DeleteReservationInfo(ctx context.Context, name string) error
 	GetReservationInfo(ctx context.Context, name string) (*types.V0044ReservationInfo, error)
 	ListReservationInfo(ctx context.Context) (*types.V0044ReservationInfoList, error)
 }
@@ -50,8 +50,8 @@ func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (strin
 }
 
 // DeleteReservationInfo implements ClientInterface
-func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, reservationName string) error {
-	res, err := c.SlurmV0044DeleteReservationWithResponse(ctx, reservationName)
+func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, name string) error {
+	res, err := c.SlurmV0044DeleteReservationWithResponse(ctx, name)
 	if err != nil {
 		return err
 	}
