@@ -396,33 +396,11 @@ func (i *informerCache) pushEvent(e event.Event) {
 }
 
 func (i *informerCache) processObjects(list object.ObjectList) {
-	now := time.Now()
 	fresh := make(set.Set[object.ObjectKey])
 	for _, item := range list.GetItems() {
 		key := item.GetKey()
 		fresh.Insert(key)
-		insert := false
-
-		e := event.Event{}
-		entry, ok := i.cache[key]
-		if !ok || entry.object == nil {
-			insert = true
-			e.Type = event.Added
-		} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, item) {
-			insert = true
-			e.Type = event.Modified
-			e.ObjectOld = entry.object.DeepCopyObject()
-		}
-
-		if insert {
-			i.cache[key] = &cacheEntry{
-				lastUpdate: now,
-				object:     item,
-				dirty:      false,
-			}
-			e.Object = item.DeepCopyObject()
-			i.pushEvent(e)
-		}
+		i.processObject(item)
 	}
 
 	for _, entry := range i.cache {
