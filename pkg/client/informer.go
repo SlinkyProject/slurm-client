@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/utils/set"
 
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -396,19 +395,18 @@ func (i *informerCache) pushEvent(e event.Event) {
 }
 
 func (i *informerCache) processObjects(list object.ObjectList) {
-	fresh := make(set.Set[object.ObjectKey])
+	now := time.Now()
 	for _, item := range list.GetItems() {
-		key := item.GetKey()
-		fresh.Insert(key)
 		i.processObject(item)
 	}
 
-	for _, entry := range i.cache {
-		if entry == nil || entry.object == nil {
+	for key, entry := range i.cache {
+		if entry == nil {
 			continue
 		}
-		key := entry.object.GetKey()
-		if !fresh.Has(key) {
+		if entry.object == nil {
+			delete(i.cache, key)
+		} else if now.After(entry.lastUpdate) {
 			e := event.Event{
 				Type:   event.Deleted,
 				Object: entry.object.DeepCopyObject(),
@@ -422,27 +420,31 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 func (i *informerCache) processObject(obj object.Object) {
 	now := time.Now()
 	key := obj.GetKey()
-	insert := false
 
-	e := event.Event{}
 	entry, ok := i.cache[key]
 	if !ok || entry.object == nil {
-		insert = true
-		e.Type = event.Added
-	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, obj) {
-		insert = true
-		e.Type = event.Modified
-		e.ObjectOld = entry.object.DeepCopyObject()
-	}
-
-	if insert {
 		i.cache[key] = &cacheEntry{
 			lastUpdate: now,
-			object:     obj,
+			object:     obj.DeepCopyObject(),
 			dirty:      false,
 		}
-		e.Object = obj.DeepCopyObject()
+		e := event.Event{
+			Type:   event.Added,
+			Object: obj.DeepCopyObject(),
+		}
 		i.pushEvent(e)
+	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) {
+		entry.lastUpdate = now
+		entry.dirty = false
+		if !equality.Semantic.DeepEqual(entry.object, obj) {
+			entry.object = obj.DeepCopyObject()
+			e := event.Event{
+				Type:      event.Modified,
+				Object:    obj.DeepCopyObject(),
+				ObjectOld: entry.object.DeepCopyObject(),
+			}
+			i.pushEvent(e)
+		}
 	}
 }
 
