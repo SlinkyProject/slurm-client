@@ -404,6 +404,9 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 	}
 
 	for _, entry := range i.cache {
+		if entry == nil || entry.object == nil {
+			continue
+		}
 		key := entry.object.GetKey()
 		if !fresh.Has(key) {
 			e := event.Event{
