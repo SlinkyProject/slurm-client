@@ -5,104 +5,66 @@ package client
 
 import (
 	"context"
-	"sync"
 	"testing"
-	"time"
 
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/utils/ptr"
 
 	v0041 "github.com/SlinkyProject/slurm-client/api/v0041"
-	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
+func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
+	fakeReader := &emptyClient{}
+	ic := newInformer(objectType, fakeReader, defaultSyncPeriod)
+	i, ok := ic.(*informerCache)
+	if !ok {
+		panic("failed to convert to *informerCache")
+	}
+	i.cache = cache
+	return i
+}
+
 func Test_informerCache_processObjects(t *testing.T) {
-	f := &emptyClient{}
-	type fields struct {
-		reader        Reader
-		objectType    object.ObjectType
-		cache         map[object.ObjectKey]*cacheEntry
-		started       bool
-		dirty         bool
-		eventCh       chan event.Event
-		syncCh        chan struct{}
-		syncObjCh     chan object.ObjectKey
-		syncErrorList error
-		syncErrorGet  map[object.ObjectKey]error
-		handler       cache.ResourceEventHandler
-		syncPeriod    time.Duration
-	}
-	type args struct {
-		list object.ObjectList
-	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		name       string
+		objectType object.ObjectType
+		cache      map[object.ObjectKey]*cacheEntry
+		list       object.ObjectList
 	}{
 		{
-			name: "V0041Node",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041Node,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				list: &types.V0041NodeList{
-					Items: []types.V0041Node{
-						{
-							V0041Node: v0041.V0041Node{
-								Name: ptr.To("node-0"),
-							},
+			name:       "V0041Node",
+			objectType: types.ObjectTypeV0041Node,
+			cache:      make(map[object.ObjectKey]*cacheEntry),
+			list: &types.V0041NodeList{
+				Items: []types.V0041Node{
+					{
+						V0041Node: v0041.V0041Node{
+							Name: ptr.To("node-0"),
 						},
-						{
-							V0041Node: v0041.V0041Node{
-								Name: ptr.To("node-1"),
-							},
+					},
+					{
+						V0041Node: v0041.V0041Node{
+							Name: ptr.To("node-1"),
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "V0041JobInfo",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041JobInfo,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				list: &types.V0041JobInfoList{
-					Items: []types.V0041JobInfo{
-						{
-							V0041JobInfo: v0041.V0041JobInfo{
-								JobId: ptr.To[int32](1),
-							},
+			name:       "V0041JobInfo",
+			objectType: types.ObjectTypeV0041JobInfo,
+			cache:      make(map[object.ObjectKey]*cacheEntry),
+			list: &types.V0041JobInfoList{
+				Items: []types.V0041JobInfo{
+					{
+						V0041JobInfo: v0041.V0041JobInfo{
+							JobId: ptr.To[int32](1),
 						},
-						{
-							V0041JobInfo: v0041.V0041JobInfo{
-								JobId: ptr.To[int32](2),
-							},
+					},
+					{
+						V0041JobInfo: v0041.V0041JobInfo{
+							JobId: ptr.To[int32](2),
 						},
 					},
 				},
@@ -111,120 +73,47 @@ func Test_informerCache_processObjects(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := &informerCache{
-				reader:        tt.fields.reader,
-				objectType:    tt.fields.objectType,
-				mu:            sync.RWMutex{},
-				cache:         tt.fields.cache,
-				started:       tt.fields.started,
-				dirty:         tt.fields.dirty,
-				eventCh:       tt.fields.eventCh,
-				syncCh:        tt.fields.syncCh,
-				syncObjCh:     tt.fields.syncObjCh,
-				syncErrorList: tt.fields.syncErrorList,
-				syncErrorGet:  tt.fields.syncErrorGet,
-				handler:       tt.fields.handler,
-				syncPeriod:    tt.fields.syncPeriod,
-			}
-			i.processObjects(tt.args.list)
-			if len(i.cache) != len(tt.args.list.GetItems()) {
-				t.Errorf("len(cache) = %v, expected %v", len(i.cache), len(tt.args.list.GetItems()))
+			i := newInformerWithData(tt.objectType, tt.cache)
+			i.processObjects(tt.list)
+			if len(i.cache) != len(tt.list.GetItems()) {
+				t.Errorf("len(cache) = %v, expected %v", len(i.cache), len(tt.list.GetItems()))
 			}
 		})
 	}
 }
 
 func Test_informerCache_processObject(t *testing.T) {
-	f := &emptyClient{}
-	type fields struct {
-		reader        Reader
-		objectType    object.ObjectType
-		cache         map[object.ObjectKey]*cacheEntry
-		started       bool
-		dirty         bool
-		eventCh       chan event.Event
-		syncCh        chan struct{}
-		syncObjCh     chan object.ObjectKey
-		syncErrorList error
-		syncErrorGet  map[object.ObjectKey]error
-		handler       cache.ResourceEventHandler
-		syncPeriod    time.Duration
-	}
-	type args struct {
-		obj object.Object
-	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		name       string
+		objectType object.ObjectType
+		cache      map[object.ObjectKey]*cacheEntry
+		obj        object.Object
 	}{
 		{
-			name: "V0041Node",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041Node,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				obj: &types.V0041Node{
-					V0041Node: v0041.V0041Node{
-						Name: ptr.To("node-0"),
-					},
+			name:       "V0041Node",
+			objectType: types.ObjectTypeV0041Node,
+			cache:      make(map[object.ObjectKey]*cacheEntry),
+			obj: &types.V0041Node{
+				V0041Node: v0041.V0041Node{
+					Name: ptr.To("node-0"),
 				},
 			},
 		},
 		{
-			name: "V0041JobInfo",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041JobInfo,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				obj: &types.V0041JobInfo{
-					V0041JobInfo: v0041.V0041JobInfo{
-						JobId: ptr.To[int32](1),
-					},
+			name:       "V0041JobInfo",
+			objectType: types.ObjectTypeV0041JobInfo,
+			cache:      make(map[object.ObjectKey]*cacheEntry),
+			obj: &types.V0041JobInfo{
+				V0041JobInfo: v0041.V0041JobInfo{
+					JobId: ptr.To[int32](1),
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := &informerCache{
-				reader:        tt.fields.reader,
-				objectType:    tt.fields.objectType,
-				mu:            sync.RWMutex{},
-				cache:         tt.fields.cache,
-				started:       tt.fields.started,
-				dirty:         tt.fields.dirty,
-				eventCh:       tt.fields.eventCh,
-				syncCh:        tt.fields.syncCh,
-				syncObjCh:     tt.fields.syncObjCh,
-				syncErrorList: tt.fields.syncErrorList,
-				syncErrorGet:  tt.fields.syncErrorGet,
-				handler:       tt.fields.handler,
-				syncPeriod:    tt.fields.syncPeriod,
-			}
-			i.processObject(tt.args.obj)
+			i := newInformerWithData(tt.objectType, tt.cache)
+			i.processObject(tt.obj)
 			if len(i.cache) != 1 {
 				t.Errorf("len(cache) = %v, expected 1", len(i.cache))
 			}
