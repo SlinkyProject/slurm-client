@@ -9,7 +9,7 @@ import (
 
 	"k8s.io/utils/ptr"
 
-	v0041 "github.com/SlinkyProject/slurm-client/api/v0041"
+	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -33,18 +33,18 @@ func Test_informerCache_processObjects(t *testing.T) {
 		list       object.ObjectList
 	}{
 		{
-			name:       "V0041Node",
-			objectType: types.ObjectTypeV0041Node,
+			name:       "V0044Node",
+			objectType: types.ObjectTypeV0044Node,
 			cache:      make(map[object.ObjectKey]*cacheEntry),
-			list: &types.V0041NodeList{
-				Items: []types.V0041Node{
+			list: &types.V0044NodeList{
+				Items: []types.V0044Node{
 					{
-						V0041Node: v0041.V0041Node{
+						V0044Node: api.V0044Node{
 							Name: ptr.To("node-0"),
 						},
 					},
 					{
-						V0041Node: v0041.V0041Node{
+						V0044Node: api.V0044Node{
 							Name: ptr.To("node-1"),
 						},
 					},
@@ -52,18 +52,18 @@ func Test_informerCache_processObjects(t *testing.T) {
 			},
 		},
 		{
-			name:       "V0041JobInfo",
-			objectType: types.ObjectTypeV0041JobInfo,
+			name:       "V0044JobInfo",
+			objectType: types.ObjectTypeV0044JobInfo,
 			cache:      make(map[object.ObjectKey]*cacheEntry),
-			list: &types.V0041JobInfoList{
-				Items: []types.V0041JobInfo{
+			list: &types.V0044JobInfoList{
+				Items: []types.V0044JobInfo{
 					{
-						V0041JobInfo: v0041.V0041JobInfo{
+						V0044JobInfo: api.V0044JobInfo{
 							JobId: ptr.To[int32](1),
 						},
 					},
 					{
-						V0041JobInfo: v0041.V0041JobInfo{
+						V0044JobInfo: api.V0044JobInfo{
 							JobId: ptr.To[int32](2),
 						},
 					},
@@ -90,21 +90,21 @@ func Test_informerCache_processObject(t *testing.T) {
 		obj        object.Object
 	}{
 		{
-			name:       "V0041Node",
-			objectType: types.ObjectTypeV0041Node,
+			name:       "V0044Node",
+			objectType: types.ObjectTypeV0044Node,
 			cache:      make(map[object.ObjectKey]*cacheEntry),
-			obj: &types.V0041Node{
-				V0041Node: v0041.V0041Node{
+			obj: &types.V0044Node{
+				V0044Node: api.V0044Node{
 					Name: ptr.To("node-0"),
 				},
 			},
 		},
 		{
-			name:       "V0041JobInfo",
-			objectType: types.ObjectTypeV0041JobInfo,
+			name:       "V0044JobInfo",
+			objectType: types.ObjectTypeV0044JobInfo,
 			cache:      make(map[object.ObjectKey]*cacheEntry),
-			obj: &types.V0041JobInfo{
-				V0041JobInfo: v0041.V0041JobInfo{
+			obj: &types.V0044JobInfo{
+				V0044JobInfo: api.V0044JobInfo{
 					JobId: ptr.To[int32](1),
 				},
 			},
