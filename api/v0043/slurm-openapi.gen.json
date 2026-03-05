@@ -9234,8 +9234,7 @@
         "properties": {
           "script": {
             "type": "string",
-            "description": "Deprecated; Populate script field in jobs[0] or job",
-            "deprecated": true
+            "description": "Job batch script contents; Same as the script field in jobs[0] or job."
           },
           "jobs": {
             "$ref": "#\/components\/schemas\/v0.0.43_job_desc_msg_list",
@@ -12482,15 +12481,15 @@
       ],
       "version": {
         "major": "25",
-        "micro": "4",
+        "micro": "6",
         "minor": "05"
       },
-      "release": "25.05.4"
+      "release": "25.05.6"
     },
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-25.05.4"
+    "version": "Slurm-25.05.6"
   },
   "servers": [
     {

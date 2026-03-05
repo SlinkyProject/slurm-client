@@ -19,6 +19,7 @@ import (
 
 var _ = Describe("Client v0042", func() {
 	const testTimeout = 30 * time.Second
+	const cacheSyncPeriod = 5 * time.Second
 	const comment = "v0042"
 	var cfg *Config
 
@@ -36,7 +37,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042ControllerPing{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -82,7 +88,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042JobInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -214,7 +225,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042Node{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -228,7 +244,7 @@ var _ = Describe("Client v0042", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("")}}
+				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -241,7 +257,7 @@ var _ = Describe("Client v0042", func() {
 
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("")}}
+				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("does-not-exist")}}
 				err := cl.Update(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -259,7 +275,7 @@ var _ = Describe("Client v0042", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("")}}
+				obj := &types.V0042Node{V0042Node: api.V0042Node{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0042Node{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
@@ -289,7 +305,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042PartitionInfo{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -303,7 +324,7 @@ var _ = Describe("Client v0042", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0042PartitionInfo{V0042PartitionInfo: api.V0042PartitionInfo{Name: ptr.To("")}}
+				obj := &types.V0042PartitionInfo{V0042PartitionInfo: api.V0042PartitionInfo{Name: ptr.To("does-not-exist")}}
 				actual := &types.V0042PartitionInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
@@ -333,7 +354,9 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 
@@ -369,7 +392,12 @@ var _ = Describe("Client v0042", func() {
 
 		BeforeEach(func() {
 			var err error
-			cl, err = NewClient(cfg)
+			cl, err = NewClient(cfg, &ClientOptions{
+				EnableFor: []object.Object{
+					&types.V0042Stats{},
+				},
+				CacheSyncPeriod: cacheSyncPeriod,
+			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cl).NotTo(BeNil())
 

@@ -21,6 +21,9 @@ type fakeClient struct {
 
 	server    string
 	authToken string
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 type updateFunc func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
@@ -247,7 +250,7 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 }
 
 func (c *fakeClient) GetInformer(obj object.ObjectType) client.InformerCache {
-	return nil
+	return newInformer(obj, c, client.DefaultWatchInterval)
 }
 
 func (c *fakeClient) GetServer() string {
@@ -267,7 +270,17 @@ func (c *fakeClient) SetToken(token string) {
 }
 
 func (c *fakeClient) Start(ctx context.Context) {
+	if c.ctx != nil {
+		return
+	}
+	c.ctx, c.cancel = context.WithCancel(ctx)
+	<-c.ctx.Done()
+	c.ctx = nil
 }
 
 func (c *fakeClient) Stop() {
+	if c.cancel != nil {
+		c.cancel()
+		c.cancel = nil
+	}
 }

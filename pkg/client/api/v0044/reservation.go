@@ -17,11 +17,13 @@ import (
 
 type ReservationInterface interface {
 	CreateReservationInfo(ctx context.Context, req any) (string, error)
-	UpdateReservationInfo(ctx context.Context, req any) error
-	DeleteReservationInfo(ctx context.Context, reservationName string) error
+	UpdateReservationInfo(ctx context.Context, name string, req any) error
+	DeleteReservationInfo(ctx context.Context, name string) error
 	GetReservationInfo(ctx context.Context, name string) (*types.V0044ReservationInfo, error)
 	ListReservationInfo(ctx context.Context) (*types.V0044ReservationInfoList, error)
 }
+
+var _ ReservationInterface = &SlurmClient{}
 
 // CreateReservationInfo implements ClientInterface
 func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (string, error) {
@@ -48,8 +50,8 @@ func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (strin
 }
 
 // DeleteReservationInfo implements ClientInterface
-func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, reservationName string) error {
-	res, err := c.SlurmV0044DeleteReservationWithResponse(ctx, reservationName)
+func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, name string) error {
+	res, err := c.SlurmV0044DeleteReservationWithResponse(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -66,11 +68,14 @@ func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, reservationName
 }
 
 // UpdateReservationInfo implements ClientInterface
-func (c *SlurmClient) UpdateReservationInfo(ctx context.Context, req any) error {
+func (c *SlurmClient) UpdateReservationInfo(ctx context.Context, name string, req any) error {
 	r, ok := req.(api.V0044ReservationDescMsg)
 	if !ok {
 		return errors.New("expected req to be V0044ReservationDescMsg")
 	}
+
+	// endpoint does not use ID parameter, but make it uniform with the rest that do
+	r.Name = &name
 
 	body := api.SlurmV0044PostReservationJSONRequestBody(r)
 	res, err := c.SlurmV0044PostReservationWithResponse(ctx, body)

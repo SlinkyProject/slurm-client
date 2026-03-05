@@ -6,7 +6,6 @@ package client
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/client-go/tools/cache"
 
@@ -95,12 +94,6 @@ type Informer interface {
 
 	// HasStarted return true if the informers underlying store has been started.
 	HasStarted() bool
-
-	// WaitForSyncList return nil if the informers were able to sync.
-	WaitForSyncList(ctx context.Context, interval time.Duration) error
-
-	// WaitForSyncGet return nil if the informer was able to sync.
-	WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error
 
 	// Run starts and runs the informer, returning after it stops.
 	// The informer will be stopped when stopCh is closed.

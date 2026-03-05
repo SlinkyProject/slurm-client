@@ -19,7 +19,6 @@ import (
 	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
 	v0044 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0044"
-	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -315,7 +314,7 @@ func (c *client) Update(
 	case *types.V0044Node:
 		err = c.v0044Client.UpdateNode(ctx, key, req)
 	case *types.V0044ReservationInfo:
-		err = c.v0044Client.UpdateReservationInfo(ctx, req)
+		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -764,17 +763,7 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 		return informerCache
 	}
 	// Ensure informer cache exists
-	c.informers[objectType] = &informerCache{
-		reader:       c,
-		objectType:   objectType,
-		cache:        make(map[object.ObjectKey]*cacheEntry),
-		dirty:        true,
-		syncErrorGet: make(map[object.ObjectKey]error),
-		syncPeriod:   c.cacheSyncPeriod,
-		eventCh:      make(chan event.Event, 8),
-		syncCh:       make(chan struct{}, 8),
-		syncObjCh:    make(chan object.ObjectKey, 8),
-	}
+	c.informers[objectType] = newInformer(objectType, c, c.cacheSyncPeriod)
 	return c.informers[objectType]
 }
 

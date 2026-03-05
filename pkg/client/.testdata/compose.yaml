@@ -21,8 +21,7 @@ services:
       timeout: 5s
       retries: 3
   accounting:
-    image: ghcr.io/slinkyproject/slurmdbd:25.11.0-ubuntu24.04
-    container_name: slurmdbd
+    image: ghcr.io/slinkyproject/slurmdbd:25.11.3-ubuntu24.04
     hostname: slurmdbd
     entrypoint: /opt/entrypoint/slurmdbd.sh
     restart: unless-stopped
@@ -43,8 +42,7 @@ services:
       database:
         condition: service_healthy
   control-plane:
-    image: ghcr.io/slinkyproject/slurmctld:25.11.0-ubuntu24.04
-    container_name: slurmctld
+    image: ghcr.io/slinkyproject/slurmctld:25.11.3-ubuntu24.04
     hostname: slurmctld
     entrypoint: /opt/entrypoint/slurmctld.sh
     restart: unless-stopped
@@ -66,8 +64,7 @@ services:
         condition: service_healthy
   compute:
     privileged: true
-    image: ghcr.io/slinkyproject/slurmd:25.11.0-ubuntu24.04
-    container_name: slurmd
+    image: ghcr.io/slinkyproject/slurmd:25.11.3-ubuntu24.04
     hostname: slurmd
     entrypoint: /opt/entrypoint/slurmd.sh
     restart: unless-stopped
@@ -88,8 +85,7 @@ services:
       control-plane:
         condition: service_healthy
   restapi:
-    image: ghcr.io/slinkyproject/slurmrestd:25.11.0-ubuntu24.04
-    container_name: slurmrestd
+    image: ghcr.io/slinkyproject/slurmrestd:25.11.3-ubuntu24.04
     hostname: slurmrestd
     environment:
       - SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv
@@ -106,26 +102,6 @@ services:
       control-plane:
         condition: service_healthy
       accounting:
-        condition: service_healthy
-  authcred:
-    image: ghcr.io/slinkyproject/sackd:25.11.0-ubuntu24.04
-    container_name: sackd
-    hostname: sackd
-    entrypoint: /opt/entrypoint/sackd.sh
-    restart: unless-stopped
-    healthcheck:
-      test: [CMD-SHELL, bash, scontrol, ping]
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
-    networks:
-      - default
-    depends_on:
-      control-plane:
         condition: service_healthy
 networks:
   default:

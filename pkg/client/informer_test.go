@@ -5,228 +5,299 @@ package client
 
 import (
 	"context"
-	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/utils/ptr"
 
-	v0041 "github.com/SlinkyProject/slurm-client/api/v0041"
-	"github.com/SlinkyProject/slurm-client/pkg/event"
+	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
+func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
+	fakeReader := &emptyClient{}
+	ic := newInformer(objectType, fakeReader, defaultSyncPeriod)
+	i, ok := ic.(*informerCache)
+	if !ok {
+		panic("failed to convert to *informerCache")
+	}
+	i.cache = cache
+	return i
+}
+
 func Test_informerCache_processObjects(t *testing.T) {
-	f := &emptyClient{}
-	type fields struct {
-		reader        Reader
+	node0 := &types.V0044Node{
+		V0044Node: api.V0044Node{
+			Name: ptr.To("node-0"),
+		},
+	}
+	now := time.Now()
+	type testCase struct {
+		name          string
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
-		started       bool
-		dirty         bool
-		eventCh       chan event.Event
-		syncCh        chan struct{}
-		syncObjCh     chan object.ObjectKey
-		syncErrorList error
-		syncErrorGet  map[object.ObjectKey]error
-		handler       cache.ResourceEventHandler
-		syncPeriod    time.Duration
+		list          object.ObjectList
+		wantCacheLen  int
+		wantAddCnt    int64
+		wantModifyCnt int64
+		wantDeleteCnt int64
 	}
-	type args struct {
-		list object.ObjectList
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		{
-			name: "V0041Node",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041Node,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				list: &types.V0041NodeList{
-					Items: []types.V0041Node{
-						{
-							V0041Node: v0041.V0041Node{
-								Name: ptr.To("node-0"),
-							},
-						},
-						{
-							V0041Node: v0041.V0041Node{
-								Name: ptr.To("node-1"),
-							},
-						},
+	tests := []testCase{
+		func() testCase {
+			return testCase{
+				name:       "add",
+				objectType: node0.GetType(),
+				cache:      make(map[object.ObjectKey]*cacheEntry),
+				list: &types.V0044NodeList{
+					Items: []types.V0044Node{
+						*node0.DeepCopy(),
 					},
 				},
-			},
-		},
-		{
-			name: "V0041JobInfo",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041JobInfo,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				list: &types.V0041JobInfoList{
-					Items: []types.V0041JobInfo{
-						{
-							V0041JobInfo: v0041.V0041JobInfo{
-								JobId: ptr.To[int32](1),
-							},
-						},
-						{
-							V0041JobInfo: v0041.V0041JobInfo{
-								JobId: ptr.To[int32](2),
-							},
-						},
+				wantCacheLen: 1,
+				wantAddCnt:   1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "modify",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: time.Now(),
+						object: func() object.Object {
+							node := node0.DeepCopy()
+							node.Comment = ptr.To("foo")
+							return node
+						}(),
+						dirty: false,
 					},
 				},
-			},
-		},
+				list: &types.V0044NodeList{
+					Items: []types.V0044Node{
+						*node0.DeepCopy(),
+					},
+				},
+				wantCacheLen:  1,
+				wantModifyCnt: 1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "no modify",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: time.Now(),
+						object:     node0.DeepCopy(),
+						dirty:      false,
+					},
+				},
+				list: &types.V0044NodeList{
+					Items: []types.V0044Node{
+						*node0.DeepCopy(),
+					},
+				},
+				wantCacheLen: 1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "delete",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: time.Now(),
+						object:     node0.DeepCopy(),
+						dirty:      false,
+					},
+				},
+				list:          &types.V0044NodeList{},
+				wantCacheLen:  0,
+				wantDeleteCnt: 1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "delete dirty, no object",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						dirty: true,
+					},
+				},
+				list: &types.V0044NodeList{
+					Items: []types.V0044Node{},
+				},
+				wantCacheLen: 0,
+			}
+		}(),
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := &informerCache{
-				reader:        tt.fields.reader,
-				objectType:    tt.fields.objectType,
-				mu:            sync.RWMutex{},
-				cache:         tt.fields.cache,
-				started:       tt.fields.started,
-				dirty:         tt.fields.dirty,
-				eventCh:       tt.fields.eventCh,
-				syncCh:        tt.fields.syncCh,
-				syncObjCh:     tt.fields.syncObjCh,
-				syncErrorList: tt.fields.syncErrorList,
-				syncErrorGet:  tt.fields.syncErrorGet,
-				handler:       tt.fields.handler,
-				syncPeriod:    tt.fields.syncPeriod,
+			stopCh := make(chan struct{})
+			var addCnt int64
+			var modifyCnt int64
+			var deleteCnt int64
+			i := newInformerWithData(tt.objectType, tt.cache)
+			i.SetEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc: func(obj any) {
+					atomic.AddInt64(&addCnt, 1)
+				},
+				UpdateFunc: func(oldObj, newObj any) {
+					atomic.AddInt64(&modifyCnt, 1)
+				},
+				DeleteFunc: func(obj any) {
+					atomic.AddInt64(&deleteCnt, 1)
+				},
+			})
+			go i.runHandler(stopCh)
+			i.processObjects(tt.list)
+			for {
+				time.Sleep(time.Second)
+				if len(i.eventCh) == 0 {
+					close(stopCh)
+					break
+				}
 			}
-			i.processObjects(tt.args.list)
-			if len(i.cache) != len(tt.args.list.GetItems()) {
-				t.Errorf("len(cache) = %v, expected %v", len(i.cache), len(tt.args.list.GetItems()))
+			if len(i.cache) != len(tt.list.GetItems()) {
+				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
+			}
+			if addCnt != tt.wantAddCnt {
+				t.Errorf("processObjects() add events = %v, want %v", addCnt, tt.wantAddCnt)
+			}
+			if modifyCnt != tt.wantModifyCnt {
+				t.Errorf("processObjects() modify events = %v, want %v", modifyCnt, tt.wantModifyCnt)
+			}
+			if deleteCnt != tt.wantDeleteCnt {
+				t.Errorf("processObjects() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			}
+			for _, entry := range i.cache {
+				if now.After(entry.lastUpdate) {
+					t.Errorf("entry %v : now %v not after lastUpdate %v", entry.object.GetKey(), now, entry.lastUpdate)
+				}
 			}
 		})
 	}
 }
 
 func Test_informerCache_processObject(t *testing.T) {
-	f := &emptyClient{}
-	type fields struct {
-		reader        Reader
+	node0 := &types.V0044Node{
+		V0044Node: api.V0044Node{
+			Name: ptr.To("node-0"),
+		},
+	}
+	type testCase struct {
+		name          string
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
-		started       bool
-		dirty         bool
-		eventCh       chan event.Event
-		syncCh        chan struct{}
-		syncObjCh     chan object.ObjectKey
-		syncErrorList error
-		syncErrorGet  map[object.ObjectKey]error
-		handler       cache.ResourceEventHandler
-		syncPeriod    time.Duration
+		obj           object.Object
+		wantCacheLen  int
+		wantAddCnt    int64
+		wantModifyCnt int64
+		wantDeleteCnt int64
 	}
-	type args struct {
-		obj object.Object
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		{
-			name: "V0041Node",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041Node,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				obj: &types.V0041Node{
-					V0041Node: v0041.V0041Node{
-						Name: ptr.To("node-0"),
+	tests := []testCase{
+		func() testCase {
+			return testCase{
+				name:         "add",
+				objectType:   node0.GetType(),
+				cache:        make(map[object.ObjectKey]*cacheEntry),
+				obj:          node0.DeepCopy(),
+				wantCacheLen: 1,
+				wantAddCnt:   1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "no modify",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: time.Now(),
+						object:     node0.DeepCopy(),
+						dirty:      false,
 					},
 				},
-			},
-		},
-		{
-			name: "V0041JobInfo",
-			fields: fields{
-				reader:        f,
-				objectType:    types.ObjectTypeV0041JobInfo,
-				cache:         make(map[object.ObjectKey]*cacheEntry),
-				started:       false,
-				dirty:         true,
-				eventCh:       nil,
-				syncCh:        nil,
-				syncObjCh:     nil,
-				syncErrorList: nil,
-				syncErrorGet:  nil,
-				handler:       nil,
-				syncPeriod:    30 * time.Second,
-			},
-			args: args{
-				obj: &types.V0041JobInfo{
-					V0041JobInfo: v0041.V0041JobInfo{
-						JobId: ptr.To[int32](1),
+				obj:          node0.DeepCopy(),
+				wantCacheLen: 1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "modify",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: time.Now(),
+						object: func() object.Object {
+							node := node0.DeepCopy()
+							node.Comment = ptr.To("foo")
+							return node
+						}(),
+						dirty: false,
 					},
 				},
-			},
-		},
+				obj:           node0.DeepCopy(),
+				wantCacheLen:  1,
+				wantModifyCnt: 1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "add, dirty, no object",
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						dirty: true,
+					},
+				},
+				obj:          node0.DeepCopy(),
+				wantCacheLen: 1,
+				wantAddCnt:   1,
+			}
+		}(),
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := &informerCache{
-				reader:        tt.fields.reader,
-				objectType:    tt.fields.objectType,
-				mu:            sync.RWMutex{},
-				cache:         tt.fields.cache,
-				started:       tt.fields.started,
-				dirty:         tt.fields.dirty,
-				eventCh:       tt.fields.eventCh,
-				syncCh:        tt.fields.syncCh,
-				syncObjCh:     tt.fields.syncObjCh,
-				syncErrorList: tt.fields.syncErrorList,
-				syncErrorGet:  tt.fields.syncErrorGet,
-				handler:       tt.fields.handler,
-				syncPeriod:    tt.fields.syncPeriod,
+			stopCh := make(chan struct{})
+			var addCnt int64
+			var modifyCnt int64
+			var deleteCnt int64
+			i := newInformerWithData(tt.objectType, tt.cache)
+			i.SetEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc: func(obj any) {
+					atomic.AddInt64(&addCnt, 1)
+				},
+				UpdateFunc: func(oldObj, newObj any) {
+					atomic.AddInt64(&modifyCnt, 1)
+				},
+				DeleteFunc: func(obj any) {
+					atomic.AddInt64(&deleteCnt, 1)
+				},
+			})
+			go i.runHandler(stopCh)
+			i.processObject(tt.obj)
+			for {
+				time.Sleep(time.Second)
+				if len(i.eventCh) == 0 {
+					close(stopCh)
+					break
+				}
 			}
-			i.processObject(tt.args.obj)
-			if len(i.cache) != 1 {
-				t.Errorf("len(cache) = %v, expected 1", len(i.cache))
+			if len(i.cache) != tt.wantCacheLen {
+				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
+			}
+			if addCnt != tt.wantAddCnt {
+				t.Errorf("processObject() add events = %v, want %v", addCnt, tt.wantAddCnt)
+			}
+			if modifyCnt != tt.wantModifyCnt {
+				t.Errorf("processObject() modify events = %v, want %v", modifyCnt, tt.wantModifyCnt)
+			}
+			if deleteCnt != tt.wantDeleteCnt {
+				t.Errorf("processObject() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
 			}
 		})
 	}

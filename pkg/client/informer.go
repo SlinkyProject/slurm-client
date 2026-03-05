@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/utils/set"
 
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -23,7 +22,6 @@ import (
 
 const (
 	defaultSyncPeriod = 30 * time.Second
-	waitSyncPeriod    = 1 * time.Second
 	batchPeriod       = 1 * time.Second
 )
 
@@ -103,15 +101,10 @@ func (i *informerCache) Run(stopCh <-chan struct{}) {
 	go i.runGetInformer(stopCh)
 	go i.runHandler(stopCh)
 
-	for {
-		_, ok := <-stopCh
-		if !ok {
-			i.mu.Lock()
-			i.started = false
-			i.mu.Unlock()
-			break
-		}
-	}
+	<-stopCh
+	i.mu.Lock()
+	i.started = false
+	i.mu.Unlock()
 }
 
 func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
@@ -403,37 +396,17 @@ func (i *informerCache) pushEvent(e event.Event) {
 
 func (i *informerCache) processObjects(list object.ObjectList) {
 	now := time.Now()
-	fresh := make(set.Set[object.ObjectKey])
 	for _, item := range list.GetItems() {
-		key := item.GetKey()
-		fresh.Insert(key)
-		insert := false
-
-		e := event.Event{}
-		entry, ok := i.cache[key]
-		if !ok || entry.object == nil {
-			insert = true
-			e.Type = event.Added
-		} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, item) {
-			insert = true
-			e.Type = event.Modified
-			e.ObjectOld = entry.object.DeepCopyObject()
-		}
-
-		if insert {
-			i.cache[key] = &cacheEntry{
-				lastUpdate: now,
-				object:     item,
-				dirty:      false,
-			}
-			e.Object = item.DeepCopyObject()
-			i.pushEvent(e)
-		}
+		i.processObject(item)
 	}
 
-	for _, entry := range i.cache {
-		key := entry.object.GetKey()
-		if !fresh.Has(key) {
+	for key, entry := range i.cache {
+		if entry == nil {
+			continue
+		}
+		if entry.object == nil {
+			delete(i.cache, key)
+		} else if now.After(entry.lastUpdate) {
 			e := event.Event{
 				Type:   event.Deleted,
 				Object: entry.object.DeepCopyObject(),
@@ -447,27 +420,31 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 func (i *informerCache) processObject(obj object.Object) {
 	now := time.Now()
 	key := obj.GetKey()
-	insert := false
 
-	e := event.Event{}
 	entry, ok := i.cache[key]
 	if !ok || entry.object == nil {
-		insert = true
-		e.Type = event.Added
-	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) && !equality.Semantic.DeepEqual(entry.object, obj) {
-		insert = true
-		e.Type = event.Modified
-		e.ObjectOld = entry.object.DeepCopyObject()
-	}
-
-	if insert {
 		i.cache[key] = &cacheEntry{
 			lastUpdate: now,
-			object:     obj,
+			object:     obj.DeepCopyObject(),
 			dirty:      false,
 		}
-		e.Object = obj.DeepCopyObject()
+		e := event.Event{
+			Type:   event.Added,
+			Object: obj.DeepCopyObject(),
+		}
 		i.pushEvent(e)
+	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) {
+		entry.lastUpdate = now
+		entry.dirty = false
+		if !equality.Semantic.DeepEqual(entry.object, obj) {
+			entry.object = obj.DeepCopyObject()
+			e := event.Event{
+				Type:      event.Modified,
+				Object:    obj.DeepCopyObject(),
+				ObjectOld: entry.object.DeepCopyObject(),
+			}
+			i.pushEvent(e)
+		}
 	}
 }
 
@@ -509,22 +486,22 @@ func (i *informerCache) HasStarted() bool {
 	return i.started
 }
 
-// WaitForSyncList implements InformerCache.
-func (i *informerCache) WaitForSyncList(ctx context.Context, interval time.Duration) error {
-	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
-		func(_ context.Context) (bool, error) {
-			return i.hasSyncedList()
-		})
-	return err
+func (i *informerCache) waitForSyncList(ctx context.Context) error {
+	timeout := 2 * i.syncPeriod
+	interval := time.Duration(timeout / 60)
+	conditionFn := func(ctx context.Context) (bool, error) {
+		return i.hasSyncedList()
+	}
+	return wait.PollUntilContextTimeout(ctx, interval, timeout, true, conditionFn)
 }
 
-// WaitForSyncGet implements InformerCache.
-func (i *informerCache) WaitForSyncGet(ctx context.Context, key object.ObjectKey, interval time.Duration) error {
-	err := wait.PollUntilContextTimeout(ctx, interval, i.syncPeriod, true,
-		func(_ context.Context) (bool, error) {
-			return i.hasSyncedGet(key)
-		})
-	return err
+func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey) error {
+	timeout := 2 * i.syncPeriod
+	interval := time.Duration(timeout / 60)
+	conditionFn := func(ctx context.Context) (bool, error) {
+		return i.hasSyncedGet(key)
+	}
+	return wait.PollUntilContextTimeout(ctx, interval, timeout, true, conditionFn)
 }
 
 // Get implements InformerCache.
@@ -534,7 +511,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 
 	if options.RefreshCache {
 		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and WaitForSyncGet().
+		// receiver and waitForSyncGet().
 		i.mu.Lock()
 		if obj := i.cache[key]; obj != nil {
 			obj.dirty = true
@@ -553,7 +530,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		i.mu.Unlock()
 	}
 
-	if err := i.WaitForSyncGet(ctx, key, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncGet(ctx, key); err != nil {
 		return fmt.Errorf("failed to wait on type %s object %s cache sync: %w", obj.GetType(), key, err)
 	}
 
@@ -657,7 +634,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 
 	if options.RefreshCache {
 		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and WaitForSyncList().
+		// receiver and waitForSyncList().
 		i.mu.Lock()
 		i.dirty = true
 		i.syncCh <- struct{}{}
@@ -668,7 +645,7 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.mu.Unlock()
 	}
 
-	if err := i.WaitForSyncList(ctx, waitSyncPeriod); err != nil {
+	if err := i.waitForSyncList(ctx); err != nil {
 		return fmt.Errorf("failed to wait on type %s cache sync: %w", list.GetType(), err)
 	}
 
@@ -683,4 +660,18 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	}
 
 	return nil
+}
+
+func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Duration) InformerCache {
+	return &informerCache{
+		reader:       reader,
+		objectType:   objectType,
+		cache:        make(map[object.ObjectKey]*cacheEntry),
+		dirty:        true,
+		syncErrorGet: make(map[object.ObjectKey]error),
+		syncPeriod:   syncPeriod,
+		eventCh:      make(chan event.Event, 8),
+		syncCh:       make(chan struct{}, 8),
+		syncObjCh:    make(chan object.ObjectKey, 8),
+	}
 }

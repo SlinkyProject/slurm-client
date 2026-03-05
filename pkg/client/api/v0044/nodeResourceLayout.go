@@ -19,6 +19,8 @@ type NodeResourceLayoutInterface interface {
 	GetNodeResourceLayout(ctx context.Context, jobId string) (*types.V0044NodeResourceLayout, error)
 }
 
+var _ NodeResourceLayoutInterface = &SlurmClient{}
+
 // GetNodeResourceLayout implements ClientInterface
 func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (*types.V0044NodeResourceLayout, error) {
 	res, err := c.SlurmV0044GetResourcesWithResponse(ctx, jobId)
