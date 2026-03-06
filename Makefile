@@ -120,7 +120,7 @@ SLURM_DATA_PARSER_OPTS ?= +inline_enums
 
 TEMPLATES_DIR = api/.template
 # https://github.com/oapi-codegen/oapi-codegen/tags
-OAPI_CODEGEN_VERSION ?= v2.5.0
+OAPI_CODEGEN_VERSION ?= v2.6.0
 
 .PHONY: generate-api
 generate-api: ## Generate Slurm OpenAPI spec file.
