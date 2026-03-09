@@ -80,7 +80,7 @@ GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck-$(GOVULNCHECK_VERSION)
 
 ## Tool Versions
-GOLANGCI_LINT_VERSION ?= v2.9.0
+GOLANGCI_LINT_VERSION ?= v2.11.1
 GOVULNCHECK_VERSION ?= latest
 
 .PHONY: govulncheck-bin
@@ -115,7 +115,7 @@ generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	done
 
 CONTAINER_TOOL ?= docker
-SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.0-ubuntu24.04
+SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.6-ubuntu24.04
 SLURM_DATA_PARSER_OPTS ?= +inline_enums
 
 TEMPLATES_DIR = api/.template
