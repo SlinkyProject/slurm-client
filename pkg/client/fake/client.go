@@ -188,6 +188,9 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0044PartitionInfo:
 		cache := entry.(*types.V0044PartitionInfo)
 		*o = *cache
+	case *types.V0044ReservationInfo:
+		cache := entry.(*types.V0044ReservationInfo)
+		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.(*types.V0044Stats)
 		*o = *cache
