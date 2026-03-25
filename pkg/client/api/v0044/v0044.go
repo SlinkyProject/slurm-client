@@ -29,6 +29,7 @@ type ClientInterface interface {
 	NodeInterface
 	NodeResourceLayoutInterface
 	PartitionInterface
+	QosInterface
 	ReconfigureInterface
 	ReservationInterface
 	StatsInterface
