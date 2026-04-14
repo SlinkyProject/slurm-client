@@ -1,3 +1,14 @@
+## v1.1.0
+
+### Added
+
+- Added test cases for reservation create, update, and delete methods.
+
+### Fixed
+
+- Updated google.golang.org/grpc to v1.79.3 to address CVE-2026-33186.
+- Updated moby/buildkit to v0.28.1 to address CVE-2026-33747.
+
 ## v1.1.0-rc1
 
 ### Added
