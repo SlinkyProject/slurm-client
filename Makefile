@@ -52,6 +52,7 @@ build: fmt tidy vet ## Build project
 .PHONY: clean
 clean: ## Clean artifacts
 	rm -f cover.out cover.html
+	rm -f "$(GOVULNCHECK_REPORT)"
 	rm -rf bin/
 
 ##@ Build Dependencies
@@ -82,6 +83,8 @@ GOVULNCHECK ?= $(LOCALBIN)/govulncheck-$(GOVULNCHECK_VERSION)
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.9.0
 GOVULNCHECK_VERSION ?= latest
+# Written by `make govulncheck`: CSV (see file header comments). CI uploads as an artifact.
+GOVULNCHECK_REPORT ?= govulncheck-vulns.csv
 
 .PHONY: govulncheck-bin
 govulncheck-bin: $(GOVULNCHECK) ## Download govulncheck locally if necessary.
@@ -161,8 +164,8 @@ get-u: ## Run `go get -u`
 	$(MAKE) tidy
 
 .PHONY: govulncheck
-govulncheck: govulncheck-bin ## Run govulncheck
-	$(GOVULNCHECK) ./...
+govulncheck: govulncheck-bin ## Write $(GOVULNCHECK_REPORT); fail if a vulnerability has fixed_version.
+	@GOVULNCHECK='$(GOVULNCHECK)' ./hack/govulncheck-report.sh -o "$(GOVULNCHECK_REPORT)"
 
 # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
 .PHONY: golangci-lint
