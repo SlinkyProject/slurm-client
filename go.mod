@@ -1,6 +1,6 @@
 module github.com/SlinkyProject/slurm-client
 
-go 1.25.5
+go 1.26.2
 
 require (
 	github.com/getkin/kin-openapi v0.133.0
