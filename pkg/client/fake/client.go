@@ -179,6 +179,30 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 
 	/////////////////////////////////////////////////////////////////////////////////
 
+	case *types.V0045ControllerPing:
+		cache := entry.(*types.V0045ControllerPing)
+		*o = *cache
+	case *types.V0045JobInfo:
+		cache := entry.(*types.V0045JobInfo)
+		*o = *cache
+	case *types.V0045NodeResourceLayout:
+		cache := entry.(*types.V0045NodeResourceLayout)
+		*o = *cache
+	case *types.V0045Node:
+		cache := entry.(*types.V0045Node)
+		*o = *cache
+	case *types.V0045PartitionInfo:
+		cache := entry.(*types.V0045PartitionInfo)
+		*o = *cache
+	case *types.V0045ReservationInfo:
+		cache := entry.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Stats:
+		cache := entry.(*types.V0045Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}

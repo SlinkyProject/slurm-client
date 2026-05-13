@@ -18,6 +18,7 @@ import (
 	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
 	v0044 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0044"
+	v0045 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -61,6 +62,7 @@ type client struct {
 	v0042Client v0042.ClientInterface
 	v0043Client v0043.ClientInterface
 	v0044Client v0044.ClientInterface
+	v0045Client v0045.ClientInterface
 
 	config Config
 
@@ -77,6 +79,8 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	options := &ClientOptions{
 		CacheSyncPeriod: defaultSyncPeriod,
 		DisableFor: []object.Object{
+			&types.V0045NodeResourceLayout{},
+			&types.V0045Reconfigure{},
 			&types.V0044NodeResourceLayout{},
 			&types.V0044Reconfigure{},
 			&types.V0043Reconfigure{},
@@ -126,6 +130,11 @@ func (c *client) createApiClients() error {
 	}
 
 	c.v0044Client, err = v0044.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %w", err)
+	}
+
+	c.v0045Client, err = v0045.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
@@ -180,6 +189,23 @@ func (c *client) Create(
 
 	/////////////////////////////////////////////////////////////////////////////////
 
+	case *types.V0045JobInfo:
+		var jobId *int32
+		jobId, err = c.v0045Client.CreateJobInfo(ctx, req)
+		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
+
+	case *types.V0045ReservationInfo:
+		var reservationName string
+		reservationName, err = c.v0045Client.CreateReservationInfo(ctx, req)
+		key = object.ObjectKey(reservationName)
+
+	case *types.V0045Node:
+		var nodeName *string
+		nodeName, err = c.v0045Client.CreateNewNode(ctx, req)
+		key = object.ObjectKey(ptr.Deref(nodeName, ""))
+
+	/////////////////////////////////////////////////////////////////////////////////
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -226,6 +252,15 @@ func (c *client) Delete(
 		err = c.v0044Client.DeleteNode(ctx, key)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.DeleteReservationInfo(ctx, key)
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045JobInfo:
+		err = c.v0045Client.DeleteJobInfo(ctx, key)
+	case *types.V0045Node:
+		err = c.v0045Client.DeleteNode(ctx, key)
+	case *types.V0045ReservationInfo:
+		err = c.v0045Client.DeleteReservationInfo(ctx, key)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -286,6 +321,15 @@ func (c *client) Update(
 		err = c.v0044Client.UpdateNode(ctx, key, req)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045JobInfo:
+		err = c.v0045Client.UpdateJobInfo(ctx, key, req)
+	case *types.V0045Node:
+		err = c.v0045Client.UpdateNode(ctx, key, req)
+	case *types.V0045ReservationInfo:
+		err = c.v0045Client.UpdateReservationInfo(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -452,6 +496,57 @@ func (c *client) Get(
 
 	/////////////////////////////////////////////////////////////////////////////////
 
+	case *types.V0045ControllerPing:
+		out, err := c.v0045Client.GetControllerPing(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045JobInfo:
+		out, err := c.v0045Client.GetJobInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045NodeResourceLayout:
+		out, err := c.v0045Client.GetNodeResourceLayout(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045Node:
+		out, err := c.v0045Client.GetNode(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045PartitionInfo:
+		out, err := c.v0045Client.GetPartitionInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045Reconfigure:
+		out, err := c.v0045Client.GetReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045ReservationInfo:
+		out, err := c.v0045Client.GetReservationInfo(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045Stats:
+		out, err := c.v0045Client.GetStats(ctx)
+		if err != nil {
+			return err
+		}
+		*o = *out
+
+	/////////////////////////////////////////////////////////////////////////////////
+
 	default:
 		return errors.New(http.StatusText(http.StatusNotImplemented))
 	}
@@ -598,6 +693,51 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0044StatsList:
 		out, err := c.v0044Client.ListStats(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045ControllerPingList:
+		out, err := c.v0045Client.ListControllerPing(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045JobInfoList:
+		out, err := c.v0045Client.ListJobInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045NodeList:
+		out, err := c.v0045Client.ListNodes(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045PartitionInfoList:
+		out, err := c.v0045Client.ListPartitionInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045ReconfigureList:
+		out, err := c.v0045Client.ListReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045ReservationInfoList:
+		out, err := c.v0045Client.ListReservationInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045StatsList:
+		out, err := c.v0045Client.ListStats(ctx)
 		if err != nil {
 			return err
 		}

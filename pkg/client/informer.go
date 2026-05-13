@@ -198,6 +198,25 @@ func (i *informerCache) doListInformer() {
 
 	/////////////////////////////////////////////////////////////////////////////////
 
+	case types.ObjectTypeV0045ControllerPing:
+		list = &types.V0045ControllerPingList{}
+	case types.ObjectTypeV0045JobInfo:
+		list = &types.V0045JobInfoList{}
+	case types.ObjectTypeV0045Node:
+		list = &types.V0045NodeList{}
+	case types.ObjectTypeV0045PartitionInfo:
+		list = &types.V0045PartitionInfoList{}
+	case types.ObjectTypeV0045Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045ReservationInfo:
+		list = &types.V0045ReservationInfoList{}
+	case types.ObjectTypeV0045NodeResourceLayout:
+		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045Stats:
+		list = &types.V0045StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
 	default:
 		// NOTE: We must handle every Slurm type otherwise panic.
 		// We cannot recover from here because the informer has started a
@@ -307,6 +326,23 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		obj = &types.V0044ReservationInfo{}
 	case types.ObjectTypeV0044Stats:
 		obj = &types.V0044Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0045ControllerPing:
+		obj = &types.V0045ControllerPing{}
+	case types.ObjectTypeV0045JobInfo:
+		obj = &types.V0045JobInfo{}
+	case types.ObjectTypeV0045Node:
+		obj = &types.V0045Node{}
+	case types.ObjectTypeV0045PartitionInfo:
+		obj = &types.V0045PartitionInfo{}
+	case types.ObjectTypeV0045Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045ReservationInfo:
+		obj = &types.V0045ReservationInfo{}
+	case types.ObjectTypeV0045Stats:
+		obj = &types.V0045Stats{}
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -573,6 +609,27 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.object.(*types.V0044Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045ControllerPing:
+		cache := entry.object.(*types.V0045ControllerPing)
+		*o = *cache
+	case *types.V0045JobInfo:
+		cache := entry.object.(*types.V0045JobInfo)
+		*o = *cache
+	case *types.V0045Node:
+		cache := entry.object.(*types.V0045Node)
+		*o = *cache
+	case *types.V0045PartitionInfo:
+		cache := entry.object.(*types.V0045PartitionInfo)
+		*o = *cache
+	case *types.V0045ReservationInfo:
+		cache := entry.object.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Stats:
+		cache := entry.object.(*types.V0045Stats)
 		*o = *cache
 
 	/////////////////////////////////////////////////////////////////////////////////
