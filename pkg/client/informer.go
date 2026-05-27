@@ -518,8 +518,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		} else {
 			i.cache[key] = &cacheEntry{dirty: true}
 		}
-		i.syncObjCh <- key
 		i.mu.Unlock()
+		i.syncObjCh <- key
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		if obj := i.cache[key]; obj != nil {
@@ -637,8 +637,8 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		// receiver and waitForSyncList().
 		i.mu.Lock()
 		i.dirty = true
-		i.syncCh <- struct{}{}
 		i.mu.Unlock()
+		i.syncCh <- struct{}{}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		i.dirty = true
