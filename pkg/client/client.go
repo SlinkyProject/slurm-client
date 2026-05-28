@@ -183,6 +183,11 @@ func (c *client) Create(
 		jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
 		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
+	case *types.V0044Qos:
+		var qosName string
+		qosName, err = c.v0044Client.CreateQos(ctx, req)
+		key = object.ObjectKey(qosName)
+
 	case *types.V0044ReservationInfo:
 		var reservationName string
 		reservationName, err = c.v0044Client.CreateReservationInfo(ctx, req)
@@ -246,6 +251,8 @@ func (c *client) Delete(
 		err = c.v0044Client.DeleteJobInfo(ctx, key)
 	case *types.V0044Node:
 		err = c.v0044Client.DeleteNode(ctx, key)
+	case *types.V0044Qos:
+		err = c.v0044Client.DeleteQos(ctx, key)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.DeleteReservationInfo(ctx, key)
 
@@ -313,6 +320,8 @@ func (c *client) Update(
 		err = c.v0044Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0044Node:
 		err = c.v0044Client.UpdateNode(ctx, key, req)
+	case *types.V0044Qos:
+		err = c.v0044Client.UpdateQos(ctx, key, req)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
 
@@ -505,6 +514,12 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0044Qos:
+		out, err := c.v0044Client.GetQos(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
 	case *types.V0044ReservationInfo:
 		out, err := c.v0044Client.GetReservationInfo(ctx, string(key))
 		if err != nil {
@@ -693,6 +708,12 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0044ReconfigureList:
 		out, err := c.v0044Client.ListReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0044QosList:
+		out, err := c.v0044Client.ListQos(ctx)
 		if err != nil {
 			return err
 		}
