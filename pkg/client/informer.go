@@ -519,7 +519,12 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 			i.cache[key] = &cacheEntry{dirty: true}
 		}
 		i.mu.Unlock()
-		i.syncObjCh <- key
+
+		select {
+		case i.syncObjCh <- key:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		if obj := i.cache[key]; obj != nil {
@@ -638,7 +643,12 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		i.mu.Lock()
 		i.dirty = true
 		i.mu.Unlock()
-		i.syncCh <- struct{}{}
+
+		select {
+		case i.syncCh <- struct{}{}:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
 		i.dirty = true
