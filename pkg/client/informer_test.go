@@ -5,6 +5,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -298,6 +299,134 @@ func Test_informerCache_processObject(t *testing.T) {
 			}
 			if deleteCnt != tt.wantDeleteCnt {
 				t.Errorf("processObject() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			}
+		})
+	}
+}
+
+func Test_informerCache_GetRefreshCacheWithFullSyncQueue(t *testing.T) {
+	type testCase struct {
+		name        string
+		obj         object.Object
+		wantErr     error
+		wantLockErr bool
+	}
+	tests := []testCase{
+		func() testCase {
+			node := &types.V0044Node{
+				V0044Node: api.V0044Node{
+					Name: ptr.To("node-0"),
+				},
+			}
+			return testCase{
+				name:    "full sync queue",
+				obj:     node,
+				wantErr: context.DeadlineExceeded,
+			}
+		}(),
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := newInformerWithData(tt.obj.GetType(), map[object.ObjectKey]*cacheEntry{})
+			i.started = true
+			for range cap(i.syncObjCh) {
+				i.syncObjCh <- object.ObjectKey("queued")
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
+			defer cancel()
+
+			done := make(chan error, 1)
+			go func() {
+				got := tt.obj.DeepCopyObject()
+				done <- i.Get(ctx, tt.obj.GetKey(), got, &GetOptions{RefreshCache: true})
+			}()
+
+			select {
+			case err := <-done:
+				if !errors.Is(err, tt.wantErr) {
+					t.Errorf("informerCache.Get(%q, RefreshCache) error = %v, want %v", tt.obj.GetKey(), err, tt.wantErr)
+				}
+			case <-time.After(250 * time.Millisecond):
+				t.Fatalf("informerCache.Get(%q, RefreshCache) blocked after context deadline with a full sync queue", tt.obj.GetKey())
+			}
+
+			lockAcquired := make(chan struct{})
+			go func() {
+				i.mu.Lock()
+				defer i.mu.Unlock()
+				close(lockAcquired)
+			}()
+			select {
+			case <-lockAcquired:
+				if tt.wantLockErr {
+					t.Errorf("informerCache.Get(%q, RefreshCache) cache mutex was unlocked, want locked", tt.obj.GetKey())
+				}
+			case <-time.After(250 * time.Millisecond):
+				if !tt.wantLockErr {
+					t.Fatalf("informerCache.Get(%q, RefreshCache) left cache mutex locked after sync queue timeout", tt.obj.GetKey())
+				}
+			}
+		})
+	}
+}
+
+func Test_informerCache_ListRefreshCacheWithFullSyncQueue(t *testing.T) {
+	type testCase struct {
+		name        string
+		objectType  object.ObjectType
+		list        object.ObjectList
+		wantErr     error
+		wantLockErr bool
+	}
+	tests := []testCase{
+		{
+			name:       "full sync queue",
+			objectType: types.ObjectTypeV0044Node,
+			list:       &types.V0044NodeList{},
+			wantErr:    context.DeadlineExceeded,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := newInformerWithData(tt.objectType, map[object.ObjectKey]*cacheEntry{})
+			i.started = true
+			for range cap(i.syncCh) {
+				i.syncCh <- struct{}{}
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
+			defer cancel()
+
+			done := make(chan error, 1)
+			go func() {
+				done <- i.List(ctx, tt.list, &ListOptions{RefreshCache: true})
+			}()
+
+			select {
+			case err := <-done:
+				if !errors.Is(err, tt.wantErr) {
+					t.Errorf("informerCache.List(%s, RefreshCache) error = %v, want %v", tt.list.GetType(), err, tt.wantErr)
+				}
+			case <-time.After(250 * time.Millisecond):
+				t.Fatalf("informerCache.List(%s, RefreshCache) blocked after context deadline with a full sync queue", tt.list.GetType())
+			}
+
+			lockAcquired := make(chan struct{})
+			go func() {
+				i.mu.Lock()
+				defer i.mu.Unlock()
+				close(lockAcquired)
+			}()
+			select {
+			case <-lockAcquired:
+				if tt.wantLockErr {
+					t.Errorf("informerCache.List(%s, RefreshCache) cache mutex was unlocked, want locked", tt.list.GetType())
+				}
+			case <-time.After(250 * time.Millisecond):
+				if !tt.wantLockErr {
+					t.Fatalf("informerCache.List(%s, RefreshCache) left cache mutex locked after sync queue timeout", tt.list.GetType())
+				}
 			}
 		})
 	}
