@@ -1,1 +1,3 @@
 *.gen.* linguist-generated=true
+NOTICE linguist-generated merge=ours
+THIRD_PARTY_LICENSES linguist-generated merge=ours
