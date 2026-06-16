@@ -5,7 +5,6 @@
 services:
   database:
     image: docker.io/mariadb:latest
-    container_name: mariadb
     hostname: mariadb
     restart: unless-stopped
     # ports:
