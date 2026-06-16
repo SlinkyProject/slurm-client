@@ -20,9 +20,15 @@ services:
       timeout: 5s
       retries: 3
   accounting:
-    image: ghcr.io/slinkyproject/slurmdbd:25.11.3-ubuntu24.04
+    build:
+      context: ./compose
+      dockerfile_inline: |
+        FROM ghcr.io/slinkyproject/slurmdbd:25.11.3-ubuntu24.04
+        COPY etc/ /opt/etc/slurm/
+        COPY entrypoint/slurmdbd.sh /usr/local/bin/entrypoint.sh
+        RUN chmod +x /usr/local/bin/entrypoint.sh
+        ENTRYPOINT /usr/local/bin/entrypoint.sh
     hostname: slurmdbd
-    entrypoint: /opt/entrypoint/slurmdbd.sh
     restart: unless-stopped
     # ports:
     #   - 16819:6819
@@ -32,18 +38,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
     networks:
       - default
     depends_on:
       database:
         condition: service_healthy
   control-plane:
-    image: ghcr.io/slinkyproject/slurmctld:25.11.3-ubuntu24.04
+    build:
+      context: ./compose
+      dockerfile_inline: |
+        FROM ghcr.io/slinkyproject/slurmctld:25.11.3-ubuntu24.04
+        COPY etc/ /opt/etc/slurm/
+        COPY entrypoint/slurmctld.sh /usr/local/bin/entrypoint.sh
+        RUN chmod +x /usr/local/bin/entrypoint.sh
+        ENTRYPOINT /usr/local/bin/entrypoint.sh
     hostname: slurmctld
-    entrypoint: /opt/entrypoint/slurmctld.sh
     restart: unless-stopped
     # ports:
     #   - 16817:6817
@@ -53,9 +62,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
     networks:
       - default
     depends_on:
@@ -63,9 +69,15 @@ services:
         condition: service_healthy
   compute:
     privileged: true
-    image: ghcr.io/slinkyproject/slurmd:25.11.3-ubuntu24.04
+    build:
+      context: ./compose
+      dockerfile_inline: |
+        FROM ghcr.io/slinkyproject/slurmd:25.11.3-ubuntu24.04
+        COPY etc/ /opt/etc/slurm/
+        COPY entrypoint/slurmd.sh /usr/local/bin/entrypoint.sh
+        RUN chmod +x /usr/local/bin/entrypoint.sh
+        ENTRYPOINT /usr/local/bin/entrypoint.sh
     hostname: slurmd
-    entrypoint: /opt/entrypoint/slurmd.sh
     restart: unless-stopped
     # ports:
     #   - 16818:6818
@@ -75,26 +87,26 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
     networks:
       - default
     depends_on:
       control-plane:
         condition: service_healthy
   restapi:
-    image: ghcr.io/slinkyproject/slurmrestd:25.11.3-ubuntu24.04
+    build:
+      context: ./compose
+      dockerfile_inline: |
+        FROM ghcr.io/slinkyproject/slurmrestd:25.11.3-ubuntu24.04
+        COPY etc/ /opt/etc/slurm/
+        COPY entrypoint/slurmrestd.sh /usr/local/bin/entrypoint.sh
+        RUN chmod +x /usr/local/bin/entrypoint.sh
+        ENTRYPOINT /usr/local/bin/entrypoint.sh
     hostname: slurmrestd
     environment:
       - SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv
-    entrypoint: /opt/entrypoint/slurmrestd.sh
     restart: unless-stopped
     ports:
       - 16820:6820
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
     networks:
       - default
     depends_on:
