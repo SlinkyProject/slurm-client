@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	v0041 "github.com/SlinkyProject/slurm-client/api/v0041"
+	v0042 "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -27,7 +27,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			_ = client.Create(ctx, obj, nil)
 			Expect(called).To(BeTrue())
 		})
@@ -39,7 +39,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.Create(ctx, obj, nil)
 			Expect(called).To(BeTrue())
@@ -54,7 +54,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			_ = client.Delete(ctx, obj)
 			Expect(called).To(BeTrue())
 		})
@@ -66,7 +66,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.Delete(ctx, obj)
 			Expect(called).To(BeTrue())
@@ -81,8 +81,8 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
-			req := v0041.V0041UpdateNodeMsg{}
+			obj := &types.V0042Node{}
+			req := v0042.V0042UpdateNodeMsg{}
 			_ = client.Update(ctx, obj, req)
 			Expect(called).To(BeTrue())
 		})
@@ -94,8 +94,8 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
-			req := v0041.V0041UpdateNodeMsg{}
+			obj := &types.V0042Node{}
+			req := v0042.V0042UpdateNodeMsg{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.Update(ctx, obj, req)
 			Expect(called).To(BeTrue())
@@ -110,7 +110,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			_ = client.Get(ctx, obj.GetKey(), obj)
 			Expect(called).To(BeTrue())
 		})
@@ -122,7 +122,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.Get(ctx, obj.GetKey(), obj)
 			Expect(called).To(BeTrue())
@@ -137,7 +137,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			list := &types.V0041NodeList{}
+			list := &types.V0042NodeList{}
 			_ = client.List(ctx, list)
 			Expect(called).To(BeTrue())
 		})
@@ -149,7 +149,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			list := &types.V0041NodeList{}
+			list := &types.V0042NodeList{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.List(ctx, list)
 			Expect(called).To(BeTrue())
@@ -164,7 +164,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			_ = client.GetInformer(obj.GetType())
 			Expect(called).To(BeTrue())
 		})
@@ -176,7 +176,7 @@ var _ = Describe("NewClient", func() {
 					return nil
 				},
 			})
-			obj := &types.V0041Node{}
+			obj := &types.V0042Node{}
 			client2 := NewClient(client1, Funcs{})
 			_ = client2.GetInformer(obj.GetType())
 			Expect(called).To(BeTrue())

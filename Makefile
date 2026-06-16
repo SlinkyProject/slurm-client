@@ -110,6 +110,7 @@ generate: ## Run all generate targets.
 .PHONY: generate-api-matrix
 generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	declare -A VERSION_MATRIX=( \
+		["ghcr.io/slinkyproject/slurmrestd:26.05.1-ubuntu26.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:25.11.3-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:25.05.6-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \

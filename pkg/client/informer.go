@@ -149,21 +149,6 @@ func (i *informerCache) doListInformer() {
 	switch i.objectType {
 	/////////////////////////////////////////////////////////////////////////////////
 
-	case types.ObjectTypeV0041ControllerPing:
-		list = &types.V0041ControllerPingList{}
-	case types.ObjectTypeV0041JobInfo:
-		list = &types.V0041JobInfoList{}
-	case types.ObjectTypeV0041Node:
-		list = &types.V0041NodeList{}
-	case types.ObjectTypeV0041PartitionInfo:
-		list = &types.V0041PartitionInfoList{}
-	case types.ObjectTypeV0041Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0041Stats:
-		list = &types.V0041StatsList{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
 	case types.ObjectTypeV0042ControllerPing:
 		list = &types.V0042ControllerPingList{}
 	case types.ObjectTypeV0042JobInfo:
@@ -210,6 +195,25 @@ func (i *informerCache) doListInformer() {
 		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0044Stats:
 		list = &types.V0044StatsList{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0045ControllerPing:
+		list = &types.V0045ControllerPingList{}
+	case types.ObjectTypeV0045JobInfo:
+		list = &types.V0045JobInfoList{}
+	case types.ObjectTypeV0045Node:
+		list = &types.V0045NodeList{}
+	case types.ObjectTypeV0045PartitionInfo:
+		list = &types.V0045PartitionInfoList{}
+	case types.ObjectTypeV0045Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045ReservationInfo:
+		list = &types.V0045ReservationInfoList{}
+	case types.ObjectTypeV0045NodeResourceLayout:
+		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045Stats:
+		list = &types.V0045StatsList{}
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -278,21 +282,6 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	switch i.objectType {
 	/////////////////////////////////////////////////////////////////////////////////
 
-	case types.ObjectTypeV0041ControllerPing:
-		obj = &types.V0041ControllerPing{}
-	case types.ObjectTypeV0041JobInfo:
-		obj = &types.V0041JobInfo{}
-	case types.ObjectTypeV0041Node:
-		obj = &types.V0041Node{}
-	case types.ObjectTypeV0041PartitionInfo:
-		obj = &types.V0041PartitionInfo{}
-	case types.ObjectTypeV0041Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0041Stats:
-		obj = &types.V0041Stats{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
 	case types.ObjectTypeV0042ControllerPing:
 		obj = &types.V0042ControllerPing{}
 	case types.ObjectTypeV0042JobInfo:
@@ -337,6 +326,23 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		obj = &types.V0044ReservationInfo{}
 	case types.ObjectTypeV0044Stats:
 		obj = &types.V0044Stats{}
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case types.ObjectTypeV0045ControllerPing:
+		obj = &types.V0045ControllerPing{}
+	case types.ObjectTypeV0045JobInfo:
+		obj = &types.V0045JobInfo{}
+	case types.ObjectTypeV0045Node:
+		obj = &types.V0045Node{}
+	case types.ObjectTypeV0045PartitionInfo:
+		obj = &types.V0045PartitionInfo{}
+	case types.ObjectTypeV0045Reconfigure:
+		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0045ReservationInfo:
+		obj = &types.V0045ReservationInfo{}
+	case types.ObjectTypeV0045Stats:
+		obj = &types.V0045Stats{}
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -550,24 +556,6 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	switch o := obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
-	case *types.V0041ControllerPing:
-		cache := entry.object.(*types.V0041ControllerPing)
-		*o = *cache
-	case *types.V0041JobInfo:
-		cache := entry.object.(*types.V0041JobInfo)
-		*o = *cache
-	case *types.V0041Node:
-		cache := entry.object.(*types.V0041Node)
-		*o = *cache
-	case *types.V0041PartitionInfo:
-		cache := entry.object.(*types.V0041PartitionInfo)
-		*o = *cache
-	case *types.V0041Stats:
-		cache := entry.object.(*types.V0041Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
 	case *types.V0042ControllerPing:
 		cache := entry.object.(*types.V0042ControllerPing)
 		*o = *cache
@@ -621,6 +609,27 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.object.(*types.V0044Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045ControllerPing:
+		cache := entry.object.(*types.V0045ControllerPing)
+		*o = *cache
+	case *types.V0045JobInfo:
+		cache := entry.object.(*types.V0045JobInfo)
+		*o = *cache
+	case *types.V0045Node:
+		cache := entry.object.(*types.V0045Node)
+		*o = *cache
+	case *types.V0045PartitionInfo:
+		cache := entry.object.(*types.V0045PartitionInfo)
+		*o = *cache
+	case *types.V0045ReservationInfo:
+		cache := entry.object.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Stats:
+		cache := entry.object.(*types.V0045Stats)
 		*o = *cache
 
 	/////////////////////////////////////////////////////////////////////////////////

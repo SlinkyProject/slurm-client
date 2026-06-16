@@ -119,24 +119,6 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	switch o := obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
-	case *types.V0041ControllerPing:
-		cache := entry.(*types.V0041ControllerPing)
-		*o = *cache
-	case *types.V0041JobInfo:
-		cache := entry.(*types.V0041JobInfo)
-		*o = *cache
-	case *types.V0041Node:
-		cache := entry.(*types.V0041Node)
-		*o = *cache
-	case *types.V0041PartitionInfo:
-		cache := entry.(*types.V0041PartitionInfo)
-		*o = *cache
-	case *types.V0041Stats:
-		cache := entry.(*types.V0041Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
 	case *types.V0042ControllerPing:
 		cache := entry.(*types.V0042ControllerPing)
 		*o = *cache
@@ -193,6 +175,30 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.(*types.V0044Stats)
+		*o = *cache
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	case *types.V0045ControllerPing:
+		cache := entry.(*types.V0045ControllerPing)
+		*o = *cache
+	case *types.V0045JobInfo:
+		cache := entry.(*types.V0045JobInfo)
+		*o = *cache
+	case *types.V0045NodeResourceLayout:
+		cache := entry.(*types.V0045NodeResourceLayout)
+		*o = *cache
+	case *types.V0045Node:
+		cache := entry.(*types.V0045Node)
+		*o = *cache
+	case *types.V0045PartitionInfo:
+		cache := entry.(*types.V0045PartitionInfo)
+		*o = *cache
+	case *types.V0045ReservationInfo:
+		cache := entry.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Stats:
+		cache := entry.(*types.V0045Stats)
 		*o = *cache
 
 	/////////////////////////////////////////////////////////////////////////////////
