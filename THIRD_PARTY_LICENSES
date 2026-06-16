@@ -1,0 +1,232 @@
+# Third-Party Software Licenses
+
+This file contains license information for third-party software components used in slurm-client.
+
+For complete license texts, please refer to the source repositories or the LICENSE files in the respective dependency packages.
+
+## Dependencies
+
+### github.com/apapsch/go-jsonmerge/v2
+- Name: github.com/apapsch/go-jsonmerge/v2
+- Version: v2.0.0
+- License: MIT
+
+### github.com/davecgh/go-spew/spew
+- Name: github.com/davecgh/go-spew/spew
+- Version: v1.1.2-0.20180830191138-d8f796af33cc
+- License: ISC
+
+### github.com/fxamacker/cbor/v2
+- Name: github.com/fxamacker/cbor/v2
+- Version: v2.9.0
+- License: MIT
+
+### github.com/getkin/kin-openapi/openapi3
+- Name: github.com/getkin/kin-openapi/openapi3
+- Version: v0.133.0
+- License: MIT
+
+### github.com/go-logr/logr
+- Name: github.com/go-logr/logr
+- Version: v1.4.3
+- License: Apache-2.0
+
+### github.com/go-openapi/jsonpointer
+- Name: github.com/go-openapi/jsonpointer
+- Version: v0.22.5
+- License: Apache-2.0
+
+### github.com/go-openapi/swag/jsonname
+- Name: github.com/go-openapi/swag/jsonname
+- Version: v0.25.5
+- License: Apache-2.0
+
+### github.com/google/uuid
+- Name: github.com/google/uuid
+- Version: v1.6.0
+- License: BSD-3-Clause
+
+### github.com/josharian/intern
+- Name: github.com/josharian/intern
+- Version: v1.0.0
+- License: MIT
+
+### github.com/json-iterator/go
+- Name: github.com/json-iterator/go
+- Version: v1.1.12
+- License: MIT
+
+### github.com/mailru/easyjson/jlexer
+- Name: github.com/mailru/easyjson/jlexer
+- Version: v0.9.1
+- License: MIT
+
+### github.com/modern-go/concurrent
+- Name: github.com/modern-go/concurrent
+- Version: v0.0.0-20180306012644-bacd9c7ef1dd
+- License: Apache-2.0
+
+### github.com/modern-go/reflect2
+- Name: github.com/modern-go/reflect2
+- Version: v1.0.3-0.20250322232337-35a7c28c31ee
+- License: Apache-2.0
+
+### github.com/mohae/deepcopy
+- Name: github.com/mohae/deepcopy
+- Version: v0.0.0-20170929034955-c48cc78d4826
+- License: MIT
+
+### github.com/munnerz/goautoneg
+- Name: github.com/munnerz/goautoneg
+- Version: v0.0.0-20191010083416-a7dc8b61c822
+- License: BSD-3-Clause
+
+### github.com/oapi-codegen/runtime
+- Name: github.com/oapi-codegen/runtime
+- Version: v1.2.0
+- License: Apache-2.0
+
+### github.com/oasdiff/yaml
+- Name: github.com/oasdiff/yaml
+- Version: v0.0.0-20250309154309-f31be36b4037
+- License: BSD-3-Clause
+
+### github.com/oasdiff/yaml
+- Name: github.com/oasdiff/yaml
+- Version: v0.0.0-20250309154309-f31be36b4037
+- License: MIT
+
+### github.com/oasdiff/yaml3
+- Name: github.com/oasdiff/yaml3
+- Version: v0.0.0-20250309153720-d2182401db90
+- License: MIT
+
+### github.com/perimeterx/marshmallow
+- Name: github.com/perimeterx/marshmallow
+- Version: v1.1.5
+- License: MIT
+
+### github.com/pmezard/go-difflib/difflib
+- Name: github.com/pmezard/go-difflib/difflib
+- Version: v1.0.1-0.20181226105442-5d4384ee4fb2
+- License: BSD-3-Clause
+
+### github.com/woodsbury/decimal128
+- Name: github.com/woodsbury/decimal128
+- Version: v1.4.0
+- License: BSD-0-Clause
+
+### github.com/x448/float16
+- Name: github.com/x448/float16
+- Version: v0.8.4
+- License: MIT
+
+### go.yaml.in/yaml/v2
+- Name: go.yaml.in/yaml/v2
+- Version: v2.4.3
+- License: Apache-2.0
+
+### golang.org/x/net
+- Name: golang.org/x/net
+- Version: v0.55.0
+- License: BSD-3-Clause
+
+### golang.org/x/oauth2
+- Name: golang.org/x/oauth2
+- Version: v0.35.0
+- License: BSD-3-Clause
+
+### golang.org/x/sys/unix
+- Name: golang.org/x/sys/unix
+- Version: v0.45.0
+- License: BSD-3-Clause
+
+### golang.org/x/term
+- Name: golang.org/x/term
+- Version: v0.43.0
+- License: BSD-3-Clause
+
+### golang.org/x/text
+- Name: golang.org/x/text
+- Version: v0.37.0
+- License: BSD-3-Clause
+
+### golang.org/x/time/rate
+- Name: golang.org/x/time/rate
+- Version: v0.14.0
+- License: BSD-3-Clause
+
+### gopkg.in/inf.v0
+- Name: gopkg.in/inf.v0
+- Version: v0.9.1
+- License: BSD-3-Clause
+
+### k8s.io/apimachinery/pkg
+- Name: k8s.io/apimachinery/pkg
+- Version: v0.35.2
+- License: Apache-2.0
+
+### k8s.io/apimachinery/third_party/forked/golang/reflect
+- Name: k8s.io/apimachinery/third_party/forked/golang/reflect
+- Version: v0.35.2
+- License: BSD-3-Clause
+
+### k8s.io/client-go
+- Name: k8s.io/client-go
+- Version: v0.35.2
+- License: Apache-2.0
+
+### k8s.io/klog/v2
+- Name: k8s.io/klog/v2
+- Version: v2.140.0
+- License: Apache-2.0
+
+### k8s.io/kube-openapi/pkg/util
+- Name: k8s.io/kube-openapi/pkg/util
+- Version: v0.0.0-20260304202019-5b3e3fdb0acf
+- License: Apache-2.0
+
+### k8s.io/utils
+- Name: k8s.io/utils
+- Version: v0.0.0-20260210185600-b8788abfbbc2
+- License: Apache-2.0
+
+### k8s.io/utils/internal/third_party/forked/golang/net
+- Name: k8s.io/utils/internal/third_party/forked/golang/net
+- Version: v0.0.0-20260210185600-b8788abfbbc2
+- License: BSD-3-Clause
+
+### sigs.k8s.io/json
+- Name: sigs.k8s.io/json
+- Version: v0.0.0-20250730193827-2d320260d730
+- License: Apache-2.0
+
+### sigs.k8s.io/json
+- Name: sigs.k8s.io/json
+- Version: v0.0.0-20250730193827-2d320260d730
+- License: BSD-3-Clause
+
+### sigs.k8s.io/randfill
+- Name: sigs.k8s.io/randfill
+- Version: v1.0.0
+- License: Apache-2.0
+
+### sigs.k8s.io/structured-merge-diff/v6/value
+- Name: sigs.k8s.io/structured-merge-diff/v6/value
+- Version: v6.3.2
+- License: Apache-2.0
+
+### sigs.k8s.io/yaml
+- Name: sigs.k8s.io/yaml
+- Version: v1.6.0
+- License: Apache-2.0
+
+### sigs.k8s.io/yaml
+- Name: sigs.k8s.io/yaml
+- Version: v1.6.0
+- License: BSD-3-Clause
+
+### sigs.k8s.io/yaml
+- Name: sigs.k8s.io/yaml
+- Version: v1.6.0
+- License: MIT
