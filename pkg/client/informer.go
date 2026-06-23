@@ -159,6 +159,12 @@ func (i *informerCache) doListInformer() {
 		list = &types.V0042PartitionInfoList{}
 	case types.ObjectTypeV0042Reconfigure:
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0042Account:
+		list = &types.V0042AccountList{}
+	case types.ObjectTypeV0042User:
+		list = &types.V0042UserList{}
+	case types.ObjectTypeV0042Assoc:
+		list = &types.V0042AssocList{}
 	case types.ObjectTypeV0042Stats:
 		list = &types.V0042StatsList{}
 
@@ -174,6 +180,12 @@ func (i *informerCache) doListInformer() {
 		list = &types.V0043PartitionInfoList{}
 	case types.ObjectTypeV0043Reconfigure:
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0043Account:
+		list = &types.V0043AccountList{}
+	case types.ObjectTypeV0043User:
+		list = &types.V0043UserList{}
+	case types.ObjectTypeV0043Assoc:
+		list = &types.V0043AssocList{}
 	case types.ObjectTypeV0043Stats:
 		list = &types.V0043StatsList{}
 
@@ -191,6 +203,12 @@ func (i *informerCache) doListInformer() {
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0044ReservationInfo:
 		list = &types.V0044ReservationInfoList{}
+	case types.ObjectTypeV0044Account:
+		list = &types.V0044AccountList{}
+	case types.ObjectTypeV0044User:
+		list = &types.V0044UserList{}
+	case types.ObjectTypeV0044Assoc:
+		list = &types.V0044AssocList{}
 	case types.ObjectTypeV0044NodeResourceLayout:
 		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0044Stats:
@@ -210,6 +228,12 @@ func (i *informerCache) doListInformer() {
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0045ReservationInfo:
 		list = &types.V0045ReservationInfoList{}
+	case types.ObjectTypeV0045Account:
+		list = &types.V0045AccountList{}
+	case types.ObjectTypeV0045User:
+		list = &types.V0045UserList{}
+	case types.ObjectTypeV0045Assoc:
+		list = &types.V0045AssocList{}
 	case types.ObjectTypeV0045NodeResourceLayout:
 		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0045Stats:
@@ -292,6 +316,12 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		obj = &types.V0042PartitionInfo{}
 	case types.ObjectTypeV0042Reconfigure:
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0042Account:
+		obj = &types.V0042Account{}
+	case types.ObjectTypeV0042User:
+		obj = &types.V0042User{}
+	case types.ObjectTypeV0042Assoc:
+		obj = &types.V0042Assoc{}
 	case types.ObjectTypeV0042Stats:
 		obj = &types.V0042Stats{}
 
@@ -307,6 +337,12 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		obj = &types.V0043PartitionInfo{}
 	case types.ObjectTypeV0043Reconfigure:
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
+	case types.ObjectTypeV0043Account:
+		obj = &types.V0043Account{}
+	case types.ObjectTypeV0043User:
+		obj = &types.V0043User{}
+	case types.ObjectTypeV0043Assoc:
+		obj = &types.V0043Assoc{}
 	case types.ObjectTypeV0043Stats:
 		obj = &types.V0043Stats{}
 
@@ -324,6 +360,12 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0044ReservationInfo:
 		obj = &types.V0044ReservationInfo{}
+	case types.ObjectTypeV0044Account:
+		obj = &types.V0044Account{}
+	case types.ObjectTypeV0044User:
+		obj = &types.V0044User{}
+	case types.ObjectTypeV0044Assoc:
+		obj = &types.V0044Assoc{}
 	case types.ObjectTypeV0044Stats:
 		obj = &types.V0044Stats{}
 
@@ -341,6 +383,12 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 		panic("Reconfigure is not supported, this scenario should have been avoided.")
 	case types.ObjectTypeV0045ReservationInfo:
 		obj = &types.V0045ReservationInfo{}
+	case types.ObjectTypeV0045Account:
+		obj = &types.V0045Account{}
+	case types.ObjectTypeV0045User:
+		obj = &types.V0045User{}
+	case types.ObjectTypeV0045Assoc:
+		obj = &types.V0045Assoc{}
 	case types.ObjectTypeV0045Stats:
 		obj = &types.V0045Stats{}
 
@@ -568,6 +616,15 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	case *types.V0042PartitionInfo:
 		cache := entry.object.(*types.V0042PartitionInfo)
 		*o = *cache
+	case *types.V0042Account:
+		cache := entry.object.(*types.V0042Account)
+		*o = *cache
+	case *types.V0042User:
+		cache := entry.object.(*types.V0042User)
+		*o = *cache
+	case *types.V0042Assoc:
+		cache := entry.object.(*types.V0042Assoc)
+		*o = *cache
 	case *types.V0042Stats:
 		cache := entry.object.(*types.V0042Stats)
 		*o = *cache
@@ -585,6 +642,15 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0043PartitionInfo:
 		cache := entry.object.(*types.V0043PartitionInfo)
+		*o = *cache
+	case *types.V0043Account:
+		cache := entry.object.(*types.V0043Account)
+		*o = *cache
+	case *types.V0043User:
+		cache := entry.object.(*types.V0043User)
+		*o = *cache
+	case *types.V0043Assoc:
+		cache := entry.object.(*types.V0043Assoc)
 		*o = *cache
 	case *types.V0043Stats:
 		cache := entry.object.(*types.V0043Stats)
@@ -607,6 +673,15 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	case *types.V0044ReservationInfo:
 		cache := entry.object.(*types.V0044ReservationInfo)
 		*o = *cache
+	case *types.V0044Account:
+		cache := entry.object.(*types.V0044Account)
+		*o = *cache
+	case *types.V0044User:
+		cache := entry.object.(*types.V0044User)
+		*o = *cache
+	case *types.V0044Assoc:
+		cache := entry.object.(*types.V0044Assoc)
+		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.object.(*types.V0044Stats)
 		*o = *cache
@@ -627,6 +702,15 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		*o = *cache
 	case *types.V0045ReservationInfo:
 		cache := entry.object.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Account:
+		cache := entry.object.(*types.V0045Account)
+		*o = *cache
+	case *types.V0045User:
+		cache := entry.object.(*types.V0045User)
+		*o = *cache
+	case *types.V0045Assoc:
+		cache := entry.object.(*types.V0045Assoc)
 		*o = *cache
 	case *types.V0045Stats:
 		cache := entry.object.(*types.V0045Stats)

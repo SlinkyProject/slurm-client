@@ -163,12 +163,40 @@ func (c *client) Create(
 		jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
 		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
 
+	case *types.V0042Account:
+		var name string
+		name, err = c.v0042Client.CreateAccount(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0042User:
+		var name string
+		name, err = c.v0042Client.CreateUser(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0042Assoc:
+		err = c.v0042Client.CreateAssoc(ctx, req)
+		key = obj.GetKey()
+
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0043JobInfo:
 		var jobId *int32
 		jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
 		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
+
+	case *types.V0043Account:
+		var name string
+		name, err = c.v0043Client.CreateAccount(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0043User:
+		var name string
+		name, err = c.v0043Client.CreateUser(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0043Assoc:
+		err = c.v0043Client.CreateAssoc(ctx, req)
+		key = obj.GetKey()
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -187,6 +215,20 @@ func (c *client) Create(
 		nodeName, err = c.v0044Client.CreateNewNode(ctx, req)
 		key = object.ObjectKey(ptr.Deref(nodeName, ""))
 
+	case *types.V0044Account:
+		var name string
+		name, err = c.v0044Client.CreateAccount(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0044User:
+		var name string
+		name, err = c.v0044Client.CreateUser(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0044Assoc:
+		err = c.v0044Client.CreateAssoc(ctx, req)
+		key = obj.GetKey()
+
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0045JobInfo:
@@ -203,6 +245,20 @@ func (c *client) Create(
 		var nodeName *string
 		nodeName, err = c.v0045Client.CreateNewNode(ctx, req)
 		key = object.ObjectKey(ptr.Deref(nodeName, ""))
+
+	case *types.V0045Account:
+		var name string
+		name, err = c.v0045Client.CreateAccount(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0045User:
+		var name string
+		name, err = c.v0045Client.CreateUser(ctx, req)
+		key = object.ObjectKey(name)
+
+	case *types.V0045Assoc:
+		err = c.v0045Client.CreateAssoc(ctx, req)
+		key = obj.GetKey()
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -229,13 +285,19 @@ func (c *client) Delete(
 
 	var err error
 	key := string(obj.GetKey())
-	switch obj.(type) {
+	switch o := obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
 
 	case *types.V0042JobInfo:
 		err = c.v0042Client.DeleteJobInfo(ctx, key)
 	case *types.V0042Node:
 		err = c.v0042Client.DeleteNode(ctx, key)
+	case *types.V0042Account:
+		err = c.v0042Client.DeleteAccount(ctx, key)
+	case *types.V0042User:
+		err = c.v0042Client.DeleteUser(ctx, key)
+	case *types.V0042Assoc:
+		err = c.v0042Client.DeleteAssoc(ctx, o.V0042Assoc)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -243,6 +305,12 @@ func (c *client) Delete(
 		err = c.v0043Client.DeleteJobInfo(ctx, key)
 	case *types.V0043Node:
 		err = c.v0043Client.DeleteNode(ctx, key)
+	case *types.V0043Account:
+		err = c.v0043Client.DeleteAccount(ctx, key)
+	case *types.V0043User:
+		err = c.v0043Client.DeleteUser(ctx, key)
+	case *types.V0043Assoc:
+		err = c.v0043Client.DeleteAssoc(ctx, o.V0043Assoc)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -252,6 +320,12 @@ func (c *client) Delete(
 		err = c.v0044Client.DeleteNode(ctx, key)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.DeleteReservationInfo(ctx, key)
+	case *types.V0044Account:
+		err = c.v0044Client.DeleteAccount(ctx, key)
+	case *types.V0044User:
+		err = c.v0044Client.DeleteUser(ctx, key)
+	case *types.V0044Assoc:
+		err = c.v0044Client.DeleteAssoc(ctx, o.V0044Assoc)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -261,6 +335,12 @@ func (c *client) Delete(
 		err = c.v0045Client.DeleteNode(ctx, key)
 	case *types.V0045ReservationInfo:
 		err = c.v0045Client.DeleteReservationInfo(ctx, key)
+	case *types.V0045Account:
+		err = c.v0045Client.DeleteAccount(ctx, key)
+	case *types.V0045User:
+		err = c.v0045Client.DeleteUser(ctx, key)
+	case *types.V0045Assoc:
+		err = c.v0045Client.DeleteAssoc(ctx, o.V0045Assoc)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -305,6 +385,12 @@ func (c *client) Update(
 		err = c.v0042Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0042Node:
 		err = c.v0042Client.UpdateNode(ctx, key, req)
+	case *types.V0042Account:
+		err = c.v0042Client.UpdateAccount(ctx, key, req)
+	case *types.V0042User:
+		err = c.v0042Client.UpdateUser(ctx, key, req)
+	case *types.V0042Assoc:
+		err = c.v0042Client.CreateAssoc(ctx, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -312,6 +398,12 @@ func (c *client) Update(
 		err = c.v0043Client.UpdateJobInfo(ctx, key, req)
 	case *types.V0043Node:
 		err = c.v0043Client.UpdateNode(ctx, key, req)
+	case *types.V0043Account:
+		err = c.v0043Client.UpdateAccount(ctx, key, req)
+	case *types.V0043User:
+		err = c.v0043Client.UpdateUser(ctx, key, req)
+	case *types.V0043Assoc:
+		err = c.v0043Client.CreateAssoc(ctx, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -321,6 +413,12 @@ func (c *client) Update(
 		err = c.v0044Client.UpdateNode(ctx, key, req)
 	case *types.V0044ReservationInfo:
 		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
+	case *types.V0044Account:
+		err = c.v0044Client.UpdateAccount(ctx, key, req)
+	case *types.V0044User:
+		err = c.v0044Client.UpdateUser(ctx, key, req)
+	case *types.V0044Assoc:
+		err = c.v0044Client.CreateAssoc(ctx, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -330,6 +428,12 @@ func (c *client) Update(
 		err = c.v0045Client.UpdateNode(ctx, key, req)
 	case *types.V0045ReservationInfo:
 		err = c.v0045Client.UpdateReservationInfo(ctx, key, req)
+	case *types.V0045Account:
+		err = c.v0045Client.UpdateAccount(ctx, key, req)
+	case *types.V0045User:
+		err = c.v0045Client.UpdateUser(ctx, key, req)
+	case *types.V0045Assoc:
+		err = c.v0045Client.CreateAssoc(ctx, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -397,6 +501,34 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0042Account:
+		out, err := c.v0042Client.GetAccount(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042User:
+		out, err := c.v0042Client.GetUser(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0042Assoc:
+		list, err := c.v0042Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		found := false
+		for i := range list.Items {
+			if list.Items[i].GetKey() == key {
+				*o = list.Items[i]
+				found = true
+				break
+			}
+		}
+		if !found {
+			return errors.New(http.StatusText(http.StatusNotFound))
+		}
 	case *types.V0042Stats:
 		out, err := c.v0042Client.GetStats(ctx)
 		if err != nil {
@@ -436,6 +568,34 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0043Account:
+		out, err := c.v0043Client.GetAccount(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0043User:
+		out, err := c.v0043Client.GetUser(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0043Assoc:
+		list, err := c.v0043Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		found := false
+		for i := range list.Items {
+			if list.Items[i].GetKey() == key {
+				*o = list.Items[i]
+				found = true
+				break
+			}
+		}
+		if !found {
+			return errors.New(http.StatusText(http.StatusNotFound))
+		}
 	case *types.V0043Stats:
 		out, err := c.v0043Client.GetStats(ctx)
 		if err != nil {
@@ -487,6 +647,34 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0044Account:
+		out, err := c.v0044Client.GetAccount(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0044User:
+		out, err := c.v0044Client.GetUser(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0044Assoc:
+		list, err := c.v0044Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		found := false
+		for i := range list.Items {
+			if list.Items[i].GetKey() == key {
+				*o = list.Items[i]
+				found = true
+				break
+			}
+		}
+		if !found {
+			return errors.New(http.StatusText(http.StatusNotFound))
+		}
 	case *types.V0044Stats:
 		out, err := c.v0044Client.GetStats(ctx)
 		if err != nil {
@@ -538,6 +726,34 @@ func (c *client) Get(
 			return err
 		}
 		*o = *out
+	case *types.V0045Account:
+		out, err := c.v0045Client.GetAccount(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045User:
+		out, err := c.v0045Client.GetUser(ctx, string(key))
+		if err != nil {
+			return err
+		}
+		*o = *out
+	case *types.V0045Assoc:
+		list, err := c.v0045Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		found := false
+		for i := range list.Items {
+			if list.Items[i].GetKey() == key {
+				*o = list.Items[i]
+				found = true
+				break
+			}
+		}
+		if !found {
+			return errors.New(http.StatusText(http.StatusNotFound))
+		}
 	case *types.V0045Stats:
 		out, err := c.v0045Client.GetStats(ctx)
 		if err != nil {
@@ -607,6 +823,24 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+	case *types.V0042AccountList:
+		out, err := c.v0042Client.ListAccount(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042UserList:
+		out, err := c.v0042Client.ListUser(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0042AssocList:
+		out, err := c.v0042Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
 	case *types.V0042StatsList:
 		out, err := c.v0042Client.ListStats(ctx)
 		if err != nil {
@@ -642,6 +876,24 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0043ReconfigureList:
 		out, err := c.v0043Client.ListReconfigure(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0043AccountList:
+		out, err := c.v0043Client.ListAccount(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0043UserList:
+		out, err := c.v0043Client.ListUser(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0043AssocList:
+		out, err := c.v0043Client.ListAssoc(ctx)
 		if err != nil {
 			return err
 		}
@@ -691,6 +943,24 @@ func (c *client) List(
 			return err
 		}
 		*objList = *out
+	case *types.V0044AccountList:
+		out, err := c.v0044Client.ListAccount(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0044UserList:
+		out, err := c.v0044Client.ListUser(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0044AssocList:
+		out, err := c.v0044Client.ListAssoc(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
 	case *types.V0044StatsList:
 		out, err := c.v0044Client.ListStats(ctx)
 		if err != nil {
@@ -732,6 +1002,24 @@ func (c *client) List(
 		*objList = *out
 	case *types.V0045ReservationInfoList:
 		out, err := c.v0045Client.ListReservationInfo(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045AccountList:
+		out, err := c.v0045Client.ListAccount(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045UserList:
+		out, err := c.v0045Client.ListUser(ctx)
+		if err != nil {
+			return err
+		}
+		*objList = *out
+	case *types.V0045AssocList:
+		out, err := c.v0045Client.ListAssoc(ctx)
 		if err != nil {
 			return err
 		}
