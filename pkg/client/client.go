@@ -174,8 +174,9 @@ func (c *client) Create(
 		key = object.ObjectKey(name)
 
 	case *types.V0042Assoc:
-		err = c.v0042Client.CreateAssoc(ctx, req)
-		key = obj.GetKey()
+		var assocKey string
+		assocKey, err = c.v0042Client.CreateAssoc(ctx, req)
+		key = object.ObjectKey(assocKey)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -195,8 +196,9 @@ func (c *client) Create(
 		key = object.ObjectKey(name)
 
 	case *types.V0043Assoc:
-		err = c.v0043Client.CreateAssoc(ctx, req)
-		key = obj.GetKey()
+		var assocKey string
+		assocKey, err = c.v0043Client.CreateAssoc(ctx, req)
+		key = object.ObjectKey(assocKey)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -226,8 +228,9 @@ func (c *client) Create(
 		key = object.ObjectKey(name)
 
 	case *types.V0044Assoc:
-		err = c.v0044Client.CreateAssoc(ctx, req)
-		key = obj.GetKey()
+		var assocKey string
+		assocKey, err = c.v0044Client.CreateAssoc(ctx, req)
+		key = object.ObjectKey(assocKey)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -257,8 +260,9 @@ func (c *client) Create(
 		key = object.ObjectKey(name)
 
 	case *types.V0045Assoc:
-		err = c.v0045Client.CreateAssoc(ctx, req)
-		key = obj.GetKey()
+		var assocKey string
+		assocKey, err = c.v0045Client.CreateAssoc(ctx, req)
+		key = object.ObjectKey(assocKey)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -390,7 +394,7 @@ func (c *client) Update(
 	case *types.V0042User:
 		err = c.v0042Client.UpdateUser(ctx, key, req)
 	case *types.V0042Assoc:
-		err = c.v0042Client.CreateAssoc(ctx, req)
+		err = c.v0042Client.UpdateAssoc(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -403,7 +407,7 @@ func (c *client) Update(
 	case *types.V0043User:
 		err = c.v0043Client.UpdateUser(ctx, key, req)
 	case *types.V0043Assoc:
-		err = c.v0043Client.CreateAssoc(ctx, req)
+		err = c.v0043Client.UpdateAssoc(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -418,7 +422,7 @@ func (c *client) Update(
 	case *types.V0044User:
 		err = c.v0044Client.UpdateUser(ctx, key, req)
 	case *types.V0044Assoc:
-		err = c.v0044Client.CreateAssoc(ctx, req)
+		err = c.v0044Client.UpdateAssoc(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -433,7 +437,7 @@ func (c *client) Update(
 	case *types.V0045User:
 		err = c.v0045Client.UpdateUser(ctx, key, req)
 	case *types.V0045Assoc:
-		err = c.v0045Client.CreateAssoc(ctx, req)
+		err = c.v0045Client.UpdateAssoc(ctx, key, req)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -514,21 +518,11 @@ func (c *client) Get(
 		}
 		*o = *out
 	case *types.V0042Assoc:
-		list, err := c.v0042Client.ListAssoc(ctx)
+		out, err := c.v0042Client.GetAssoc(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		found := false
-		for i := range list.Items {
-			if list.Items[i].GetKey() == key {
-				*o = list.Items[i]
-				found = true
-				break
-			}
-		}
-		if !found {
-			return errors.New(http.StatusText(http.StatusNotFound))
-		}
+		*o = *out
 	case *types.V0042Stats:
 		out, err := c.v0042Client.GetStats(ctx)
 		if err != nil {
@@ -581,21 +575,11 @@ func (c *client) Get(
 		}
 		*o = *out
 	case *types.V0043Assoc:
-		list, err := c.v0043Client.ListAssoc(ctx)
+		out, err := c.v0043Client.GetAssoc(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		found := false
-		for i := range list.Items {
-			if list.Items[i].GetKey() == key {
-				*o = list.Items[i]
-				found = true
-				break
-			}
-		}
-		if !found {
-			return errors.New(http.StatusText(http.StatusNotFound))
-		}
+		*o = *out
 	case *types.V0043Stats:
 		out, err := c.v0043Client.GetStats(ctx)
 		if err != nil {
@@ -660,21 +644,11 @@ func (c *client) Get(
 		}
 		*o = *out
 	case *types.V0044Assoc:
-		list, err := c.v0044Client.ListAssoc(ctx)
+		out, err := c.v0044Client.GetAssoc(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		found := false
-		for i := range list.Items {
-			if list.Items[i].GetKey() == key {
-				*o = list.Items[i]
-				found = true
-				break
-			}
-		}
-		if !found {
-			return errors.New(http.StatusText(http.StatusNotFound))
-		}
+		*o = *out
 	case *types.V0044Stats:
 		out, err := c.v0044Client.GetStats(ctx)
 		if err != nil {
@@ -739,21 +713,11 @@ func (c *client) Get(
 		}
 		*o = *out
 	case *types.V0045Assoc:
-		list, err := c.v0045Client.ListAssoc(ctx)
+		out, err := c.v0045Client.GetAssoc(ctx, string(key))
 		if err != nil {
 			return err
 		}
-		found := false
-		for i := range list.Items {
-			if list.Items[i].GetKey() == key {
-				*o = list.Items[i]
-				found = true
-				break
-			}
-		}
-		if !found {
-			return errors.New(http.StatusText(http.StatusNotFound))
-		}
+		*o = *out
 	case *types.V0045Stats:
 		out, err := c.v0045Client.GetStats(ctx)
 		if err != nil {
