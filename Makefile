@@ -83,7 +83,7 @@ GOVULNCHECK ?= $(LOCALBIN)/govulncheck-$(GOVULNCHECK_VERSION)
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.11.1
-GOVULNCHECK_VERSION ?= latest
+GOVULNCHECK_VERSION ?= v1.3.0
 # Written by `make govulncheck`: CSV (see file header comments). CI uploads as an artifact.
 GOVULNCHECK_REPORT ?= govulncheck-vulns.csv
 
