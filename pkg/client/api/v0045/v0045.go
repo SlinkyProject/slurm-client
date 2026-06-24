@@ -24,6 +24,8 @@ const (
 
 type ClientInterface interface {
 	api.ClientWithResponsesInterface
+	AccountInterface
+	AssocInterface
 	ControllerPingInfoInterface
 	JobInfoInterface
 	NodeInterface
@@ -32,6 +34,7 @@ type ClientInterface interface {
 	ReconfigureInterface
 	ReservationInterface
 	StatsInterface
+	UserInterface
 }
 
 type SlurmClient struct {
