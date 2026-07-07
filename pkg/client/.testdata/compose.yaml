@@ -107,26 +107,6 @@ services:
         condition: service_healthy
       accounting:
         condition: service_healthy
-  authcred:
-    image: ghcr.io/slinkyproject/sackd:25.11.0-ubuntu24.04
-    container_name: sackd
-    hostname: sackd
-    entrypoint: /opt/entrypoint/sackd.sh
-    restart: unless-stopped
-    healthcheck:
-      test: [CMD-SHELL, bash, scontrol, ping]
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    volumes:
-      - ./compose/etc/:/opt/etc/slurm/:ro
-      - ./compose/entrypoint/:/opt/entrypoint/:ro
-    networks:
-      - default
-    depends_on:
-      control-plane:
-        condition: service_healthy
 networks:
   default:
     driver: bridge
