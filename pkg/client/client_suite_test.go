@@ -35,7 +35,7 @@ var _ = BeforeSuite(func() {
 	ctx, cancel = context.WithCancel(context.TODO())
 
 	composeFilePaths := []string{"./.testdata/compose.yaml"}
-	compose, err = tcc.NewDockerComposeWith(tcc.WithStackFiles(composeFilePaths...), tcc.StackIdentifier("testdata"))
+	compose, err = tcc.NewDockerComposeWith(tcc.WithStackFiles(composeFilePaths...))
 	Expect(err).NotTo(HaveOccurred())
 
 	containerCleanup()
