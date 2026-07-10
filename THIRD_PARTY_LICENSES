@@ -138,22 +138,22 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### golang.org/x/sys/unix
 - Name: golang.org/x/sys/unix
-- Version: v0.45.0
+- Version: v0.46.0
 - License: BSD-3-Clause
 
 ### golang.org/x/term
 - Name: golang.org/x/term
-- Version: v0.43.0
+- Version: v0.44.0
 - License: BSD-3-Clause
 
 ### golang.org/x/text
 - Name: golang.org/x/text
-- Version: v0.37.0
+- Version: v0.38.0
 - License: BSD-3-Clause
 
 ### golang.org/x/time/rate
 - Name: golang.org/x/time/rate
-- Version: v0.14.0
+- Version: v0.15.0
 - License: BSD-3-Clause
 
 ### gopkg.in/inf.v0
@@ -163,17 +163,17 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### k8s.io/apimachinery/pkg
 - Name: k8s.io/apimachinery/pkg
-- Version: v0.35.2
+- Version: v0.36.0
 - License: Apache-2.0
 
 ### k8s.io/apimachinery/third_party/forked/golang/reflect
 - Name: k8s.io/apimachinery/third_party/forked/golang/reflect
-- Version: v0.35.2
+- Version: v0.36.0
 - License: BSD-3-Clause
 
 ### k8s.io/client-go
 - Name: k8s.io/client-go
-- Version: v0.35.2
+- Version: v0.36.0
 - License: Apache-2.0
 
 ### k8s.io/klog/v2
@@ -183,17 +183,17 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### k8s.io/kube-openapi/pkg/util
 - Name: k8s.io/kube-openapi/pkg/util
-- Version: v0.0.0-20260304202019-5b3e3fdb0acf
+- Version: v0.0.0-20260319004828-5883c5ee87b9
 - License: Apache-2.0
 
 ### k8s.io/utils
 - Name: k8s.io/utils
-- Version: v0.0.0-20260210185600-b8788abfbbc2
+- Version: v0.0.0-20260319190234-28399d86e0b5
 - License: Apache-2.0
 
 ### k8s.io/utils/internal/third_party/forked/golang/net
 - Name: k8s.io/utils/internal/third_party/forked/golang/net
-- Version: v0.0.0-20260210185600-b8788abfbbc2
+- Version: v0.0.0-20260319190234-28399d86e0b5
 - License: BSD-3-Clause
 
 ### sigs.k8s.io/json
