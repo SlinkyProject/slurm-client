@@ -131,6 +131,15 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0042PartitionInfo:
 		cache := entry.(*types.V0042PartitionInfo)
 		*o = *cache
+	case *types.V0042Account:
+		cache := entry.(*types.V0042Account)
+		*o = *cache
+	case *types.V0042User:
+		cache := entry.(*types.V0042User)
+		*o = *cache
+	case *types.V0042Assoc:
+		cache := entry.(*types.V0042Assoc)
+		*o = *cache
 	case *types.V0042Stats:
 		cache := entry.(*types.V0042Stats)
 		*o = *cache
@@ -148,6 +157,15 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		*o = *cache
 	case *types.V0043PartitionInfo:
 		cache := entry.(*types.V0043PartitionInfo)
+		*o = *cache
+	case *types.V0043Account:
+		cache := entry.(*types.V0043Account)
+		*o = *cache
+	case *types.V0043User:
+		cache := entry.(*types.V0043User)
+		*o = *cache
+	case *types.V0043Assoc:
+		cache := entry.(*types.V0043Assoc)
 		*o = *cache
 	case *types.V0043Stats:
 		cache := entry.(*types.V0043Stats)
@@ -173,6 +191,15 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	case *types.V0044ReservationInfo:
 		cache := entry.(*types.V0044ReservationInfo)
 		*o = *cache
+	case *types.V0044Account:
+		cache := entry.(*types.V0044Account)
+		*o = *cache
+	case *types.V0044User:
+		cache := entry.(*types.V0044User)
+		*o = *cache
+	case *types.V0044Assoc:
+		cache := entry.(*types.V0044Assoc)
+		*o = *cache
 	case *types.V0044Stats:
 		cache := entry.(*types.V0044Stats)
 		*o = *cache
@@ -196,6 +223,15 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 		*o = *cache
 	case *types.V0045ReservationInfo:
 		cache := entry.(*types.V0045ReservationInfo)
+		*o = *cache
+	case *types.V0045Account:
+		cache := entry.(*types.V0045Account)
+		*o = *cache
+	case *types.V0045User:
+		cache := entry.(*types.V0045User)
+		*o = *cache
+	case *types.V0045Assoc:
+		cache := entry.(*types.V0045Assoc)
 		*o = *cache
 	case *types.V0045Stats:
 		cache := entry.(*types.V0045Stats)

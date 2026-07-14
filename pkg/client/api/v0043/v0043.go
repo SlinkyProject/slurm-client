@@ -24,12 +24,15 @@ const (
 
 type ClientInterface interface {
 	api.ClientWithResponsesInterface
+	AccountInterface
+	AssocInterface
 	ControllerPingInfoInterface
 	JobInfoInterface
 	NodeInterface
 	PartitionInterface
 	ReconfigureInterface
 	StatsInterface
+	UserInterface
 }
 
 type SlurmClient struct {
