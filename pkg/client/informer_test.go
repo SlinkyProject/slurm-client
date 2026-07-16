@@ -38,18 +38,22 @@ func Test_informerCache_processObjects(t *testing.T) {
 	now := time.Now()
 	type testCase struct {
 		name          string
+		object        *types.V0044Node
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		list          object.ObjectList
+		syncErr       bool
 		wantCacheLen  int
 		wantAddCnt    int64
 		wantModifyCnt int64
 		wantDeleteCnt int64
+		wantSyncErr   error
 	}
 	tests := []testCase{
 		func() testCase {
 			return testCase{
 				name:       "add",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache:      make(map[object.ObjectKey]*cacheEntry),
 				list: &types.V0044NodeList{
@@ -64,6 +68,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "modify",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -88,6 +93,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "no modify",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -107,6 +113,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "delete",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -116,13 +123,16 @@ func Test_informerCache_processObjects(t *testing.T) {
 					},
 				},
 				list:          &types.V0044NodeList{},
+				syncErr:       true,
 				wantCacheLen:  0,
 				wantDeleteCnt: 1,
+				wantSyncErr:   nil,
 			}
 		}(),
 		func() testCase {
 			return testCase{
 				name:       "delete dirty, no object",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -132,7 +142,9 @@ func Test_informerCache_processObjects(t *testing.T) {
 				list: &types.V0044NodeList{
 					Items: []types.V0044Node{},
 				},
+				syncErr:      true,
 				wantCacheLen: 0,
+				wantSyncErr:  nil,
 			}
 		}(),
 	}
@@ -154,6 +166,10 @@ func Test_informerCache_processObjects(t *testing.T) {
 					atomic.AddInt64(&deleteCnt, 1)
 				},
 			})
+			if tt.syncErr {
+				i.syncErrorGet[tt.object.GetKey()] = errors.New("error")
+			}
+
 			go i.runHandler(stopCh)
 			i.processObjects(tt.list)
 			for {
@@ -163,6 +179,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 					break
 				}
 			}
+			syncErr := i.syncErrorGet[tt.object.GetKey()]
 			if len(i.cache) != len(tt.list.GetItems()) {
 				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
 			}
@@ -174,6 +191,9 @@ func Test_informerCache_processObjects(t *testing.T) {
 			}
 			if deleteCnt != tt.wantDeleteCnt {
 				t.Errorf("processObjects() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			}
+			if !errors.Is(syncErr, tt.wantSyncErr) {
+				t.Errorf("processObjects() got syncErr = %v, want %v", syncErr, tt.wantSyncErr)
 			}
 			for _, entry := range i.cache {
 				if now.After(entry.lastUpdate) {
@@ -190,20 +210,25 @@ func Test_informerCache_processObject(t *testing.T) {
 			Name: ptr.To("node-0"),
 		},
 	}
+	oneHourAgo := time.Now().Add(time.Duration(-1) * time.Hour)
 	type testCase struct {
 		name          string
+		object        *types.V0044Node
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		obj           object.Object
+		syncErr       bool
 		wantCacheLen  int
 		wantAddCnt    int64
 		wantModifyCnt int64
 		wantDeleteCnt int64
+		wantSyncErr   error
 	}
 	tests := []testCase{
 		func() testCase {
 			return testCase{
 				name:         "add",
+				object:       node0,
 				objectType:   node0.GetType(),
 				cache:        make(map[object.ObjectKey]*cacheEntry),
 				obj:          node0.DeepCopy(),
@@ -214,6 +239,7 @@ func Test_informerCache_processObject(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "no modify",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -229,6 +255,7 @@ func Test_informerCache_processObject(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "modify",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -249,6 +276,7 @@ func Test_informerCache_processObject(t *testing.T) {
 		func() testCase {
 			return testCase{
 				name:       "add, dirty, no object",
+				object:     node0,
 				objectType: node0.GetType(),
 				cache: map[object.ObjectKey]*cacheEntry{
 					node0.GetKey(): {
@@ -258,6 +286,41 @@ func Test_informerCache_processObject(t *testing.T) {
 				obj:          node0.DeepCopy(),
 				wantCacheLen: 1,
 				wantAddCnt:   1,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "clear syncErr when object returns successfully with object",
+				object:     node0,
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						lastUpdate: oneHourAgo,
+						object:     node0,
+						dirty:      true,
+					},
+				},
+				obj:          node0.DeepCopy(),
+				syncErr:      true,
+				wantCacheLen: 1,
+				wantSyncErr:  nil,
+			}
+		}(),
+		func() testCase {
+			return testCase{
+				name:       "clear syncErr when object returns successfully without object",
+				object:     node0,
+				objectType: node0.GetType(),
+				cache: map[object.ObjectKey]*cacheEntry{
+					node0.GetKey(): {
+						dirty: true,
+					},
+				},
+				obj:          node0.DeepCopy(),
+				syncErr:      true,
+				wantCacheLen: 1,
+				wantAddCnt:   1,
+				wantSyncErr:  nil,
 			}
 		}(),
 	}
@@ -279,6 +342,10 @@ func Test_informerCache_processObject(t *testing.T) {
 					atomic.AddInt64(&deleteCnt, 1)
 				},
 			})
+			if tt.syncErr {
+				i.syncErrorGet[tt.object.GetKey()] = errors.New("error")
+			}
+
 			go i.runHandler(stopCh)
 			i.processObject(tt.obj)
 			for {
@@ -288,6 +355,7 @@ func Test_informerCache_processObject(t *testing.T) {
 					break
 				}
 			}
+			syncErr := i.syncErrorGet[tt.object.GetKey()]
 			if len(i.cache) != tt.wantCacheLen {
 				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
 			}
@@ -299,6 +367,9 @@ func Test_informerCache_processObject(t *testing.T) {
 			}
 			if deleteCnt != tt.wantDeleteCnt {
 				t.Errorf("processObject() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			}
+			if !errors.Is(syncErr, tt.wantSyncErr) {
+				t.Errorf("processObject() got syncErr = %v, want %v", syncErr, tt.wantSyncErr)
 			}
 		})
 	}
