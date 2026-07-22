@@ -406,12 +406,14 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 		}
 		if entry.object == nil {
 			delete(i.cache, key)
+			delete(i.syncErrorGet, key)
 		} else if now.After(entry.lastUpdate) {
 			e := event.Event{
 				Type:   event.Deleted,
 				Object: entry.object.DeepCopyObject(),
 			}
 			delete(i.cache, key)
+			delete(i.syncErrorGet, key)
 			i.pushEvent(e)
 		}
 	}
@@ -428,6 +430,7 @@ func (i *informerCache) processObject(obj object.Object) {
 			object:     obj.DeepCopyObject(),
 			dirty:      false,
 		}
+		delete(i.syncErrorGet, key)
 		e := event.Event{
 			Type:   event.Added,
 			Object: obj.DeepCopyObject(),
@@ -436,6 +439,7 @@ func (i *informerCache) processObject(obj object.Object) {
 	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) {
 		entry.lastUpdate = now
 		entry.dirty = false
+		delete(i.syncErrorGet, key)
 		if !equality.Semantic.DeepEqual(entry.object, obj) {
 			entry.object = obj.DeepCopyObject()
 			e := event.Event{
