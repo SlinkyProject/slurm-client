@@ -67,6 +67,22 @@ if err != nil {
 }
 ```
 
+To read a rotating token file for every request, configure a file token provider
+instead of a static token.
+
+```golang
+config := &client.Config{
+	Server: "http://<host>:6820",
+	TokenProvider: client.FileTokenProvider{
+		Path: "/var/run/secrets/slurm/token",
+	},
+}
+slurmClient, err := client.NewClient(config)
+if err != nil {
+	return err
+}
+```
+
 Start Slurm client cache.
 
 ```golang

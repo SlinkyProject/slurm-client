@@ -55,7 +55,13 @@ type Client interface {
 
 	SetServer(server string)
 	GetServer() string
+
+	// SetToken replaces the configured TokenProvider with a static token used
+	// by subsequent requests.
+	// It is safe to call concurrently with client requests and informers.
 	SetToken(token string)
+
+	// GetToken returns the latest token successfully resolved by the provider.
 	GetToken() string
 }
 

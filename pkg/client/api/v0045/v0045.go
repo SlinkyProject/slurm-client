@@ -12,6 +12,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
+	clientapi "github.com/SlinkyProject/slurm-client/pkg/client/api"
 )
 
 const (
@@ -40,7 +41,12 @@ type SlurmClient struct {
 
 var _ ClientInterface = &SlurmClient{}
 
-func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterface, error) {
+func NewSlurmClient(server, token string, httpServer *http.Client, opts ...clientapi.ClientOption) (ClientInterface, error) {
+	tokenProvider, err := clientapi.NewTokenProvider(token, opts...)
+	if err != nil {
+		return nil, err
+	}
+
 	httpClient := http.DefaultClient
 	if httpServer != nil {
 		httpClient = httpServer
@@ -48,7 +54,14 @@ func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterf
 
 	// Create header injection function
 	headerFunc := func(ctx context.Context, req *http.Request) error {
-		req.Header.Add(headerSlurmUserToken, token)
+		token, err := tokenProvider.Token(ctx)
+		if err != nil {
+			return fmt.Errorf("unable to resolve auth token: %w", err)
+		}
+		if token == "" {
+			return fmt.Errorf("auth token cannot be empty")
+		}
+		req.Header.Set(headerSlurmUserToken, token)
 		req.Header.Add(headerContentType, headerApplicationJson)
 		return nil
 	}

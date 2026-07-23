@@ -15,6 +15,7 @@ import (
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
+	clientapi "github.com/SlinkyProject/slurm-client/pkg/client/api"
 	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
 	v0044 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0044"
@@ -31,8 +32,12 @@ type Config struct {
 	Server string
 
 	// The Slurm JWT token for authentication.
-	// +required
+	// Either AuthToken or TokenProvider is required. TokenProvider takes
+	// precedence when both are configured.
 	AuthToken string
+
+	// TokenProvider supplies the Slurm JWT token for every request.
+	TokenProvider TokenProvider
 
 	// HTTPClient is the HTTP client to use for requests.
 	HTTPClient *http.Client
@@ -44,10 +49,14 @@ func validate(config *Config) error {
 		return fmt.Errorf("config cannot be nil")
 	case config.Server == "":
 		return fmt.Errorf("server cannot be empty")
-	case config.AuthToken == "":
-		return fmt.Errorf("authToken cannot be empty")
+	case config.AuthToken == "" && config.TokenProvider == nil:
+		return fmt.Errorf("authToken and tokenProvider cannot both be empty")
 	}
 	return nil
+}
+
+type tokenProviderValue struct {
+	TokenProvider
 }
 
 type client struct {
@@ -67,6 +76,10 @@ type client struct {
 	config Config
 
 	cacheSyncPeriod time.Duration
+
+	tokenMu       sync.RWMutex
+	authToken     string
+	tokenProvider *tokenProviderValue
 }
 
 // NewClient initializes a client.
@@ -96,6 +109,12 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 		config:          ptr.Deref(config, Config{}),
 		cacheSyncPeriod: options.CacheSyncPeriod,
 	}
+	tokenProvider := c.config.TokenProvider
+	if tokenProvider == nil {
+		tokenProvider = StaticTokenProvider(c.config.AuthToken)
+		c.authToken = c.config.AuthToken
+	}
+	c.tokenProvider = &tokenProviderValue{TokenProvider: tokenProvider}
 
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 
@@ -119,22 +138,24 @@ func (c *client) createApiClients() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.v0042Client, err = v0042.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
+	tokenProviderOption := clientapi.WithTokenProvider(clientapi.TokenProviderFunc(c.resolveToken))
+
+	c.v0042Client, err = v0042.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient, tokenProviderOption)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0043Client, err = v0043.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
+	c.v0043Client, err = v0043.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient, tokenProviderOption)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0044Client, err = v0044.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
+	c.v0044Client, err = v0044.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient, tokenProviderOption)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
-	c.v0045Client, err = v0045.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient)
+	c.v0045Client, err = v0045.NewSlurmClient(c.config.Server, c.config.AuthToken, c.config.HTTPClient, tokenProviderOption)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
@@ -765,17 +786,40 @@ func (c *client) SetServer(server string) {
 	}
 }
 
-// GetToken returns the client token.
+// GetToken returns the current client token.
 func (c *client) GetToken() string {
-	return c.config.AuthToken
+	c.tokenMu.RLock()
+	defer c.tokenMu.RUnlock()
+
+	return c.authToken
 }
 
-// GetToken returns the client token.
+// SetToken updates the client token used by subsequent requests.
 func (c *client) SetToken(token string) {
-	c.config.AuthToken = token
-	if err := c.createApiClients(); err != nil {
-		panic(fmt.Errorf("unable to create client: %w", err))
+	c.tokenMu.Lock()
+	defer c.tokenMu.Unlock()
+
+	c.tokenProvider = &tokenProviderValue{TokenProvider: StaticTokenProvider(token)}
+	c.authToken = token
+}
+
+func (c *client) resolveToken(ctx context.Context) (string, error) {
+	c.tokenMu.RLock()
+	tokenProvider := c.tokenProvider
+	c.tokenMu.RUnlock()
+
+	token, err := tokenProvider.Token(ctx)
+	if err != nil {
+		return "", err
 	}
+
+	c.tokenMu.Lock()
+	if tokenProvider == c.tokenProvider {
+		c.authToken = token
+	}
+	c.tokenMu.Unlock()
+
+	return token, nil
 }
 
 // GetInformer implements Client.

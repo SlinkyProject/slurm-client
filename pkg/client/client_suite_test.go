@@ -50,19 +50,25 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(restapiServer).NotTo(BeEmpty())
 
+	slurmJwt = mintSlurmToken("infinite")
+})
+
+func mintSlurmToken(lifespan string) string {
+	GinkgoHelper()
+
 	controlPlaneC, err := compose.ServiceContainer(ctx, "control-plane")
 	Expect(err).NotTo(HaveOccurred())
 
-	cmd := "scontrol token username=slurm lifespan=infinite"
-	rc, reader, err := controlPlaneC.Exec(ctx, strings.Split(cmd, " "))
+	cmd := []string{"scontrol", "token", "username=slurm", "lifespan=" + lifespan}
+	rc, reader, err := controlPlaneC.Exec(ctx, cmd)
 	Expect(err).NotTo(HaveOccurred())
 	stdout, _ := demultiplexReader(reader)
 	Expect(rc).To(Equal(0))
 	token := strings.TrimPrefix(stdout, "SLURM_JWT=")
 	token = strings.TrimSuffix(token, "\n")
-	slurmJwt = token
-	Expect(slurmJwt).NotTo(BeEmpty())
-})
+	Expect(token).NotTo(BeEmpty())
+	return token
+}
 
 func demultiplexReader(multiplexedReader io.Reader) (string, string) {
 	stdout := new(bytes.Buffer)
