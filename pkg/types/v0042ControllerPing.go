@@ -15,11 +15,6 @@ const (
 	ObjectTypeV0042ControllerPing = "V0042ControllerPing"
 )
 
-const (
-	V0042ControllerPingPingedUP   = "UP"
-	V0042ControllerPingPingedDOWN = "DOWN"
-)
-
 type V0042ControllerPing struct {
 	api.V0042ControllerPing
 }
