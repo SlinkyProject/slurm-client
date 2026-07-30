@@ -1,3 +1,9 @@
+## v1.0.5
+
+### Fixed
+
+- Fix security vulnerabilities.
+
 ## v1.0.4
 
 ### Fixed
