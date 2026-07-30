@@ -1,3 +1,10 @@
+## v1.1.2
+
+### Fixed
+
+- Fix security vulnerabilities.
+- Clear syncErrorGet map entry on cache sync.
+
 ## v1.1.1
 
 ### Fixed
