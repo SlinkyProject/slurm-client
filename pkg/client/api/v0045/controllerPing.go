@@ -12,6 +12,7 @@ import (
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -35,7 +36,7 @@ func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*type
 			return &item, nil
 		}
 	}
-	return nil, errors.New(http.StatusText(http.StatusNotFound))
+	return nil, apierrors.ErrNotFound
 }
 
 // ListControllerPing implements ClientInterface

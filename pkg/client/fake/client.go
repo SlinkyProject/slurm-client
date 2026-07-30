@@ -11,6 +11,7 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -116,7 +117,7 @@ func (f *ClientBuilder) Build() client.Client {
 func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.Object, opts ...client.GetOption) error {
 	entry, exists := c.cache[obj.GetType()][key]
 	if !exists {
-		return errors.New(http.StatusText(http.StatusNotFound))
+		return apierrors.ErrNotFound
 	}
 	switch o := obj.(type) {
 	/////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +207,7 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 	return nil
 }
@@ -236,7 +237,7 @@ func (c *fakeClient) Delete(ctx context.Context, obj object.Object, opts ...clie
 	t := obj.GetType()
 	k := obj.GetKey()
 	if _, ok := c.cache[t][k]; !ok {
-		return errors.New(http.StatusText(http.StatusNotFound))
+		return apierrors.ErrNotFound
 	}
 	delete(c.cache[t], k)
 	return nil
@@ -246,7 +247,7 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 	t := obj.GetType()
 	k := obj.GetKey()
 	if _, ok := c.cache[t][k]; !ok {
-		return errors.New(http.StatusText(http.StatusNotFound))
+		return apierrors.ErrNotFound
 	}
 	if _, ok := c.cache[t]; !ok {
 		c.cache[t] = make(map[object.ObjectKey]object.Object)

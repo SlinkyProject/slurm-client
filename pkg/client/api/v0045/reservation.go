@@ -11,6 +11,7 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -111,7 +112,7 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 	}
 
 	if len(res.JSON200.Reservations) == 0 {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0045ReservationInfo{}
