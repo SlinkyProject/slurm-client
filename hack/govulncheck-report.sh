@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-GOVULNCHECK="${GOVULNCHECK:-${REPO_ROOT}/bin/govulncheck-latest}"
+GOVULNCHECK="${GOVULNCHECK:-${REPO_ROOT}/bin/govulncheck}"
 PACKAGE_PATTERN="${PACKAGE_PATTERN:-./...}"
 OUTPUT_FILE=""
 
@@ -37,7 +37,7 @@ HELP OPTIONS:
 	-h, --help          Show this help message.
 
 ENVIRONMENT:
-	GOVULNCHECK         govulncheck binary; defaults to repo-local bin/govulncheck-latest
+	GOVULNCHECK         govulncheck binary; defaults to repo-local bin/govulncheck
 	PACKAGE_PATTERN     Packages to scan; defaults to ./...
 EOF
 }

@@ -31,7 +31,7 @@ HELP OPTIONS:
 	-c, --commit		Commit changes using Git
 
 ENVIRONMENT:
-	GOVULNCHECK         govulncheck binary; defaults to repo-local bin/govulncheck-latest
+	GOVULNCHECK         govulncheck binary; defaults to repo-local bin/govulncheck
 	OUTPUT_FILE         File to write commit messages to.
 	PACKAGE_PATTERN     Packages to scan; defaults to ./...
 EOF
@@ -115,8 +115,9 @@ done
 
 go mod tidy
 
-git add go.mod go.sum
+make legal
 
+git add go.mod go.sum THIRD_PARTY_LICENSES NOTICE
 if [[ $COMMIT == 'true' ]]; then
 	git commit -F "$OUTPUT_FILE"
 fi
