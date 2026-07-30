@@ -128,7 +128,7 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### golang.org/x/net
 - Name: golang.org/x/net
-- Version: v0.55.0
+- Version: v0.56.0
 - License: BSD-3-Clause
 
 ### golang.org/x/oauth2
@@ -148,7 +148,7 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### golang.org/x/text
 - Name: golang.org/x/text
-- Version: v0.38.0
+- Version: v0.39.0
 - License: BSD-3-Clause
 
 ### golang.org/x/time/rate
