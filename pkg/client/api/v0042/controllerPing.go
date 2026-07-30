@@ -43,7 +43,7 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0042Contr
 	res, err := c.SlurmV0042GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	} else if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
