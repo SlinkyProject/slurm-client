@@ -169,6 +169,5 @@ require (
 	gopkg.in/ini.v1 v1.67.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
-	k8s.io/klog/v2 v2.140.0 // indirect
 	tags.cncf.io/container-device-interface v1.1.0 // indirect
 )
