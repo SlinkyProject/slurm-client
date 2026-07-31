@@ -10,6 +10,7 @@ import (
 
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -19,8 +20,9 @@ type fakeClient struct {
 
 	updateFn updateFunc
 
-	server    string
-	authToken string
+	server        string
+	authToken     string
+	tokenProvider token.Provider
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -274,8 +276,9 @@ func (c *fakeClient) GetToken() string {
 	return c.authToken
 }
 
-func (c *fakeClient) SetToken(token string) {
-	c.authToken = token
+func (c *fakeClient) SetTokenProvider(tokenProvider token.Provider) {
+	c.tokenProvider = tokenProvider
+	c.authToken = ""
 }
 
 func (c *fakeClient) Start(ctx context.Context) {

@@ -13,6 +13,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -25,8 +26,8 @@ var _ = Describe("Client v0042", func() {
 
 	BeforeEach(func() {
 		cfg = &Config{
-			Server:    restapiServer,
-			AuthToken: slurmJwt,
+			Server:        restapiServer,
+			TokenProvider: token.StaticProvider(slurmJwt),
 		}
 	})
 

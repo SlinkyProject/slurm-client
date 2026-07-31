@@ -58,8 +58,8 @@ Create a Slurm client handle.
 
 ```golang
 config := &client.Config{
-	Server:    "http://<host>:6820",
-	AuthToken: "<`auth/jwt` token>",
+	Server:        "http://<host>:6820",
+	TokenProvider: token.StaticProvider("<`auth/jwt` token>"),
 }
 slurmClient, err := client.NewClient(config)
 if err != nil {
@@ -73,7 +73,7 @@ instead of a static token.
 ```golang
 config := &client.Config{
 	Server: "http://<host>:6820",
-	TokenProvider: client.FileTokenProvider{
+	TokenProvider: token.FileProvider{
 		Path: "/var/run/secrets/slurm/token",
 	},
 }

@@ -12,6 +12,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 )
 
 func TestNewClient(t *testing.T) {
@@ -29,7 +31,7 @@ func TestNewClient(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "with token",
+			name: "missing provider",
 			args: args{
 				config: &Config{
 					Server: "http://bar",
@@ -38,20 +40,20 @@ func TestNewClient(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "with server",
+			name: "missing server",
 			args: args{
 				config: &Config{
-					AuthToken: "foo",
+					TokenProvider: token.StaticProvider("foo"),
 				},
 			},
 			wantErr: true,
 		},
 		{
-			name: "valid token",
+			name: "valid static provider",
 			args: args{
 				config: &Config{
-					AuthToken: "foo",
-					Server:    "http://bar",
+					Server:        "http://bar",
+					TokenProvider: token.StaticProvider("foo"),
 				},
 			},
 		},
@@ -60,7 +62,7 @@ func TestNewClient(t *testing.T) {
 			args: args{
 				config: &Config{
 					Server:        "http://bar",
-					TokenProvider: StaticTokenProvider("foo"),
+					TokenProvider: token.StaticProvider("foo"),
 				},
 			},
 		},
@@ -86,9 +88,8 @@ func TestGetTokenReturnsCachedProviderToken(t *testing.T) {
 	defer server.Close()
 
 	slurmClient, err := NewClient(&Config{
-		Server:    server.URL,
-		AuthToken: "ignored-static-token",
-		TokenProvider: TokenProviderFunc(func(context.Context) (string, error) {
+		Server: server.URL,
+		TokenProvider: token.ProviderFunc(func(context.Context) (string, error) {
 			providerCalls++
 			return providerToken, nil
 		}),
@@ -119,7 +120,7 @@ func TestGetTokenReturnsCachedProviderToken(t *testing.T) {
 	}
 }
 
-func TestSetTokenUpdatesSubsequentRequests(t *testing.T) {
+func TestSetTokenProviderUpdatesSubsequentRequests(t *testing.T) {
 	const (
 		initialToken = "initial-token"
 		rotatedToken = "rotated-token"
@@ -139,8 +140,8 @@ func TestSetTokenUpdatesSubsequentRequests(t *testing.T) {
 	defer server.Close()
 
 	slurmClient, err := NewClient(&Config{
-		Server:    server.URL,
-		AuthToken: initialToken,
+		Server:        server.URL,
+		TokenProvider: token.StaticProvider(initialToken),
 	})
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)
@@ -169,7 +170,7 @@ func TestSetTokenUpdatesSubsequentRequests(t *testing.T) {
 	}
 
 	makeRequests()
-	slurmClient.SetToken(rotatedToken)
+	slurmClient.SetTokenProvider(token.StaticProvider(rotatedToken))
 	makeRequests()
 
 	if got := slurmClient.GetToken(); got != rotatedToken {
@@ -179,7 +180,7 @@ func TestSetTokenUpdatesSubsequentRequests(t *testing.T) {
 		internalClient.v0043Client != v0043Client ||
 		internalClient.v0044Client != v0044Client ||
 		internalClient.v0045Client != v0045Client {
-		t.Fatal("SetToken() replaced a versioned API client")
+		t.Fatal("SetTokenProvider() replaced a versioned API client")
 	}
 
 	mu.Lock()
@@ -198,7 +199,7 @@ func TestSetTokenUpdatesSubsequentRequests(t *testing.T) {
 	}
 }
 
-func TestSetTokenWinsOverInFlightProviderResolution(t *testing.T) {
+func TestSetTokenProviderWinsOverInFlightProviderResolution(t *testing.T) {
 	const (
 		providerToken = "provider-token"
 		rotatedToken  = "rotated-token"
@@ -213,7 +214,7 @@ func TestSetTokenWinsOverInFlightProviderResolution(t *testing.T) {
 
 	slurmClient, err := NewClient(&Config{
 		Server: server.URL,
-		TokenProvider: TokenProviderFunc(func(ctx context.Context) (string, error) {
+		TokenProvider: token.ProviderFunc(func(ctx context.Context) (string, error) {
 			close(started)
 			select {
 			case <-release:
@@ -242,25 +243,31 @@ func TestSetTokenWinsOverInFlightProviderResolution(t *testing.T) {
 		t.Fatalf("provider was not called: %v", ctx.Err())
 	}
 
-	slurmClient.SetToken(rotatedToken)
+	slurmClient.SetTokenProvider(token.StaticProvider(rotatedToken))
 	close(release)
 	if err := <-requestDone; err != nil {
 		t.Fatalf("v0045 ping error = %v", err)
+	}
+	if got := slurmClient.GetToken(); got != "" {
+		t.Fatalf("GetToken() before resolving the replacement provider = %q, want an empty token", got)
+	}
+	if _, err := internalClient.v0045Client.SlurmV0045GetPingWithResponse(context.Background()); err != nil {
+		t.Fatalf("v0045 ping with replacement provider error = %v", err)
 	}
 	if got := slurmClient.GetToken(); got != rotatedToken {
 		t.Fatalf("GetToken() = %q, want %q", got, rotatedToken)
 	}
 }
 
-func TestSetTokenConcurrentWithRequests(t *testing.T) {
+func TestSetTokenProviderConcurrentWithRequests(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
 
 	slurmClient, err := NewClient(&Config{
-		Server:    server.URL,
-		AuthToken: "initial-token",
+		Server:        server.URL,
+		TokenProvider: token.StaticProvider("initial-token"),
 	})
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)
@@ -280,7 +287,7 @@ func TestSetTokenConcurrentWithRequests(t *testing.T) {
 		defer wg.Done()
 		<-start
 		for i := 0; i < readers*iterations; i++ {
-			slurmClient.SetToken("rotated-token")
+			slurmClient.SetTokenProvider(token.StaticProvider("rotated-token"))
 		}
 	}()
 
@@ -306,7 +313,7 @@ func TestSetTokenConcurrentWithRequests(t *testing.T) {
 	}
 }
 
-func TestFileTokenProviderUpdatesSubsequentRequests(t *testing.T) {
+func TestFileProviderUpdatesSubsequentRequests(t *testing.T) {
 	const tokenHeader = "X-SLURM-USER-TOKEN" //nolint:gosec // disable G101
 
 	tokenPath := filepath.Join(t.TempDir(), "token")
@@ -323,7 +330,7 @@ func TestFileTokenProviderUpdatesSubsequentRequests(t *testing.T) {
 
 	slurmClient, err := NewClient(&Config{
 		Server:        server.URL,
-		TokenProvider: FileTokenProvider{Path: tokenPath},
+		TokenProvider: token.FileProvider{Path: tokenPath},
 	})
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)

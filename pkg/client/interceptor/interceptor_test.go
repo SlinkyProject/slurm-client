@@ -11,6 +11,7 @@ import (
 
 	v0042 "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/client"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -205,26 +206,26 @@ var _ = Describe("NewClient", func() {
 			Expect(called).To(BeTrue())
 		})
 	})
-	Context("SetToken", func() {
+	Context("SetTokenProvider", func() {
 		It("should call the provided function", func() {
 			var called bool
-			client := NewClient(wrappedClient, Funcs{
-				SetToken: func(string) {
+			interceptingClient := NewClient(wrappedClient, Funcs{
+				SetTokenProvider: func(token.Provider) {
 					called = true
 				},
 			})
-			client.SetToken("")
+			interceptingClient.SetTokenProvider(token.StaticProvider(""))
 			Expect(called).To(BeTrue())
 		})
 		It("should call the underlying client if the provided function is nil", func() {
 			var called bool
 			client1 := NewClient(wrappedClient, Funcs{
-				SetToken: func(string) {
+				SetTokenProvider: func(token.Provider) {
 					called = true
 				},
 			})
 			client2 := NewClient(client1, Funcs{})
-			client2.SetToken("")
+			client2.SetTokenProvider(token.StaticProvider(""))
 			Expect(called).To(BeTrue())
 		})
 	})
@@ -324,8 +325,8 @@ func (e *emptyClient) GetToken() string {
 	return ""
 }
 
-// SetToken implements client.Client.
-func (e *emptyClient) SetToken(token string) {
+// SetTokenProvider implements client.Client.
+func (e *emptyClient) SetTokenProvider(tokenProvider token.Provider) {
 }
 
 // Start implements client.Client.

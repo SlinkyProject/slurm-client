@@ -7,23 +7,24 @@ import (
 	"context"
 
 	"github.com/SlinkyProject/slurm-client/pkg/client"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
 // Funcs contains functions that are called instead of the underlying client's methods.
 type Funcs struct {
-	Get         func(ctx context.Context, key object.ObjectKey, obj object.Object, opts ...client.GetOption) error
-	List        func(ctx context.Context, list object.ObjectList, opts ...client.ListOption) error
-	Create      func(ctx context.Context, obj object.Object, req any, opts ...client.CreateOption) error
-	Delete      func(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error
-	Update      func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
-	GetInformer func(obj object.ObjectType) client.InformerCache
-	GetServer   func() string
-	SetServer   func(server string)
-	GetToken    func() string
-	SetToken    func(token string)
-	Start       func(ctx context.Context)
-	Stop        func()
+	Get              func(ctx context.Context, key object.ObjectKey, obj object.Object, opts ...client.GetOption) error
+	List             func(ctx context.Context, list object.ObjectList, opts ...client.ListOption) error
+	Create           func(ctx context.Context, obj object.Object, req any, opts ...client.CreateOption) error
+	Delete           func(ctx context.Context, obj object.Object, opts ...client.DeleteOption) error
+	Update           func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error
+	GetInformer      func(obj object.ObjectType) client.InformerCache
+	GetServer        func() string
+	SetServer        func(server string)
+	GetToken         func() string
+	SetTokenProvider func(tokenProvider token.Provider)
+	Start            func(ctx context.Context)
+	Stop             func()
 }
 
 // NewClient returns a new interceptor client that calls the functions in funcs instead of the underlying client's methods, if they are not nil.
@@ -102,11 +103,11 @@ func (c *interceptor) GetToken() string {
 	return c.client.GetToken()
 }
 
-func (c *interceptor) SetToken(token string) {
-	if c.funcs.SetToken != nil {
-		c.funcs.SetToken(token)
+func (c *interceptor) SetTokenProvider(tokenProvider token.Provider) {
+	if c.funcs.SetTokenProvider != nil {
+		c.funcs.SetTokenProvider(tokenProvider)
 	}
-	c.client.SetToken(token)
+	c.client.SetTokenProvider(tokenProvider)
 }
 
 func (c *interceptor) Start(ctx context.Context) {

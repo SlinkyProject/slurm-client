@@ -9,6 +9,7 @@ import (
 
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -56,10 +57,9 @@ type Client interface {
 	SetServer(server string)
 	GetServer() string
 
-	// SetToken replaces the configured TokenProvider with a static token used
-	// by subsequent requests.
+	// SetTokenProvider replaces the TokenProvider used by subsequent requests.
 	// It is safe to call concurrently with client requests and informers.
-	SetToken(token string)
+	SetTokenProvider(tokenProvider token.Provider)
 
 	// GetToken returns the latest token successfully resolved by the provider.
 	GetToken() string

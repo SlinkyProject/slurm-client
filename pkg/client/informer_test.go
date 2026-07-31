@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
+
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/utils/ptr"
 
@@ -551,8 +553,8 @@ func (f *emptyClient) GetToken() string {
 	return ""
 }
 
-// GetToken implements Client.
-func (f *emptyClient) SetToken(token string) {
+// SetTokenProvider implements Client.
+func (f *emptyClient) SetTokenProvider(tokenProvider token.Provider) {
 }
 
 // Start implements Client.

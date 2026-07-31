@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
@@ -23,7 +24,7 @@ var _ = Describe("Token provider", func() {
 
 		slurmClient, err := NewClient(&Config{
 			Server:        restapiServer,
-			TokenProvider: FileTokenProvider{Path: tokenPath},
+			TokenProvider: token.FileProvider{Path: tokenPath},
 		})
 		Expect(err).NotTo(HaveOccurred())
 
