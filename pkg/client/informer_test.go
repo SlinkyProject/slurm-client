@@ -29,6 +29,27 @@ func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKe
 	return i
 }
 
+// waitForEvents waits for the event handler to record want events, so that the
+// counts are final and safe to read once the caller asserts on them. Draining
+// eventCh is not enough, the informer runs each handler in its own go-routine.
+func waitForEvents(t *testing.T, want int64, counts ...*int64) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		var got int64
+		for _, count := range counts {
+			got += atomic.LoadInt64(count)
+		}
+		if got >= want {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("event handler recorded %v events, want %v", got, want)
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
 func Test_informerCache_processObjects(t *testing.T) {
 	node0 := &types.V0044Node{
 		V0044Node: api.V0044Node{
@@ -170,27 +191,24 @@ func Test_informerCache_processObjects(t *testing.T) {
 				i.syncErrorGet[tt.object.GetKey()] = errors.New("error")
 			}
 
-			go i.runHandler(stopCh)
 			i.processObjects(tt.list)
-			for {
-				time.Sleep(time.Second)
-				if len(i.eventCh) == 0 {
-					close(stopCh)
-					break
-				}
-			}
+			wantEvents := int64(len(i.eventCh))
+			go i.runHandler(stopCh)
+			waitForEvents(t, wantEvents, &addCnt, &modifyCnt, &deleteCnt)
+			close(stopCh)
+
 			syncErr := i.syncErrorGet[tt.object.GetKey()]
 			if len(i.cache) != len(tt.list.GetItems()) {
 				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
 			}
-			if addCnt != tt.wantAddCnt {
-				t.Errorf("processObjects() add events = %v, want %v", addCnt, tt.wantAddCnt)
+			if got := atomic.LoadInt64(&addCnt); got != tt.wantAddCnt {
+				t.Errorf("processObjects() add events = %v, want %v", got, tt.wantAddCnt)
 			}
-			if modifyCnt != tt.wantModifyCnt {
-				t.Errorf("processObjects() modify events = %v, want %v", modifyCnt, tt.wantModifyCnt)
+			if got := atomic.LoadInt64(&modifyCnt); got != tt.wantModifyCnt {
+				t.Errorf("processObjects() modify events = %v, want %v", got, tt.wantModifyCnt)
 			}
-			if deleteCnt != tt.wantDeleteCnt {
-				t.Errorf("processObjects() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			if got := atomic.LoadInt64(&deleteCnt); got != tt.wantDeleteCnt {
+				t.Errorf("processObjects() delete events = %v, want %v", got, tt.wantDeleteCnt)
 			}
 			if !errors.Is(syncErr, tt.wantSyncErr) {
 				t.Errorf("processObjects() got syncErr = %v, want %v", syncErr, tt.wantSyncErr)
@@ -346,27 +364,24 @@ func Test_informerCache_processObject(t *testing.T) {
 				i.syncErrorGet[tt.object.GetKey()] = errors.New("error")
 			}
 
-			go i.runHandler(stopCh)
 			i.processObject(tt.obj)
-			for {
-				time.Sleep(time.Second)
-				if len(i.eventCh) == 0 {
-					close(stopCh)
-					break
-				}
-			}
+			wantEvents := int64(len(i.eventCh))
+			go i.runHandler(stopCh)
+			waitForEvents(t, wantEvents, &addCnt, &modifyCnt, &deleteCnt)
+			close(stopCh)
+
 			syncErr := i.syncErrorGet[tt.object.GetKey()]
 			if len(i.cache) != tt.wantCacheLen {
 				t.Errorf("len(cache) = %v, want %v", len(i.cache), tt.wantCacheLen)
 			}
-			if addCnt != tt.wantAddCnt {
-				t.Errorf("processObject() add events = %v, want %v", addCnt, tt.wantAddCnt)
+			if got := atomic.LoadInt64(&addCnt); got != tt.wantAddCnt {
+				t.Errorf("processObject() add events = %v, want %v", got, tt.wantAddCnt)
 			}
-			if modifyCnt != tt.wantModifyCnt {
-				t.Errorf("processObject() modify events = %v, want %v", modifyCnt, tt.wantModifyCnt)
+			if got := atomic.LoadInt64(&modifyCnt); got != tt.wantModifyCnt {
+				t.Errorf("processObject() modify events = %v, want %v", got, tt.wantModifyCnt)
 			}
-			if deleteCnt != tt.wantDeleteCnt {
-				t.Errorf("processObject() delete events = %v, want %v", deleteCnt, tt.wantDeleteCnt)
+			if got := atomic.LoadInt64(&deleteCnt); got != tt.wantDeleteCnt {
+				t.Errorf("processObject() delete events = %v, want %v", got, tt.wantDeleteCnt)
 			}
 			if !errors.Is(syncErr, tt.wantSyncErr) {
 				t.Errorf("processObject() got syncErr = %v, want %v", syncErr, tt.wantSyncErr)
