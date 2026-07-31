@@ -14798,15 +14798,15 @@
       ],
       "version": {
         "major": "26",
-        "micro": "1",
+        "micro": "2",
         "minor": "05"
       },
-      "release": "26.05.1"
+      "release": "26.05.2"
     },
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-26.05.1"
+    "version": "Slurm-26.05.2"
   },
   "servers": [
     {
