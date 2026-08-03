@@ -16,6 +16,7 @@ import (
 	v0042 "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -214,12 +215,12 @@ var _ = Describe("NewFakeClient", func() {
 		})
 	})
 
-	Context("SetToken", func() {
+	Context("SetTokenProvider", func() {
 		It("should return", func() {
-			const token = "token-foo"
-			client := NewFakeClient()
-			client.SetToken(token)
-			Expect(client.GetToken()).NotTo(BeNil())
+			tokenProvider := token.StaticProvider("token-foo")
+			slurmClient := NewFakeClient()
+			slurmClient.SetTokenProvider(tokenProvider)
+			Expect(slurmClient.(*fakeClient).tokenProvider).To(Equal(tokenProvider))
 		})
 	})
 

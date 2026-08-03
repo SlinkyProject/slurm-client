@@ -58,8 +58,24 @@ Create a Slurm client handle.
 
 ```golang
 config := &client.Config{
-	Server:    "http://<host>:6820",
-	AuthToken: "<`auth/jwt` token>",
+	Server:        "http://<host>:6820",
+	TokenProvider: token.StaticProvider("<`auth/jwt` token>"),
+}
+slurmClient, err := client.NewClient(config)
+if err != nil {
+	return err
+}
+```
+
+To read a rotating token file for every request, configure a file token provider
+instead of a static token.
+
+```golang
+config := &client.Config{
+	Server: "http://<host>:6820",
+	TokenProvider: token.FileProvider{
+		Path: "/var/run/secrets/slurm/token",
+	},
 }
 slurmClient, err := client.NewClient(config)
 if err != nil {
