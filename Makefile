@@ -109,12 +109,13 @@ generate: ## Run all generate targets.
 	$(MAKE) generate-api-matrix
 	go generate ./...
 
+# https://github.com/SlinkyProject/containers/pkgs/container/slurmrestd
 .PHONY: generate-api-matrix
 generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	declare -A VERSION_MATRIX=( \
-		["ghcr.io/slinkyproject/slurmrestd:26.05.1-ubuntu26.04"]="" \
-		["ghcr.io/slinkyproject/slurmrestd:25.11.3-ubuntu24.04"]="" \
-		["ghcr.io/slinkyproject/slurmrestd:25.05.6-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:26.05.2-ubuntu26.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:25.11.7-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:25.05.8-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \
 	); \
 	for key in $${!VERSION_MATRIX[@]}; do \
@@ -122,12 +123,12 @@ generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	done
 
 CONTAINER_TOOL ?= docker
-SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:25.05.6-ubuntu24.04
-SLURM_DATA_PARSER_OPTS ?= +inline_enums
+SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:26.05.2-ubuntu26.04
+SLURM_DATA_PARSER_OPTS ?=
 
 TEMPLATES_DIR = api/.template
 # https://github.com/oapi-codegen/oapi-codegen/tags
-OAPI_CODEGEN_VERSION ?= v2.6.0
+OAPI_CODEGEN_VERSION ?= v2.8.0
 
 .PHONY: generate-api
 generate-api: ## Generate Slurm OpenAPI spec file.
