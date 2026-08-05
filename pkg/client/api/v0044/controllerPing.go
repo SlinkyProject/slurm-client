@@ -10,8 +10,6 @@ import (
 
 	"k8s.io/utils/ptr"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
@@ -49,7 +47,7 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0044Contr
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 	list := &types.V0044ControllerPingList{
 		Items: make([]types.V0044ControllerPing, len(res.JSON200.Pings)),

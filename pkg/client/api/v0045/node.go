@@ -8,8 +8,6 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -43,7 +41,7 @@ func (c *SlurmClient) CreateNewNode(ctx context.Context, req any) (*string, erro
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	nodeName, err := utils.ParseNodeName(r.NodeConf)
@@ -66,7 +64,7 @@ func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -89,7 +87,7 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) 
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -108,7 +106,7 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	if len(res.JSON200.Nodes) == 0 {
@@ -133,7 +131,7 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0045NodeList, erro
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	list := &types.V0045NodeList{

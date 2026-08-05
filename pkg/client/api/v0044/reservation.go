@@ -8,8 +8,6 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -44,7 +42,7 @@ func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (strin
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return "", utilerrors.NewAggregate(errs)
+		return "", errors.Join(errs...)
 	}
 
 	return *r.Name, nil
@@ -62,7 +60,7 @@ func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, name string) er
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -89,7 +87,7 @@ func (c *SlurmClient) UpdateReservationInfo(ctx context.Context, name string, re
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -108,7 +106,7 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	if len(res.JSON200.Reservations) == 0 {
@@ -133,7 +131,7 @@ func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*types.V0044Rese
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	list := &types.V0044ReservationInfoList{

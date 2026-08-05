@@ -8,8 +8,6 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
@@ -31,7 +29,7 @@ func (c *SlurmClient) GetReconfigure(ctx context.Context) (*types.V0044Reconfigu
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 	out := &types.V0044Reconfigure{}
 	return out, nil
