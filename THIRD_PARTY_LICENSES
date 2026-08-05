@@ -11,11 +11,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Version: v2.0.0
 - License: MIT
 
-### github.com/davecgh/go-spew/spew
-- Name: github.com/davecgh/go-spew/spew
-- Version: v1.1.2-0.20180830191138-d8f796af33cc
-- License: ISC
-
 ### github.com/fxamacker/cbor/v2
 - Name: github.com/fxamacker/cbor/v2
 - Version: v2.9.2
@@ -56,11 +51,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Version: v1.0.3-0.20250322232337-35a7c28c31ee
 - License: Apache-2.0
 
-### github.com/munnerz/goautoneg
-- Name: github.com/munnerz/goautoneg
-- Version: v0.0.0-20191010083416-a7dc8b61c822
-- License: BSD-3-Clause
-
 ### github.com/oapi-codegen/runtime
 - Name: github.com/oapi-codegen/runtime
 - Version: v1.6.0
@@ -80,11 +70,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Name: github.com/oasdiff/yaml3
 - Version: v0.0.14
 - License: MIT
-
-### github.com/pmezard/go-difflib/difflib
-- Name: github.com/pmezard/go-difflib/difflib
-- Version: v1.0.1-0.20181226105442-5d4384ee4fb2
-- License: BSD-3-Clause
 
 ### github.com/santhosh-tekuri/jsonschema/v6
 - Name: github.com/santhosh-tekuri/jsonschema/v6
@@ -106,29 +91,9 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Version: v0.57.0
 - License: BSD-3-Clause
 
-### golang.org/x/oauth2
-- Name: golang.org/x/oauth2
-- Version: v0.36.0
-- License: BSD-3-Clause
-
-### golang.org/x/sys/unix
-- Name: golang.org/x/sys/unix
-- Version: v0.47.0
-- License: BSD-3-Clause
-
-### golang.org/x/term
-- Name: golang.org/x/term
-- Version: v0.45.0
-- License: BSD-3-Clause
-
 ### golang.org/x/text
 - Name: golang.org/x/text
 - Version: v0.40.0
-- License: BSD-3-Clause
-
-### golang.org/x/time/rate
-- Name: golang.org/x/time/rate
-- Version: v0.15.0
 - License: BSD-3-Clause
 
 ### gopkg.in/inf.v0
@@ -145,11 +110,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Name: k8s.io/apimachinery/third_party/forked/golang/reflect
 - Version: v0.36.3
 - License: BSD-3-Clause
-
-### k8s.io/client-go
-- Name: k8s.io/client-go
-- Version: v0.36.3
-- License: Apache-2.0
 
 ### k8s.io/klog/v2
 - Name: k8s.io/klog/v2
@@ -190,18 +150,3 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Name: sigs.k8s.io/structured-merge-diff/v6/value
 - Version: v6.4.2
 - License: Apache-2.0
-
-### sigs.k8s.io/yaml
-- Name: sigs.k8s.io/yaml
-- Version: v1.6.0
-- License: Apache-2.0
-
-### sigs.k8s.io/yaml
-- Name: sigs.k8s.io/yaml
-- Version: v1.6.0
-- License: BSD-3-Clause
-
-### sigs.k8s.io/yaml
-- Name: sigs.k8s.io/yaml
-- Version: v1.6.0
-- License: MIT

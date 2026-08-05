@@ -7,8 +7,7 @@ import (
 	"context"
 	"time"
 
-	"k8s.io/client-go/tools/cache"
-
+	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )

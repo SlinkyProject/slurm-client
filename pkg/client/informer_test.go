@@ -10,12 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SlinkyProject/slurm-client/pkg/client/token"
-
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
+	"github.com/SlinkyProject/slurm-client/pkg/cache"
+	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
