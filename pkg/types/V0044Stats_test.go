@@ -6,9 +6,8 @@ package types
 import (
 	"testing"
 
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
+	"github.com/SlinkyProject/slurm-client/internal/equality"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -34,7 +33,7 @@ func TestV0044Stats_GetKey(t *testing.T) {
 			o := &V0044Stats{
 				V0044StatsMsg: tt.fields.V0044Stats,
 			}
-			if got := o.GetKey(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.GetKey(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044Stats.GetKey() = %v, want %v", got, tt.want)
 			}
 		})
@@ -63,7 +62,7 @@ func TestV0044Stats_GetType(t *testing.T) {
 			o := &V0044Stats{
 				V0044StatsMsg: tt.fields.V0044Stats,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044Stats.GetType() = %v, want %v", got, tt.want)
 			}
 		})
@@ -99,7 +98,7 @@ func TestV0044Stats_DeepCopyObject(t *testing.T) {
 			o := &V0044Stats{
 				V0044StatsMsg: tt.fields.V0044Stats,
 			}
-			if got := o.DeepCopyObject(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.DeepCopyObject(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044Stats.DeepCopyObject() = %v, want %v", got, tt.want)
 			}
 		})
@@ -135,7 +134,7 @@ func TestV0044Stats_DeepCopy(t *testing.T) {
 			o := &V0044Stats{
 				V0044StatsMsg: tt.fields.V0044Stats,
 			}
-			if got := o.DeepCopy(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.DeepCopy(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044Stats.DeepCopy() = %v, want %v", got, tt.want)
 			}
 		})
@@ -164,7 +163,7 @@ func TestV0044StatsList_GetType(t *testing.T) {
 			o := &V0044StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044StatsList.GetType() = %v, want %v", got, tt.want)
 			}
 		})
@@ -204,7 +203,7 @@ func TestV0044StatsList_GetItems(t *testing.T) {
 			o := &V0044StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.GetItems(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044StatsList.GetItems() = %v, want %v", got, tt.want)
 			}
 		})
@@ -312,7 +311,7 @@ func TestV0044StatsList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !apiequality.Semantic.DeepEqual(got, tt.want) {
+			if got := o.DeepCopyObjectList(); !equality.Semantic.DeepEqual(got, tt.want) {
 				t.Errorf("V0044StatsList.DeepCopyObjectList() = %v, want %v", got, tt.want)
 			}
 		})
