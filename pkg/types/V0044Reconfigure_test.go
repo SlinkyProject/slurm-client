@@ -6,7 +6,8 @@ package types
 import (
 	"testing"
 
-	"github.com/SlinkyProject/slurm-client/internal/equality"
+	"github.com/stretchr/testify/require"
+
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -23,9 +24,8 @@ func TestV0044Reconfigure_GetKey(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &V0044Reconfigure{}
-			if got := o.GetKey(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Reconfigure.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -43,9 +43,8 @@ func TestV0044Reconfigure_GetType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &V0044Reconfigure{}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Reconfigure.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -67,9 +66,8 @@ func TestV0044Reconfigure_DeepCopyObject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &V0044Reconfigure{}
-			if got := o.DeepCopyObject(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Reconfigure.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -91,9 +89,8 @@ func TestV0044Reconfigure_DeepCopy(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &V0044Reconfigure{}
-			if got := o.DeepCopy(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Reconfigure.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -120,9 +117,8 @@ func TestV0044ReconfigureList_GetType(t *testing.T) {
 			o := &V0044ReconfigureList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReconfigureList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -160,9 +156,8 @@ func TestV0044ReconfigureList_GetItems(t *testing.T) {
 			o := &V0044ReconfigureList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReconfigureList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -224,9 +219,7 @@ func TestV0044ReconfigureList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0044ReconfigureList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -268,9 +261,8 @@ func TestV0044ReconfigureList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044ReconfigureList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReconfigureList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

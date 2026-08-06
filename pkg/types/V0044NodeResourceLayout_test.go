@@ -6,8 +6,9 @@ package types
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
-	"github.com/SlinkyProject/slurm-client/internal/equality"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -33,9 +34,8 @@ func TestV0044NodeResource_GetKey(t *testing.T) {
 			o := &V0044NodeResourceLayout{
 				V0044NodeResourceLayoutList: tt.fields.V0044NodeResourceLayout,
 			}
-			if got := o.GetKey(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayout.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -62,9 +62,8 @@ func TestV0044NodeResource_GetType(t *testing.T) {
 			o := &V0044NodeResourceLayout{
 				V0044NodeResourceLayoutList: tt.fields.V0044NodeResourceLayout,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayout.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -81,7 +80,7 @@ func TestV0044NodeResource_DeepCopyObject(t *testing.T) {
 		{
 			name: "empty",
 			fields: fields{
-				V0044NodeResourceLayout: []api.V0044NodeResourceLayout{},
+				V0044NodeResourceLayout: nil,
 			},
 			want: &V0044NodeResourceLayout{},
 		},
@@ -98,9 +97,8 @@ func TestV0044NodeResource_DeepCopyObject(t *testing.T) {
 			o := &V0044NodeResourceLayout{
 				V0044NodeResourceLayoutList: tt.fields.V0044NodeResourceLayout,
 			}
-			if got := o.DeepCopyObject(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayout.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -117,7 +115,7 @@ func TestV0044NodeResource_DeepCopy(t *testing.T) {
 		{
 			name: "empty",
 			fields: fields{
-				V0044NodeResourceLayout: []api.V0044NodeResourceLayout{},
+				V0044NodeResourceLayout: nil,
 			},
 			want: &V0044NodeResourceLayout{},
 		},
@@ -134,9 +132,8 @@ func TestV0044NodeResource_DeepCopy(t *testing.T) {
 			o := &V0044NodeResourceLayout{
 				V0044NodeResourceLayoutList: tt.fields.V0044NodeResourceLayout,
 			}
-			if got := o.DeepCopy(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayout.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -163,9 +160,8 @@ func TestV0044NodeResourceList_GetType(t *testing.T) {
 			o := &V0044NodeResourceLayoutList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayoutList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -207,9 +203,8 @@ func TestV0044NodeResourceList_GetItems(t *testing.T) {
 			o := &V0044NodeResourceLayoutList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayoutList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -273,9 +268,7 @@ func TestV0044NodeResourceList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0044NodeResourceLayoutList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -319,9 +312,8 @@ func TestV0044NodeResourceList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044NodeResourceLayoutList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeResourceLayoutList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

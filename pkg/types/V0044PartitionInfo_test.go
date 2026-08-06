@@ -9,8 +9,9 @@ import (
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
+	"github.com/stretchr/testify/require"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
-	"github.com/SlinkyProject/slurm-client/internal/equality"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -43,9 +44,8 @@ func TestV0044PartitionInfo_GetKey(t *testing.T) {
 			o := &V0044PartitionInfo{
 				V0044PartitionInfo: tt.fields.V0044PartitionInfo,
 			}
-			if got := o.GetKey(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfo.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -72,9 +72,8 @@ func TestV0044PartitionInfo_GetType(t *testing.T) {
 			o := &V0044PartitionInfo{
 				V0044PartitionInfo: tt.fields.V0044PartitionInfo,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfo.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -108,9 +107,8 @@ func TestV0044PartitionInfo_DeepCopyObject(t *testing.T) {
 			o := &V0044PartitionInfo{
 				V0044PartitionInfo: tt.fields.V0044PartitionInfo,
 			}
-			if got := o.DeepCopyObject(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfo.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -144,9 +142,8 @@ func TestV0044PartitionInfo_DeepCopy(t *testing.T) {
 			o := &V0044PartitionInfo{
 				V0044PartitionInfo: tt.fields.V0044PartitionInfo,
 			}
-			if got := o.DeepCopy(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfo.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -228,9 +225,8 @@ func TestV0044PartitionInfoList_GetType(t *testing.T) {
 			o := &V0044PartitionInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfoList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -270,9 +266,8 @@ func TestV0044PartitionInfoList_GetItems(t *testing.T) {
 			o := &V0044PartitionInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfoList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -335,9 +330,7 @@ func TestV0044PartitionInfoList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0044PartitionInfoList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -381,9 +374,8 @@ func TestV0044PartitionInfoList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044PartitionInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044PartitionInfoList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

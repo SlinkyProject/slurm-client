@@ -9,8 +9,9 @@ import (
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
+	"github.com/stretchr/testify/require"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
-	"github.com/SlinkyProject/slurm-client/internal/equality"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -43,9 +44,8 @@ func TestV0044Node_GetKey(t *testing.T) {
 			o := &V0044Node{
 				V0044Node: tt.fields.V0044Node,
 			}
-			if got := o.GetKey(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Node.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -72,9 +72,8 @@ func TestV0044Node_GetType(t *testing.T) {
 			o := &V0044Node{
 				V0044Node: tt.fields.V0044Node,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Node.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -108,9 +107,8 @@ func TestV0044Node_DeepCopyObject(t *testing.T) {
 			o := &V0044Node{
 				V0044Node: tt.fields.V0044Node,
 			}
-			if got := o.DeepCopyObject(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Node.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -144,9 +142,8 @@ func TestV0044Node_DeepCopy(t *testing.T) {
 			o := &V0044Node{
 				V0044Node: tt.fields.V0044Node,
 			}
-			if got := o.DeepCopy(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044Node.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -220,9 +217,8 @@ func TestV0044NodeList_GetType(t *testing.T) {
 			o := &V0044NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -262,9 +258,8 @@ func TestV0044NodeList_GetItems(t *testing.T) {
 			o := &V0044NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -327,9 +322,7 @@ func TestV0044NodeList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0044NodeList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -373,9 +366,8 @@ func TestV0044NodeList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044NodeList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

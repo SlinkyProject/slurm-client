@@ -12,7 +12,6 @@ import (
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
-	"github.com/SlinkyProject/slurm-client/internal/equality"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -117,7 +116,7 @@ var _ = Describe("Client v0044", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("writing the result back to the go struct")
-				Expect(equality.Semantic.DeepEqual(obj, actual)).To(BeTrue())
+				Expect(actual).To(BeEquivalentTo(obj))
 			}, SpecTimeout(testTimeout))
 			It("should fail if the object request is invalid", func(ctx SpecContext) {
 				By("creating the object")
@@ -169,7 +168,7 @@ var _ = Describe("Client v0044", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the object field was updated")
-				Expect(equality.Semantic.DeepEqual(obj.Comment, updateReq.Comment)).To(BeTrue())
+				Expect(updateReq.Comment).To(BeEquivalentTo(obj.Comment))
 			}, SpecTimeout(testTimeout))
 		})
 
@@ -193,7 +192,7 @@ var _ = Describe("Client v0044", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the fetched object equals the created one")
-				Expect(equality.Semantic.DeepEqual(obj, actual)).To(BeTrue())
+				Expect(actual).To(BeEquivalentTo(obj))
 			}, SpecTimeout(testTimeout))
 		})
 
@@ -267,7 +266,7 @@ var _ = Describe("Client v0044", func() {
 				}, testTimeout, 2*time.Second).Should(Succeed())
 
 				By("checking the layout is not empty")
-				Expect(equality.Semantic.DeepEqual(layout, &types.V0044NodeResourceLayout{})).NotTo(BeTrue())
+				Expect(layout).ToNot(BeEquivalentTo(&types.V0044NodeResourceLayout{}))
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -320,7 +319,7 @@ var _ = Describe("Client v0044", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the object field was updated")
-				Expect(equality.Semantic.DeepEqual(obj.Comment, req.Comment)).To(BeTrue())
+				Expect(obj.Comment).To(BeEquivalentTo(req.Comment))
 			}, SpecTimeout(testTimeout))
 		})
 
