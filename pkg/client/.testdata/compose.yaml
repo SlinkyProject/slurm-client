@@ -23,7 +23,7 @@ services:
     build:
       context: ./compose
       dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmdbd:26.05.1-ubuntu26.04
+        FROM ghcr.io/slinkyproject/slurmdbd:26.05-ubuntu26.04
         COPY etc/ /opt/etc/slurm/
         COPY entrypoint/slurmdbd.sh /usr/local/bin/entrypoint.sh
         RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -47,7 +47,7 @@ services:
     build:
       context: ./compose
       dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmctld:26.05.1-ubuntu26.04
+        FROM ghcr.io/slinkyproject/slurmctld:26.05-ubuntu26.04
         COPY etc/ /opt/etc/slurm/
         COPY entrypoint/slurmctld.sh /usr/local/bin/entrypoint.sh
         RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -72,7 +72,7 @@ services:
     build:
       context: ./compose
       dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmd:26.05.1-ubuntu26.04
+        FROM ghcr.io/slinkyproject/slurmd:26.05-ubuntu26.04
         COPY etc/ /opt/etc/slurm/
         COPY entrypoint/slurmd.sh /usr/local/bin/entrypoint.sh
         RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -96,7 +96,7 @@ services:
     build:
       context: ./compose
       dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmrestd:26.05.1-ubuntu26.04
+        FROM ghcr.io/slinkyproject/slurmrestd:26.05-ubuntu26.04
         COPY etc/ /opt/etc/slurm/
         COPY entrypoint/slurmrestd.sh /usr/local/bin/entrypoint.sh
         RUN chmod +x /usr/local/bin/entrypoint.sh
