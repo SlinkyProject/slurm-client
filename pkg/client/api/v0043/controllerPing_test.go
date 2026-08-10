@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
@@ -134,9 +134,7 @@ func TestSlurmClient_GetControllerPing(t *testing.T) {
 				t.Errorf("SlurmClient.GetControllerPing() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetControllerPing() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -256,9 +254,7 @@ func TestSlurmClient_ListControllerPing(t *testing.T) {
 				t.Errorf("SlurmClient.ListControllerPing() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.ListControllerPing() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

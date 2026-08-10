@@ -7,15 +7,16 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0042/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0042/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"k8s.io/utils/ptr"
 )
 
 func TestSlurmClient_CreateJobInfo(t *testing.T) {
@@ -140,9 +141,7 @@ func TestSlurmClient_CreateJobInfo(t *testing.T) {
 				t.Errorf("SlurmClient.CreateJobInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.CreateJobInfo() got = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -438,9 +437,7 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 				t.Errorf("SlurmClient.GetJobInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetJobInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -556,9 +553,7 @@ func TestSlurmClient_ListJobInfo(t *testing.T) {
 				t.Errorf("SlurmClient.ListJobInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.ListJobInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

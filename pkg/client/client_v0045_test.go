@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
@@ -117,7 +116,7 @@ var _ = Describe("Client v0045", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("writing the result back to the go struct")
-				Expect(equality.Semantic.DeepEqual(obj, actual)).To(BeTrue())
+				Expect(actual).To(BeEquivalentTo(obj))
 			}, SpecTimeout(testTimeout))
 			It("should fail if the object request is invalid", func(ctx SpecContext) {
 				By("creating the object")
@@ -169,7 +168,7 @@ var _ = Describe("Client v0045", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the object field was updated")
-				Expect(equality.Semantic.DeepEqual(obj.Comment, updateReq.Comment)).To(BeTrue())
+				Expect(updateReq.Comment).To(BeEquivalentTo(obj.Comment))
 			}, SpecTimeout(testTimeout))
 		})
 
@@ -193,7 +192,7 @@ var _ = Describe("Client v0045", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the fetched object equals the created one")
-				Expect(equality.Semantic.DeepEqual(obj, actual)).To(BeTrue())
+				Expect(actual).To(BeEquivalentTo(obj))
 			}, SpecTimeout(testTimeout))
 		})
 
@@ -267,7 +266,7 @@ var _ = Describe("Client v0045", func() {
 				}, testTimeout, 2*time.Second).Should(Succeed())
 
 				By("checking the layout is not empty")
-				Expect(equality.Semantic.DeepEqual(layout, &types.V0045NodeResourceLayout{})).NotTo(BeTrue())
+				Expect(layout).ToNot(BeEquivalentTo(&types.V0045NodeResourceLayout{}))
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -320,7 +319,7 @@ var _ = Describe("Client v0045", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating the object field was updated")
-				Expect(equality.Semantic.DeepEqual(obj.Comment, req.Comment)).To(BeTrue())
+				Expect(obj.Comment).To(BeEquivalentTo(req.Comment))
 			}, SpecTimeout(testTimeout))
 		})
 

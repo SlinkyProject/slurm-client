@@ -6,7 +6,7 @@ package types
 import (
 	"testing"
 
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
@@ -42,9 +42,8 @@ func TestV0042ControllerPing_GetKey(t *testing.T) {
 			o := &V0042ControllerPing{
 				V0042ControllerPing: tt.fields.V0042ControllerPing,
 			}
-			if got := o.GetKey(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPing.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -71,9 +70,8 @@ func TestV0042ControllerPing_GetType(t *testing.T) {
 			o := &V0042ControllerPing{
 				V0042ControllerPing: tt.fields.V0042ControllerPing,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPing.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -107,9 +105,8 @@ func TestV0042ControllerPing_DeepCopyObject(t *testing.T) {
 			o := &V0042ControllerPing{
 				V0042ControllerPing: tt.fields.V0042ControllerPing,
 			}
-			if got := o.DeepCopyObject(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPing.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -143,9 +140,8 @@ func TestV0042ControllerPing_DeepCopy(t *testing.T) {
 			o := &V0042ControllerPing{
 				V0042ControllerPing: tt.fields.V0042ControllerPing,
 			}
-			if got := o.DeepCopy(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPing.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -172,9 +168,8 @@ func TestV0042ControllerPingList_GetType(t *testing.T) {
 			o := &V0042ControllerPingList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPingList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -214,9 +209,8 @@ func TestV0042ControllerPingList_GetItems(t *testing.T) {
 			o := &V0042ControllerPingList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPingList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -279,9 +273,7 @@ func TestV0042ControllerPingList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0042ControllerPingList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -325,9 +317,8 @@ func TestV0042ControllerPingList_DeepCopyObjectList(t *testing.T) {
 			o := &V0042ControllerPingList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0042ControllerPingList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

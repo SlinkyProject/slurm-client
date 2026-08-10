@@ -6,7 +6,7 @@ package types
 import (
 	"testing"
 
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
@@ -43,9 +43,8 @@ func TestV0043Node_GetKey(t *testing.T) {
 			o := &V0043Node{
 				V0043Node: tt.fields.V0043Node,
 			}
-			if got := o.GetKey(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Node.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -72,9 +71,8 @@ func TestV0043Node_GetType(t *testing.T) {
 			o := &V0043Node{
 				V0043Node: tt.fields.V0043Node,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Node.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -108,9 +106,8 @@ func TestV0043Node_DeepCopyObject(t *testing.T) {
 			o := &V0043Node{
 				V0043Node: tt.fields.V0043Node,
 			}
-			if got := o.DeepCopyObject(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Node.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -144,9 +141,8 @@ func TestV0043Node_DeepCopy(t *testing.T) {
 			o := &V0043Node{
 				V0043Node: tt.fields.V0043Node,
 			}
-			if got := o.DeepCopy(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Node.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -220,9 +216,8 @@ func TestV0043NodeList_GetType(t *testing.T) {
 			o := &V0043NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043NodeList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -262,9 +257,8 @@ func TestV0043NodeList_GetItems(t *testing.T) {
 			o := &V0043NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043NodeList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -327,9 +321,7 @@ func TestV0043NodeList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0043NodeList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -373,9 +365,8 @@ func TestV0043NodeList_DeepCopyObjectList(t *testing.T) {
 			o := &V0043NodeList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043NodeList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

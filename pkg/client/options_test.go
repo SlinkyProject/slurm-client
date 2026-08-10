@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/equality"
+	"github.com/stretchr/testify/require"
 
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -103,9 +103,8 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 				DisableFor:      tt.fields.DisableFor,
 				CacheSyncPeriod: tt.fields.CacheSyncPeriod,
 			}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("ClientOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -133,9 +132,8 @@ func TestCreateOptions_ApplyOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &CreateOptions{}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("CreateOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -182,9 +180,8 @@ func TestDeleteOptions_ApplyOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &DeleteOptions{}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("DeleteOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -251,9 +248,8 @@ func TestGetOptions_ApplyOptions(t *testing.T) {
 				SkipCache:    tt.fields.SkipCache,
 				RefreshCache: tt.fields.RefreshCache,
 			}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("GetOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -320,9 +316,8 @@ func TestListOptions_ApplyOptions(t *testing.T) {
 				SkipCache:    tt.fields.SkipCache,
 				RefreshCache: tt.fields.RefreshCache,
 			}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("ListOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -369,9 +364,8 @@ func TestUpdateOptions_ApplyOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &UpdateOptions{}
-			if got := o.ApplyOptions(tt.args.opts); !equality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("UpdateOptions.ApplyOptions() = %v, want %v", got, tt.want)
-			}
+			got := o.ApplyOptions(tt.args.opts)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

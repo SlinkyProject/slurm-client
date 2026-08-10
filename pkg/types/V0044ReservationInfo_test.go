@@ -6,7 +6,7 @@ package types
 import (
 	"testing"
 
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
@@ -42,9 +42,8 @@ func TestV0044ReservationInfo_GetKey(t *testing.T) {
 			o := &V0044ReservationInfo{
 				V0044ReservationInfo: tt.fields.V0044ReservationInfo,
 			}
-			if got := o.GetKey(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfo.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -71,9 +70,8 @@ func TestV0044ReservationInfo_GetType(t *testing.T) {
 			o := &V0044ReservationInfo{
 				V0044ReservationInfo: tt.fields.V0044ReservationInfo,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfo.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -107,9 +105,8 @@ func TestV0044ReservationInfo_DeepCopyObject(t *testing.T) {
 			o := &V0044ReservationInfo{
 				V0044ReservationInfo: tt.fields.V0044ReservationInfo,
 			}
-			if got := o.DeepCopyObject(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfo.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -143,9 +140,8 @@ func TestV0044ReservationInfo_DeepCopy(t *testing.T) {
 			o := &V0044ReservationInfo{
 				V0044ReservationInfo: tt.fields.V0044ReservationInfo,
 			}
-			if got := o.DeepCopy(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfo.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -172,9 +168,8 @@ func TestV0044ReservationInfoList_GetType(t *testing.T) {
 			o := &V0044ReservationInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfoList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -214,9 +209,8 @@ func TestV0044ReservationInfoList_GetItems(t *testing.T) {
 			o := &V0044ReservationInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfoList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -279,9 +273,7 @@ func TestV0044ReservationInfoList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0044ReservationInfoList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -325,9 +317,8 @@ func TestV0044ReservationInfoList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044ReservationInfoList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0044ReservationInfoList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

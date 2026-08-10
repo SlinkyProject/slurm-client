@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
@@ -134,9 +134,7 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 				t.Errorf("SlurmClient.GetPartitionInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetPartitionInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -258,9 +256,7 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 				t.Errorf("SlurmClient.ListPartitionInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.ListPartitionInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

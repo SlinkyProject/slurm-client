@@ -6,7 +6,7 @@ package types
 import (
 	"testing"
 
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	"github.com/stretchr/testify/require"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -34,9 +34,8 @@ func TestV0043Stats_GetKey(t *testing.T) {
 			o := &V0043Stats{
 				V0043StatsMsg: tt.fields.V0043Stats,
 			}
-			if got := o.GetKey(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Stats.GetKey() = %v, want %v", got, tt.want)
-			}
+			got := o.GetKey()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -63,9 +62,8 @@ func TestV0043Stats_GetType(t *testing.T) {
 			o := &V0043Stats{
 				V0043StatsMsg: tt.fields.V0043Stats,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Stats.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -99,9 +97,8 @@ func TestV0043Stats_DeepCopyObject(t *testing.T) {
 			o := &V0043Stats{
 				V0043StatsMsg: tt.fields.V0043Stats,
 			}
-			if got := o.DeepCopyObject(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Stats.DeepCopyObject() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObject()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -135,9 +132,8 @@ func TestV0043Stats_DeepCopy(t *testing.T) {
 			o := &V0043Stats{
 				V0043StatsMsg: tt.fields.V0043Stats,
 			}
-			if got := o.DeepCopy(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043Stats.DeepCopy() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopy()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -164,9 +160,8 @@ func TestV0043StatsList_GetType(t *testing.T) {
 			o := &V0043StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetType(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043StatsList.GetType() = %v, want %v", got, tt.want)
-			}
+			got := o.GetType()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -204,9 +199,8 @@ func TestV0043StatsList_GetItems(t *testing.T) {
 			o := &V0043StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.GetItems(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043StatsList.GetItems() = %v, want %v", got, tt.want)
-			}
+			got := o.GetItems()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -268,9 +262,7 @@ func TestV0043StatsList_AppendItem(t *testing.T) {
 			}
 			o.AppendItem(tt.args.object)
 			got := len(o.GetItems())
-			if want != got {
-				t.Errorf("V0043StatsList.AppendItem() = %v, want %v", got, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }
@@ -312,9 +304,8 @@ func TestV0043StatsList_DeepCopyObjectList(t *testing.T) {
 			o := &V0043StatsList{
 				Items: tt.fields.Items,
 			}
-			if got := o.DeepCopyObjectList(); !apiequality.Semantic.DeepEqual(got, tt.want) {
-				t.Errorf("V0043StatsList.DeepCopyObjectList() = %v, want %v", got, tt.want)
-			}
+			got := o.DeepCopyObjectList()
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

@@ -8,10 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
@@ -446,7 +446,7 @@ func (i *informerCache) processObject(obj object.Object) {
 		entry.lastUpdate = now
 		entry.dirty = false
 		delete(i.syncErrorGet, key)
-		if !equality.Semantic.DeepEqual(entry.object, obj) {
+		if !reflect.DeepEqual(entry.object, obj) {
 			entry.object = obj.DeepCopyObject()
 			e := event.Event{
 				Type:      event.Modified,
