@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
@@ -135,9 +135,7 @@ func TestSlurmClient_GetReservationInfo(t *testing.T) {
 				t.Errorf("SlurmClient.GetReservationInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetReservationInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -259,9 +257,7 @@ func TestSlurmClient_ListReservationInfo(t *testing.T) {
 				t.Errorf("SlurmClient.ListReservationInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.ListReservationInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -376,9 +372,7 @@ func TestSlurmClient_CreateReservationInfo(t *testing.T) {
 				t.Errorf("SlurmClient.CreateReservationInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.CreateReservationInfo() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 
 	}

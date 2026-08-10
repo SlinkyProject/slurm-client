@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
@@ -110,9 +110,7 @@ func TestSlurmClient_GetReconfigure(t *testing.T) {
 				t.Errorf("SlurmClient.GetReconfigure() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetReconfigure() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -213,9 +211,7 @@ func TestSlurmClient_ListReconfigure(t *testing.T) {
 				t.Errorf("SlurmClient.ListReconfigure() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.ListReconfigure() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

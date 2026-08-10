@@ -6,9 +6,8 @@ package types
 import (
 	"testing"
 
-	"k8s.io/utils/ptr"
-
 	"github.com/stretchr/testify/require"
+	"k8s.io/utils/ptr"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"

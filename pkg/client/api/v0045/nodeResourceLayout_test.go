@@ -5,8 +5,9 @@ package v0045
 
 import (
 	"context"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0045/fake"
@@ -93,9 +94,7 @@ func TestSlurmClient_GetNodeResourceLayout(t *testing.T) {
 				t.Errorf("SlurmClient.GetNodeResourceLayout() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SlurmClient.GetNodeResourceLayout() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
