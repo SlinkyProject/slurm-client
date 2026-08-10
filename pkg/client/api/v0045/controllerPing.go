@@ -34,7 +34,7 @@ func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*type
 			return &item, nil
 		}
 	}
-	return nil, apierrors.ErrNotFound
+	return nil, apierrors.ErrObjectNotFound
 }
 
 // ListControllerPing implements ClientInterface

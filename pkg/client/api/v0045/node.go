@@ -110,7 +110,7 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 	}
 
 	if len(res.JSON200.Nodes) == 0 {
-		return nil, apierrors.ErrNotFound
+		return nil, apierrors.ErrObjectNotFound
 	}
 
 	out := &types.V0045Node{}

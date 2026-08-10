@@ -9,6 +9,6 @@ import (
 )
 
 var (
-	ErrNotFound       = errors.New(http.StatusText(http.StatusNotFound))
+	ErrObjectNotFound = errors.New(http.StatusText(http.StatusNotFound))
 	ErrNotImplemented = errors.New(http.StatusText(http.StatusNotImplemented))
 )
