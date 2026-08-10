@@ -7,8 +7,7 @@ package client
 import (
 	"context"
 
-	"k8s.io/client-go/tools/cache"
-
+	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
