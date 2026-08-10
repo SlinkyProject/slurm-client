@@ -8,8 +8,9 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/utils/ptr"
+
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
