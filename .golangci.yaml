@@ -10,13 +10,15 @@ linters:
     - gocritic
     - gosec
     - ineffassign
+    - misspell
     - nilnil
     - nilerr
     - unused
     - wastedassign
-  exclusions:
-    mispell:
+  settings:
+    misspell:
       locale: US
+  exclusions:
     generated: lax
     presets:
       - comments
