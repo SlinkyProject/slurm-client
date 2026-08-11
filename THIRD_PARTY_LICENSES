@@ -56,11 +56,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Version: v0.40.0
 - License: BSD-3-Clause
 
-### k8s.io/apimachinery/pkg/util
-- Name: k8s.io/apimachinery/pkg/util
-- Version: v0.36.3
-- License: Apache-2.0
-
 ### k8s.io/utils
 - Name: k8s.io/utils
 - Version: v0.0.0-20260707023825-cf1189d6abe3

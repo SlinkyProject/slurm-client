@@ -17,5 +17,4 @@ Third-party Dependencies:
 - github.com/oasdiff/yaml3 (MIT)
 - github.com/santhosh-tekuri/jsonschema/v6 (Apache-2.0)
 - golang.org/x/text (BSD-3-Clause)
-- k8s.io/apimachinery/pkg/util (Apache-2.0)
 - k8s.io/utils (Apache-2.0)
