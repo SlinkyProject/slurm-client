@@ -19,13 +19,13 @@ func PollUntilContextTimeout(ctx context.Context, interval, timeout time.Duratio
 }
 
 // loopConditionUntilContext executes the provided condition at intervals defined by
-// the provided timer until the provided context is cancelled, the condition returns
+// the provided timer until the provided context is canceled, the condition returns
 // true, or the condition returns an error. If sliding is true, the period is computed
 // after condition runs. If it is false then period includes the runtime for condition.
 // If immediate is false the first delay happens before any call to condition, if
 // immediate is true the condition will be invoked before waiting and guarantees that
 // the condition is invoked at least once, regardless of whether the context has been
-// cancelled. The returned error is the error returned by the last condition or the
+// canceled. The returned error is the error returned by the last condition or the
 // context error if the context was terminated.
 //
 // This is the common loop construct for all polling in the wait package.
@@ -63,7 +63,7 @@ func loopConditionUntilContext(ctx context.Context, interval time.Duration, imme
 	}
 
 	for {
-		// Wait for either the context to be cancelled or the next invocation be called.
+		// Wait for either the context to be canceled or the next invocation be called.
 		select {
 		case <-doneCh:
 			return ctx.Err()
@@ -75,7 +75,7 @@ func loopConditionUntilContext(ctx context.Context, interval time.Duration, imme
 		// repeatedly even when the context has been canceled. We therefore must
 		// explicitly check for context cancellation on every loop and exit if true to
 		// guarantee that we don't invoke condition more than once after context has
-		// been cancelled.
+		// been canceled.
 		if err := ctx.Err(); err != nil {
 			return err
 		}
