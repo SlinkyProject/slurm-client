@@ -83,7 +83,7 @@ func TestPollUntilContextTimeout_TimeoutEnforced(t *testing.T) {
 }
 
 // TestPollUntilContextTimeout_ParentContextCancelled ensures that if the parent
-// context is cancelled mid-flight, the loop aborts instantly without waiting for the timeout.
+// context is canceled mid-flight, the loop aborts instantly without waiting for the timeout.
 func TestPollUntilContextTimeout_ParentContextCancelled(t *testing.T) {
 	parentCtx, cancelParent := context.WithCancel(context.Background())
 	defer cancelParent()
