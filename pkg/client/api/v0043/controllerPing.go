@@ -10,8 +10,7 @@ import (
 
 	"k8s.io/utils/ptr"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -35,7 +34,7 @@ func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*type
 			return &item, nil
 		}
 	}
-	return nil, errors.New(http.StatusText(http.StatusNotFound))
+	return nil, apierrors.ErrObjectNotFound
 }
 
 // ListControllerPing implements ClientInterface
@@ -43,12 +42,12 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0043Contr
 	res, err := c.SlurmV0043GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
-	} else if res.StatusCode() != 200 {
+	} else if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 	list := &types.V0043ControllerPingList{
 		Items: make([]types.V0043ControllerPing, len(res.JSON200.Pings)),

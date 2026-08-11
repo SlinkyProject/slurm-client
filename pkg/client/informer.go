@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
@@ -221,7 +221,7 @@ func (i *informerCache) doListInformer() {
 		// NOTE: We must handle every Slurm type otherwise panic.
 		// We cannot recover from here because the informer has started a
 		// number of go-routines that must all start and stop together.
-		panic(errors.New(http.StatusText(http.StatusNotImplemented)))
+		panic(apierrors.ErrNotImplemented)
 	}
 
 	opts := &ListOptions{SkipCache: true}
@@ -357,7 +357,7 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	err := i.reader.Get(context.TODO(), key, obj, opts)
 
 	i.mu.Lock()
-	if err != nil && err.Error() != http.StatusText(http.StatusNotFound) {
+	if err != nil && !errors.Is(err, apierrors.ErrObjectNotFound) {
 		i.syncErrorGet[key] = err
 	} else {
 		i.syncErrorGet[key] = nil
@@ -554,7 +554,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 
 	entry, ok := i.cache[key]
 	if !ok || entry.object == nil {
-		return errors.New(http.StatusText(http.StatusNotFound))
+		return apierrors.ErrObjectNotFound
 	}
 
 	switch o := obj.(type) {
@@ -639,7 +639,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	return nil

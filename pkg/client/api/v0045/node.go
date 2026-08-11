@@ -8,9 +8,8 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -37,12 +36,12 @@ func (c *SlurmClient) CreateNewNode(ctx context.Context, req any) (*string, erro
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	nodeName, err := utils.ParseNodeName(r.NodeConf)
@@ -60,12 +59,12 @@ func (c *SlurmClient) DeleteNode(ctx context.Context, nodeName string) error {
 		return err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -83,12 +82,12 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) 
 		return err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -102,16 +101,16 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	if len(res.JSON200.Nodes) == 0 {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
+		return nil, apierrors.ErrObjectNotFound
 	}
 
 	out := &types.V0045Node{}
@@ -127,12 +126,12 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0045NodeList, erro
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	list := &types.V0045NodeList{

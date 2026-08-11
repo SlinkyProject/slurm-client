@@ -8,9 +8,8 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -38,12 +37,12 @@ func (c *SlurmClient) CreateReservationInfo(ctx context.Context, req any) (strin
 		return "", err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return "", utilerrors.NewAggregate(errs)
+		return "", errors.Join(errs...)
 	}
 
 	return *r.Name, nil
@@ -56,12 +55,12 @@ func (c *SlurmClient) DeleteReservationInfo(ctx context.Context, name string) er
 		return err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -83,12 +82,12 @@ func (c *SlurmClient) UpdateReservationInfo(ctx context.Context, name string, re
 		return err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return utilerrors.NewAggregate(errs)
+		return errors.Join(errs...)
 	}
 
 	return nil
@@ -102,16 +101,16 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	if len(res.JSON200.Reservations) == 0 {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
+		return nil, apierrors.ErrObjectNotFound
 	}
 
 	out := &types.V0045ReservationInfo{}
@@ -127,12 +126,12 @@ func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*types.V0045Rese
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	list := &types.V0045ReservationInfoList{

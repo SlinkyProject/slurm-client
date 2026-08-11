@@ -8,9 +8,8 @@ import (
 	"errors"
 	"net/http"
 
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
@@ -30,16 +29,16 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	if len(res.JSON200.Partitions) == 0 {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
+		return nil, apierrors.ErrObjectNotFound
 	}
 
 	out := &types.V0045PartitionInfo{}
@@ -55,12 +54,12 @@ func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0045Partit
 		return nil, err
 	}
 
-	if res.StatusCode() != 200 {
+	if res.StatusCode() != http.StatusOK {
 		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
-		return nil, utilerrors.NewAggregate(errs)
+		return nil, errors.Join(errs...)
 	}
 
 	list := &types.V0045PartitionInfoList{

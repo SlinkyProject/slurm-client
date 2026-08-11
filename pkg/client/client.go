@@ -21,6 +21,7 @@ import (
 	v0044 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0044"
 	v0045 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0045"
 	tokenprovider "github.com/SlinkyProject/slurm-client/pkg/client/token"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -219,7 +220,7 @@ func (c *client) Create(
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	if err != nil {
@@ -277,7 +278,7 @@ func (c *client) Delete(
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	if err != nil {
@@ -289,7 +290,7 @@ func (c *client) Delete(
 		// We expect the error to always be NotFound because we deleted the
 		// object from Slurm then attempted to Get the deleted object with
 		// refreshed cache.
-		if err.Error() != http.StatusText(http.StatusNotFound) {
+		if !errors.Is(err, apierrors.ErrObjectNotFound) {
 			return err
 		}
 	}
@@ -346,7 +347,7 @@ func (c *client) Update(
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	if err != nil {
@@ -560,7 +561,7 @@ func (c *client) Get(
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	return nil
@@ -758,7 +759,7 @@ func (c *client) List(
 	/////////////////////////////////////////////////////////////////////////////////
 
 	default:
-		return errors.New(http.StatusText(http.StatusNotImplemented))
+		return apierrors.ErrNotImplemented
 	}
 
 	return nil
