@@ -11,8 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
-
+	"github.com/SlinkyProject/slurm-client/internal/wait"
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/event"

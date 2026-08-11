@@ -16,11 +16,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 - Version: v0.146.0
 - License: MIT
 
-### github.com/go-logr/logr
-- Name: github.com/go-logr/logr
-- Version: v1.4.4
-- License: Apache-2.0
-
 ### github.com/go-openapi/jsonpointer
 - Name: github.com/go-openapi/jsonpointer
 - Version: v1.0.0
@@ -64,11 +59,6 @@ For complete license texts, please refer to the source repositories or the LICEN
 ### k8s.io/apimachinery/pkg/util
 - Name: k8s.io/apimachinery/pkg/util
 - Version: v0.36.3
-- License: Apache-2.0
-
-### k8s.io/klog/v2
-- Name: k8s.io/klog/v2
-- Version: v2.140.0
 - License: Apache-2.0
 
 ### k8s.io/utils
