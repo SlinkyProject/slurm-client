@@ -11,10 +11,8 @@ import (
 	"testing"
 
 	"github.com/moby/moby/api/pkg/stdcopy"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	tcc "github.com/testcontainers/testcontainers-go/modules/compose"
 )
 
