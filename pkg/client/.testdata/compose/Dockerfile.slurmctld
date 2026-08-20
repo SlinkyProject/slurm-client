@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+FROM ghcr.io/slinkyproject/slurmctld:26.05-ubuntu26.04
+COPY etc/ /opt/etc/slurm/
+COPY entrypoint/slurmctld.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT /usr/local/bin/entrypoint.sh
