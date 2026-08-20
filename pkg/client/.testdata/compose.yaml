@@ -22,12 +22,7 @@ services:
   accounting:
     build:
       context: ./compose
-      dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmdbd:26.05-ubuntu26.04
-        COPY etc/ /opt/etc/slurm/
-        COPY entrypoint/slurmdbd.sh /usr/local/bin/entrypoint.sh
-        RUN chmod +x /usr/local/bin/entrypoint.sh
-        ENTRYPOINT /usr/local/bin/entrypoint.sh
+      dockerfile: Dockerfile.slurmdbd
     hostname: slurmdbd
     restart: unless-stopped
     # ports:
@@ -46,12 +41,7 @@ services:
   control-plane:
     build:
       context: ./compose
-      dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmctld:26.05-ubuntu26.04
-        COPY etc/ /opt/etc/slurm/
-        COPY entrypoint/slurmctld.sh /usr/local/bin/entrypoint.sh
-        RUN chmod +x /usr/local/bin/entrypoint.sh
-        ENTRYPOINT /usr/local/bin/entrypoint.sh
+      dockerfile: Dockerfile.slurmctld
     hostname: slurmctld
     restart: unless-stopped
     # ports:
@@ -71,12 +61,7 @@ services:
     privileged: true
     build:
       context: ./compose
-      dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmd:26.05-ubuntu26.04
-        COPY etc/ /opt/etc/slurm/
-        COPY entrypoint/slurmd.sh /usr/local/bin/entrypoint.sh
-        RUN chmod +x /usr/local/bin/entrypoint.sh
-        ENTRYPOINT /usr/local/bin/entrypoint.sh
+      dockerfile: Dockerfile.slurmd
     hostname: slurmd
     restart: unless-stopped
     # ports:
@@ -95,12 +80,7 @@ services:
   restapi:
     build:
       context: ./compose
-      dockerfile_inline: |
-        FROM ghcr.io/slinkyproject/slurmrestd:26.05-ubuntu26.04
-        COPY etc/ /opt/etc/slurm/
-        COPY entrypoint/slurmrestd.sh /usr/local/bin/entrypoint.sh
-        RUN chmod +x /usr/local/bin/entrypoint.sh
-        ENTRYPOINT /usr/local/bin/entrypoint.sh
+      dockerfile: Dockerfile.slurmrestd
     hostname: slurmrestd
     environment:
       - SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv
