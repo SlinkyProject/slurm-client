@@ -17,9 +17,6 @@ import (
 const (
 	headerSlurmUserName  = "X-SLURM-USER-NAME"
 	headerSlurmUserToken = "X-SLURM-USER-TOKEN" //nolint:gosec // disable G101
-
-	headerContentType     = "Content-Type"
-	headerApplicationJson = "application/json"
 )
 
 type ClientInterface interface {
@@ -47,8 +44,7 @@ func NewSlurmClient(server, token string, httpServer *http.Client) (ClientInterf
 
 	// Create header injection function
 	headerFunc := func(ctx context.Context, req *http.Request) error {
-		req.Header.Add(headerSlurmUserToken, token)
-		req.Header.Add(headerContentType, headerApplicationJson)
+		req.Header.Set(headerSlurmUserToken, token)
 		return nil
 	}
 
