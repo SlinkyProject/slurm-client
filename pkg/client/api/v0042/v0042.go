@@ -18,9 +18,6 @@ import (
 const (
 	headerSlurmUserName  = "X-SLURM-USER-NAME"
 	headerSlurmUserToken = "X-SLURM-USER-TOKEN" //nolint:gosec // disable G101
-
-	headerContentType     = "Content-Type"
-	headerApplicationJson = "application/json"
 )
 
 type ClientInterface interface {
@@ -60,7 +57,6 @@ func NewSlurmClient(server, token string, httpServer *http.Client, opts ...clien
 			return fmt.Errorf("auth token cannot be empty")
 		}
 		req.Header.Set(headerSlurmUserToken, token)
-		req.Header.Add(headerContentType, headerApplicationJson)
 		return nil
 	}
 
