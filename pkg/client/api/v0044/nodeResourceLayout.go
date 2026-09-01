@@ -36,7 +36,7 @@ func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (
 	}
 
 	if len(res.JSON200.Nodes) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0044NodeResourceLayout{

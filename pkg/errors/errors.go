@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrObjectNotFound = errors.New(http.StatusText(http.StatusNotFound))
+	ErrNotFound       = errors.New(http.StatusText(http.StatusNotFound))
 	ErrNotImplemented = errors.New(http.StatusText(http.StatusNotImplemented))
 )
 
@@ -17,7 +17,7 @@ var (
 func NewHTTPError(statusCode int) error {
 	switch statusCode {
 	case http.StatusNotFound:
-		return ErrObjectNotFound
+		return ErrNotFound
 	case http.StatusNotImplemented:
 		return ErrNotImplemented
 	default:

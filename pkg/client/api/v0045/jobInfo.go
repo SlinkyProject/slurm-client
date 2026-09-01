@@ -108,7 +108,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	}
 
 	if len(res.JSON200.Jobs) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0045JobInfo{}

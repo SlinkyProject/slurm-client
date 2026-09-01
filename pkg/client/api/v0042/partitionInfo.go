@@ -38,7 +38,7 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 	}
 
 	if len(res.JSON200.Partitions) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0042PartitionInfo{}

@@ -20,7 +20,7 @@ func TestNewHTTPError(t *testing.T) {
 		{
 			name:       "Not Found",
 			statusCode: http.StatusNotFound,
-			want:       apierrors.ErrObjectNotFound,
+			want:       apierrors.ErrNotFound,
 		},
 		{
 			name:       "Not Implemented",
@@ -44,7 +44,7 @@ func TestNewHTTPError_UnmappedStatus(t *testing.T) {
 	if got, want := err.Error(), http.StatusText(http.StatusInternalServerError); got != want {
 		t.Errorf("NewHTTPError() error = %q, want %q", got, want)
 	}
-	if errors.Is(err, apierrors.ErrObjectNotFound) {
-		t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrObjectNotFound", err)
+	if errors.Is(err, apierrors.ErrNotFound) {
+		t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrNotFound", err)
 	}
 }

@@ -290,7 +290,7 @@ func (c *client) Delete(
 		// We expect the error to always be NotFound because we deleted the
 		// object from Slurm then attempted to Get the deleted object with
 		// refreshed cache.
-		if !errors.Is(err, apierrors.ErrObjectNotFound) {
+		if !errors.Is(err, apierrors.ErrNotFound) {
 			return err
 		}
 	}

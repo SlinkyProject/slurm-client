@@ -175,7 +175,7 @@ var _ = Describe("Client v0042", func() {
 		})
 
 		Context("Get", func() {
-			It("should return ErrObjectNotFound from cache if the object does not exist", func(ctx SpecContext) {
+			It("should return ErrNotFound from cache if the object does not exist", func(ctx SpecContext) {
 				By("waiting for the informer cache to start")
 				Eventually(cl.GetInformer(types.ObjectTypeV0042JobInfo).HasStarted).Should(BeTrue())
 
@@ -183,14 +183,14 @@ var _ = Describe("Client v0042", func() {
 				obj := &types.V0042JobInfo{}
 				key := object.ObjectKey("2147483647")
 				err := cl.Get(ctx, key, obj)
-				Expect(errors.Is(err, apierrors.ErrObjectNotFound)).To(BeTrue())
+				Expect(errors.Is(err, apierrors.ErrNotFound)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
-			It("should return ErrObjectNotFound from the live API if the object does not exist", func(ctx SpecContext) {
+			It("should return ErrNotFound from the live API if the object does not exist", func(ctx SpecContext) {
 				By("fetching a non-existent object from the live API")
 				obj := &types.V0042JobInfo{}
 				key := object.ObjectKey("2147483647")
 				err := cl.Get(ctx, key, obj, &GetOptions{SkipCache: true})
-				Expect(errors.Is(err, apierrors.ErrObjectNotFound)).To(BeTrue())
+				Expect(errors.Is(err, apierrors.ErrNotFound)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
 			It("should fetch an existing object for a go struct", func(ctx SpecContext) {
 				By("initially creating an object")

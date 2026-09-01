@@ -110,7 +110,7 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 	}
 
 	if len(res.JSON200.Reservations) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0044ReservationInfo{}
