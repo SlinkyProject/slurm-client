@@ -100,7 +100,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	}
 
 	if res.StatusCode() != http.StatusOK {
-		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		errs := []error{apierrors.NewHTTPError(res.StatusCode())}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}

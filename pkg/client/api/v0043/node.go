@@ -73,7 +73,7 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 	}
 
 	if res.StatusCode() != http.StatusOK {
-		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		errs := []error{apierrors.NewHTTPError(res.StatusCode())}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
