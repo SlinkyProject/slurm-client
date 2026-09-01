@@ -9,6 +9,18 @@ import (
 )
 
 var (
-	ErrObjectNotFound = errors.New(http.StatusText(http.StatusNotFound))
+	ErrNotFound       = errors.New(http.StatusText(http.StatusNotFound))
 	ErrNotImplemented = errors.New(http.StatusText(http.StatusNotImplemented))
 )
+
+// NewHTTPError returns the canonical client error for an HTTP status code.
+func NewHTTPError(statusCode int) error {
+	switch statusCode {
+	case http.StatusNotFound:
+		return ErrNotFound
+	case http.StatusNotImplemented:
+		return ErrNotImplemented
+	default:
+		return errors.New(http.StatusText(statusCode))
+	}
+}

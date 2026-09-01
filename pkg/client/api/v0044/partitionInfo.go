@@ -30,7 +30,7 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 	}
 
 	if res.StatusCode() != http.StatusOK {
-		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		errs := []error{apierrors.NewHTTPError(res.StatusCode())}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
@@ -38,7 +38,7 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 	}
 
 	if len(res.JSON200.Partitions) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0044PartitionInfo{}

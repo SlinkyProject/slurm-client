@@ -95,7 +95,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	}
 
 	if res.StatusCode() != http.StatusOK {
-		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		errs := []error{apierrors.NewHTTPError(res.StatusCode())}
 		if res.JSONDefault != nil {
 			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
 		}
@@ -103,7 +103,7 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 	}
 
 	if len(res.JSON200.Jobs) == 0 {
-		return nil, apierrors.ErrObjectNotFound
+		return nil, apierrors.ErrNotFound
 	}
 
 	out := &types.V0042JobInfo{}

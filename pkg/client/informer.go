@@ -356,7 +356,7 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	err := i.reader.Get(context.TODO(), key, obj, opts)
 
 	i.mu.Lock()
-	if err != nil && !errors.Is(err, apierrors.ErrObjectNotFound) {
+	if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
 		i.syncErrorGet[key] = err
 	} else {
 		i.syncErrorGet[key] = nil
@@ -553,7 +553,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 
 	entry, ok := i.cache[key]
 	if !ok || entry.object == nil {
-		return apierrors.ErrObjectNotFound
+		return apierrors.ErrNotFound
 	}
 
 	switch o := obj.(type) {
