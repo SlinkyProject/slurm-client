@@ -24,10 +24,12 @@ const (
 	batchPeriod       = 1 * time.Second
 
 	// syncPollInterval is how often waitForSyncGet/waitForSyncList poll the in-memory
-	// dirty flag while waiting for a pending refresh to land. The check itself is a cheap
-	// map lookup under a read lock, so this can be much finer than syncPeriod without added
-	// cost; a coarse interval only adds pure latency to every RefreshCache/WaitRefreshCache
-	// caller, since Create and Update always wait on this internally after every write.
+	// dirty flag while waiting for a pending refresh to land, clamped to the wait's own
+	// timeout so a very low CacheSyncPeriod still gets at least one poll inside its window.
+	// The check itself is a cheap map lookup under a read lock, so this can be much finer
+	// than syncPeriod without added cost; a coarse interval only adds pure latency to every
+	// RefreshCache/WaitRefreshCache caller, since Create and Update always wait on this
+	// internally after every write.
 	syncPollInterval = 50 * time.Millisecond
 )
 
@@ -507,7 +509,7 @@ func (i *informerCache) waitForSyncList(ctx context.Context) error {
 	conditionFn := func(ctx context.Context) (bool, error) {
 		return i.hasSyncedList()
 	}
-	return wait.PollUntilContextTimeout(ctx, syncPollInterval, timeout, true, conditionFn)
+	return wait.PollUntilContextTimeout(ctx, min(syncPollInterval, timeout), timeout, true, conditionFn)
 }
 
 func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey) error {
@@ -515,7 +517,7 @@ func (i *informerCache) waitForSyncGet(ctx context.Context, key object.ObjectKey
 	conditionFn := func(ctx context.Context) (bool, error) {
 		return i.hasSyncedGet(key)
 	}
-	return wait.PollUntilContextTimeout(ctx, syncPollInterval, timeout, true, conditionFn)
+	return wait.PollUntilContextTimeout(ctx, min(syncPollInterval, timeout), timeout, true, conditionFn)
 }
 
 // Get implements InformerCache.
