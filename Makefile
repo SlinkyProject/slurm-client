@@ -89,11 +89,12 @@ ln -sf $(1)-$(3) $(1)
 endef
 
 ## Tool Binaries
-GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
+GOLANGCI_LINT = $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.11.1
+GOLANGCI_LINT_BASE_REV ?= HEAD
 GOVULNCHECK_VERSION ?= v1.3.0
 # Written by `make govulncheck`: CSV (see file header comments). CI uploads as an artifact.
 GOVULNCHECK_REPORT ?= govulncheck-vulns.csv
@@ -185,7 +186,7 @@ govulncheck: govulncheck-bin ## Write $(GOVULNCHECK_REPORT); fail if a vulnerabi
 # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
 .PHONY: golangci-lint
 golangci-lint: golangci-lint-bin ## Run golangci-lint.
-	$(GOLANGCI_LINT) run --fix
+	$(GOLANGCI_LINT) run --new-from-rev "$(GOLANGCI_LINT_BASE_REV)" --fix
 
 # https://github.com/golangci/golangci-lint/blob/main/.pre-commit-hooks.yaml
 .PHONY: golangci-lint-fmt
