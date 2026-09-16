@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
 // SPDX-License-Identifier: Apache-2.0
 
-// Package hostlist expands Slurm's bracketed numeric host lists.
+// Package hostlist converts between Slurm host lists and individual host names.
 package hostlist
 
 import (
