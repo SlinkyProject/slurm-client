@@ -14,6 +14,7 @@ project.
   - [Limitations](#limitations)
   - [Installation](#installation)
     - [Usage](#usage)
+      - [Host lists](#host-lists)
       - [Create](#create)
       - [Delete](#delete)
       - [Get](#get)
@@ -89,6 +90,26 @@ Start Slurm client cache.
 ctx := context.Background()
 go slurmClient.Start(ctx)
 ```
+
+#### Host lists
+
+Use `github.com/SlinkyProject/slurm-client/pkg/hostlist` to expand node lists
+returned by Slurm. This package uses pure Go and does not require Slurm binaries
+at runtime.
+
+```golang
+hosts, err := hostlist.Expand("dgx8-[0-47]")
+if err != nil {
+	return err
+}
+// hosts contains dgx8-0, dgx8-1, ..., dgx8-47.
+```
+
+Expansion preserves Slurm's padding, ordering, and duplicate names. See the
+[package documentation](pkg/hostlist/expand.go) for supported syntax and size
+limits. Unit tests use recorded Slurm outputs; `make test` also compares the
+implementation directly with `scontrol show hostnames` in the existing client
+test suite's Slurm container.
 
 #### Create
 
