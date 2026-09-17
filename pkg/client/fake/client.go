@@ -6,6 +6,7 @@ package fake
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/SlinkyProject/slurm-client/pkg/client"
@@ -36,8 +37,8 @@ var FakeSecret = "slurm-token"
 var FakeServer = "fakeserver"
 
 // NewFakeClient creates a new fake client for testing.
-func NewFakeClient() client.Client {
-	return NewClientBuilder().Build()
+func NewFakeClient(initObjs ...object.RuntimeObject) client.Client {
+	return NewClientBuilder().WithRuntimeObjects(initObjs...).Build()
 }
 
 // NewClientBuilder returns a new builder to create a fake client.
@@ -62,6 +63,21 @@ func (f *ClientBuilder) WithObjects(initObjs ...object.Object) *ClientBuilder {
 // WithLists can be optionally used to initialize this fake client with object.ObjectList(s).
 func (f *ClientBuilder) WithLists(initLists ...object.ObjectList) *ClientBuilder {
 	f.initLists = append(f.initLists, initLists...)
+	return f
+}
+
+// WithRuntimeObjects initializes this fake client with object.RuntimeObject(s).
+func (f *ClientBuilder) WithRuntimeObjects(initObjs ...object.RuntimeObject) *ClientBuilder {
+	for _, initObj := range initObjs {
+		switch obj := initObj.(type) {
+		case object.Object:
+			f.WithObjects(obj)
+		case object.ObjectList:
+			f.WithLists(obj)
+		default:
+			panic(fmt.Sprintf("ClientBuilder: unsupported type %T", initObj))
+		}
+	}
 	return f
 }
 

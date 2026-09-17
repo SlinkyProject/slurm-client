@@ -34,9 +34,7 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(err).To(HaveOccurred())
 		})
 		It("should return Found object", func() {
-			client := NewClientBuilder().
-				WithObjects(&types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}).
-				Build()
+			client := NewFakeClient(&types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}})
 			obj := &types.V0042Node{}
 			key := object.ObjectKey("node-0")
 			err := client.Get(ctx, key, obj)
@@ -66,13 +64,11 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(list.Items).To(BeEmpty())
 		})
 		It("should return non-empty list", func() {
-			client := NewClientBuilder().
-				WithLists(&types.V0042NodeList{Items: []types.V0042Node{
-					{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}},
-					{V0042Node: v0042.V0042Node{Name: ptr.To("node-1")}},
-					{V0042Node: v0042.V0042Node{Name: ptr.To("node-2")}},
-				}}).
-				Build()
+			client := NewFakeClient(&types.V0042NodeList{Items: []types.V0042Node{
+				{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}},
+				{V0042Node: v0042.V0042Node{Name: ptr.To("node-1")}},
+				{V0042Node: v0042.V0042Node{Name: ptr.To("node-2")}},
+			}})
 			list := &types.V0042NodeList{}
 			err := client.List(ctx, list)
 			Expect(err).To(BeNil())

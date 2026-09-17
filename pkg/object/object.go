@@ -7,14 +7,18 @@ type ObjectType string
 
 type ObjectKey string
 
-type Object interface {
-	GetKey() ObjectKey
+type RuntimeObject interface {
 	GetType() ObjectType
+}
+
+type Object interface {
+	RuntimeObject
+	GetKey() ObjectKey
 	DeepCopyObject() Object
 }
 
 type ObjectList interface {
-	GetType() ObjectType
+	RuntimeObject
 	GetItems() []Object
 	AppendItem(Object)
 	DeepCopyObjectList() ObjectList
