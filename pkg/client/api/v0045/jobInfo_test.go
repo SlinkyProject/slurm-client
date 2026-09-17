@@ -11,11 +11,12 @@ import (
 	"strconv"
 	"testing"
 
+	"k8s.io/utils/ptr"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0045/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0045/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"k8s.io/utils/ptr"
 )
 
 func TestSlurmClient_CreateJobInfo(t *testing.T) {
