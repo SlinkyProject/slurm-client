@@ -30,9 +30,7 @@ func (o *V0044Reconfigure) DeepCopyObject() object.Object {
 }
 
 func (o *V0044Reconfigure) DeepCopy() *V0044Reconfigure {
-	out := new(V0044Reconfigure)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 type V0044ReconfigureList struct {
@@ -55,11 +53,11 @@ func (o *V0044ReconfigureList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0044ReconfigureList) AppendItem(object object.Object) {
-	out, ok := object.(*V0044Reconfigure)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0044Reconfigure)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

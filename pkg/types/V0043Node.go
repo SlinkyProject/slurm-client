@@ -36,9 +36,7 @@ func (o *V0043Node) DeepCopyObject() object.Object {
 }
 
 func (o *V0043Node) DeepCopy() *V0043Node {
-	out := new(V0043Node)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 func (o *V0043Node) GetStateAsSet() set.Set[api.V0043NodeState] {
@@ -70,11 +68,11 @@ func (o *V0043NodeList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0043NodeList) AppendItem(object object.Object) {
-	out, ok := object.(*V0043Node)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0043Node)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

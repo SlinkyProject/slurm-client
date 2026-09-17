@@ -11,7 +11,6 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type StatsInterface interface {
@@ -31,9 +30,8 @@ func (c *SlurmClient) GetStats(ctx context.Context) (*types.V0042Stats, error) {
 		}
 		return nil, utilerrors.NewAggregate(errs)
 	}
-	out := &types.V0042Stats{}
-	utils.RemarshalOrDie(res.JSON200.Statistics, out)
-	return out, nil
+	out := types.V0042Stats{V0042StatsMsg: res.JSON200.Statistics}
+	return &out, nil
 }
 
 // ListStats implements ClientInterface
