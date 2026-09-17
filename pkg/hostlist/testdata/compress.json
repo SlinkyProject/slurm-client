@@ -1,0 +1,412 @@
+{
+  "reference": "Slurm 26.05.4: scontrol show hostlist COMMA_SEPARATED_HOSTS",
+  "cases": [
+    {
+      "hosts": [],
+      "expression": ""
+    },
+    {
+      "hosts": [
+        "node"
+      ],
+      "expression": "node"
+    },
+    {
+      "hosts": [
+        "aa",
+        "ab"
+      ],
+      "expression": "aa,ab"
+    },
+    {
+      "hosts": [
+        "node0"
+      ],
+      "expression": "node0"
+    },
+    {
+      "hosts": [
+        "node0",
+        "node1",
+        "node2"
+      ],
+      "expression": "node[0-2]"
+    },
+    {
+      "hosts": [
+        "node2",
+        "node1",
+        "node2"
+      ],
+      "expression": "node[2,1-2]"
+    },
+    {
+      "hosts": [
+        "node1",
+        "node1",
+        "node2"
+      ],
+      "expression": "node[1,1-2]"
+    },
+    {
+      "hosts": [
+        "node0",
+        "node2",
+        "node1"
+      ],
+      "expression": "node[0,2,1]"
+    },
+    {
+      "hosts": [
+        "node00",
+        "node01",
+        "node1",
+        "node2"
+      ],
+      "expression": "node[00-01,1-2]"
+    },
+    {
+      "hosts": [
+        "node0",
+        "node00",
+        "node1",
+        "node01"
+      ],
+      "expression": "node[0,00,1,01]"
+    },
+    {
+      "hosts": [
+        "node09",
+        "node10",
+        "node11"
+      ],
+      "expression": "node[09-11]"
+    },
+    {
+      "hosts": [
+        "node9",
+        "node010",
+        "node011"
+      ],
+      "expression": "node[9,010-011]"
+    },
+    {
+      "hosts": [
+        "node098",
+        "node099",
+        "node100",
+        "node101"
+      ],
+      "expression": "node[098-101]"
+    },
+    {
+      "hosts": [
+        "node01",
+        "node2",
+        "node03"
+      ],
+      "expression": "node[01,2,03]"
+    },
+    {
+      "hosts": [
+        "node001",
+        "node02"
+      ],
+      "expression": "node[001,02]"
+    },
+    {
+      "hosts": [
+        "node1",
+        "other1",
+        "node2"
+      ],
+      "expression": "node1,other1,node2"
+    },
+    {
+      "hosts": [
+        "rack0node0",
+        "rack0node1",
+        "rack1node0",
+        "rack1node1"
+      ],
+      "expression": "rack0node[0-1],rack1node[0-1]"
+    },
+    {
+      "hosts": [
+        "rack0node0",
+        "rack1node1"
+      ],
+      "expression": "rack0node0,rack1node1"
+    },
+    {
+      "hosts": [
+        "node0.example",
+        "node1.example"
+      ],
+      "expression": "node0.example,node1.example"
+    },
+    {
+      "hosts": [
+        "99b",
+        "100b"
+      ],
+      "expression": "99b,100b"
+    },
+    {
+      "hosts": [
+        "7",
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "expression": "[7-11]"
+    },
+    {
+      "hosts": [
+        "01",
+        "02",
+        "90",
+        "10"
+      ],
+      "expression": "[01-02,90,10]"
+    },
+    {
+      "hosts": [
+        "192.168.1.1",
+        "192.168.1.2",
+        "192.168.1.120"
+      ],
+      "expression": "192.168.1.[1-2,120]"
+    },
+    {
+      "hosts": [
+        "node",
+        "node0",
+        "node1",
+        "node"
+      ],
+      "expression": "node,node[0-1],node"
+    },
+    {
+      "hosts": [
+        "node000",
+        "node001",
+        "node002"
+      ],
+      "expression": "node[000-002]"
+    },
+    {
+      "hosts": [
+        "node0",
+        "node1",
+        "other0",
+        "other1",
+        "node2"
+      ],
+      "expression": "node[0-1],other[0-1],node2"
+    },
+    {
+      "hosts": [
+        "node0",
+        "node3",
+        "node4",
+        "node8",
+        "linux",
+        "linux2",
+        "linux5",
+        "node4",
+        "node12",
+        "node15",
+        "linux8",
+        "linux23"
+      ],
+      "expression": "node[0,3-4,8],linux,linux[2,5],node[4,12,15],linux[8,23]"
+    },
+    {
+      "hosts": [
+        "a1",
+        "b1",
+        "b2",
+        "b3",
+        "c1",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "e1"
+      ],
+      "expression": "a1,b[1-3],c1,d[1-5],e1"
+    },
+    {
+      "hosts": [
+        "b1",
+        "b2",
+        "b3",
+        "d1",
+        "d3",
+        "d4"
+      ],
+      "expression": "b[1-3],d[1,3-4]"
+    },
+    {
+      "hosts": [
+        "dgx8-0",
+        "dgx8-1",
+        "dgx8-2",
+        "dgx8-3",
+        "dgx8-4",
+        "dgx8-5",
+        "dgx8-6",
+        "dgx8-7",
+        "dgx8-8",
+        "dgx8-9",
+        "dgx8-10",
+        "dgx8-11",
+        "dgx8-12",
+        "dgx8-13",
+        "dgx8-14",
+        "dgx8-15",
+        "dgx8-16",
+        "dgx8-17",
+        "dgx8-18",
+        "dgx8-19",
+        "dgx8-20",
+        "dgx8-21",
+        "dgx8-22",
+        "dgx8-23",
+        "dgx8-24",
+        "dgx8-25",
+        "dgx8-26",
+        "dgx8-27",
+        "dgx8-28",
+        "dgx8-29",
+        "dgx8-30",
+        "dgx8-31",
+        "dgx8-32",
+        "dgx8-33",
+        "dgx8-34",
+        "dgx8-35",
+        "dgx8-36",
+        "dgx8-37",
+        "dgx8-38",
+        "dgx8-39",
+        "dgx8-40",
+        "dgx8-41",
+        "dgx8-42",
+        "dgx8-43",
+        "dgx8-44",
+        "dgx8-45",
+        "dgx8-46",
+        "dgx8-47"
+      ],
+      "expression": "dgx8-[0-47]"
+    },
+    {
+      "hosts": [
+        "node01",
+        "node02",
+        "node03",
+        "node04",
+        "node05",
+        "node06",
+        "node07",
+        "node08",
+        "node09",
+        "node10",
+        "node11",
+        "node12",
+        "node13",
+        "node14",
+        "node15",
+        "node16",
+        "node17",
+        "node18",
+        "node19",
+        "node20",
+        "node21",
+        "node22",
+        "node23",
+        "node24",
+        "node25",
+        "node26",
+        "node27",
+        "node28",
+        "node29",
+        "node30",
+        "node31",
+        "node32",
+        "node33",
+        "node34",
+        "node35",
+        "node36",
+        "node37",
+        "node38",
+        "node39",
+        "node40",
+        "node41",
+        "node42",
+        "node43",
+        "node44",
+        "node45",
+        "node46",
+        "node47",
+        "node48",
+        "node49",
+        "node50",
+        "node51",
+        "node52",
+        "node53",
+        "node54",
+        "node55",
+        "node56",
+        "node57",
+        "node58",
+        "node59",
+        "node60",
+        "node61",
+        "node62",
+        "node63",
+        "node64",
+        "node65",
+        "node66",
+        "node67",
+        "node68",
+        "node69",
+        "node70",
+        "node71",
+        "node72",
+        "node73",
+        "node74",
+        "node75",
+        "node76",
+        "node77",
+        "node78",
+        "node79",
+        "node80",
+        "node81",
+        "node82",
+        "node83",
+        "node84",
+        "node85",
+        "node86",
+        "node87",
+        "node88",
+        "node89",
+        "node90",
+        "node91",
+        "node92",
+        "node93",
+        "node94",
+        "node95",
+        "node96",
+        "node97",
+        "node98",
+        "node99",
+        "node100"
+      ],
+      "expression": "node[01-100]"
+    }
+  ]
+}
