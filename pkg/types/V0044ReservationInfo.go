@@ -35,9 +35,7 @@ func (o *V0044ReservationInfo) DeepCopyObject() object.RuntimeObject {
 }
 
 func (o *V0044ReservationInfo) DeepCopy() *V0044ReservationInfo {
-	out := new(V0044ReservationInfo)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 type V0044ReservationInfoList struct {
@@ -60,11 +58,11 @@ func (o *V0044ReservationInfoList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0044ReservationInfoList) AppendItem(object object.Object) {
-	out, ok := object.(*V0044ReservationInfo)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0044ReservationInfo)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObject implements RuntimeObject.

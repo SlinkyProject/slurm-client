@@ -11,7 +11,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type ReservationInterface interface {
@@ -113,9 +112,8 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := &types.V0044ReservationInfo{}
-	utils.RemarshalOrDie(res.JSON200.Reservations[0], out)
-	return out, nil
+	out := types.V0044ReservationInfo{V0044ReservationInfo: res.JSON200.Reservations[0]}
+	return &out, nil
 }
 
 // ListReservationInfo implements ClientInterface
@@ -138,7 +136,7 @@ func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*types.V0044Rese
 		Items: make([]types.V0044ReservationInfo, len(res.JSON200.Reservations)),
 	}
 	for i, item := range res.JSON200.Reservations {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0044ReservationInfo{V0044ReservationInfo: item}
 	}
 	return list, nil
 }
