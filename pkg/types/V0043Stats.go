@@ -33,9 +33,7 @@ func (o *V0043Stats) DeepCopyObject() object.Object {
 }
 
 func (o *V0043Stats) DeepCopy() *V0043Stats {
-	out := new(V0043Stats)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 type V0043StatsList struct {
@@ -58,11 +56,11 @@ func (o *V0043StatsList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0043StatsList) AppendItem(object object.Object) {
-	out, ok := object.(*V0043Stats)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0043Stats)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

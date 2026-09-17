@@ -40,9 +40,7 @@ func (o *V0041ControllerPing) DeepCopyObject() object.Object {
 }
 
 func (o *V0041ControllerPing) DeepCopy() *V0041ControllerPing {
-	out := new(V0041ControllerPing)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 type V0041ControllerPingList struct {
@@ -65,11 +63,11 @@ func (o *V0041ControllerPingList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0041ControllerPingList) AppendItem(object object.Object) {
-	out, ok := object.(*V0041ControllerPing)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0041ControllerPing)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

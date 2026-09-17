@@ -12,7 +12,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type NodeResourceLayoutInterface interface {
@@ -43,8 +42,6 @@ func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (
 	out := &types.V0044NodeResourceLayout{
 		V0044NodeResourceLayoutList: make([]api.V0044NodeResourceLayout, len(res.JSON200.Nodes)),
 	}
-	for i, item := range res.JSON200.Nodes {
-		utils.RemarshalOrDie(item, &out.V0044NodeResourceLayoutList[i])
-	}
+	copy(out.V0044NodeResourceLayoutList, res.JSON200.Nodes)
 	return out, nil
 }

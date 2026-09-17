@@ -36,9 +36,7 @@ func (o *V0041PartitionInfo) DeepCopyObject() object.Object {
 }
 
 func (o *V0041PartitionInfo) DeepCopy() *V0041PartitionInfo {
-	out := new(V0041PartitionInfo)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 func (o *V0041PartitionInfo) GetStateAsSet() set.Set[api.V0041PartitionInfoPartitionState] {
@@ -73,11 +71,11 @@ func (o *V0041PartitionInfoList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0041PartitionInfoList) AppendItem(object object.Object) {
-	out, ok := object.(*V0041PartitionInfo)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0041PartitionInfo)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

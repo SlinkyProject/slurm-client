@@ -12,7 +12,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type NodeInterface interface {
@@ -85,9 +84,8 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
 
-	out := &types.V0043Node{}
-	utils.RemarshalOrDie(res.JSON200.Nodes[0], out)
-	return out, nil
+	out := types.V0043Node{V0043Node: res.JSON200.Nodes[0]}
+	return &out, nil
 }
 
 // ListNodes implements ClientInterface
@@ -110,7 +108,7 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0043NodeList, erro
 		Items: make([]types.V0043Node, len(res.JSON200.Nodes)),
 	}
 	for i, item := range res.JSON200.Nodes {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0043Node{V0043Node: item}
 	}
 	return list, nil
 }

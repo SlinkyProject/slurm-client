@@ -39,9 +39,7 @@ func (o *V0042JobInfo) DeepCopyObject() object.Object {
 }
 
 func (o *V0042JobInfo) DeepCopy() *V0042JobInfo {
-	out := new(V0042JobInfo)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 func (o *V0042JobInfo) GetStateAsSet() set.Set[api.V0042JobInfoJobState] {
@@ -73,11 +71,11 @@ func (o *V0042JobInfoList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0042JobInfoList) AppendItem(object object.Object) {
-	out, ok := object.(*V0042JobInfo)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0042JobInfo)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObjectList implements ObjectList.

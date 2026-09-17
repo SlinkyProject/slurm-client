@@ -5,122 +5,76 @@ package utils
 
 import (
 	"testing"
-
-	"k8s.io/utils/ptr"
 )
 
-type objectA struct {
-	Str    string  `json:"str"`
-	StrPtr *string `json:"str_ptr"`
-	Int    int32   `json:"int"`
-	IntPtr *int32  `json:"int_ptr"`
+type ObjectA struct {
+	Str    string
+	StrPtr *string
+	Int    int32
+	IntPtr *int32
 }
 
-type objectB struct {
-	objectA
+type ObjectB struct {
+	ObjectA
 }
 
-func TestRemarshal(t *testing.T) {
-	objA := objectA{
+func sampleA() ObjectA {
+	return ObjectA{
 		Str:    "foo",
-		StrPtr: ptr.To("bar"),
+		StrPtr: new("bar"),
 		Int:    1,
-		IntPtr: ptr.To[int32](2),
-	}
-	type args struct {
-		in  any
-		out any
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "Empty object",
-			args: args{
-				in:  objectA{},
-				out: &objectB{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "With non-nil data",
-			args: args{
-				in:  objA,
-				out: &objectB{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "With pointer in struct",
-			args: args{
-				in:  &objA,
-				out: &objectB{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "With non-pointer in, out struct",
-			args: args{
-				in:  objA,
-				out: objectB{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "With non-pointer out struct",
-			args: args{
-				in:  &objA,
-				out: objectB{},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Remarshal(tt.args.in, tt.args.out); (err != nil) != tt.wantErr {
-				t.Errorf("Remarshal() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+		IntPtr: new(int32(2)),
 	}
 }
 
-func TestRemarshalOrDie(t *testing.T) {
-	objA := objectA{
-		Str:    "foo",
-		StrPtr: ptr.To("bar"),
-		Int:    1,
-		IntPtr: ptr.To[int32](2),
+func TestClone(t *testing.T) {
+	in := sampleA()
+	got := Clone(&in)
+	if got == &in || got.StrPtr == in.StrPtr || got.IntPtr == in.IntPtr {
+		t.Fatalf("Clone() did not deep copy pointers")
 	}
-	objB := &objectB{}
-	type args struct {
-		in  any
-		out any
+	if got.Str != in.Str || *got.StrPtr != *in.StrPtr || got.Int != in.Int || *got.IntPtr != *in.IntPtr {
+		t.Fatalf("Clone() = %#v, want %#v", got, in)
 	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "Empty object",
-			args: args{
-				in:  objectA{},
-				out: &objectB{},
-			},
-		},
-		{
-			name: "With non-nil data",
-			args: args{
-				in:  objA,
-				out: &objB,
-			},
-		},
+	if Clone[ObjectA](nil) != nil {
+		t.Fatalf("Clone(nil) should be nil")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			RemarshalOrDie(tt.args.in, tt.args.out)
-		})
+}
+
+type cloneAll struct {
+	NilPtr   *int
+	Ptr      *int
+	NilSlice []string
+	Slice    []string
+	NilMap   map[string]int
+	Map      map[string]int
+	Arr      [2]int
+	Nested   ObjectA
+	NilAny   any
+	Any      any
+	priv     int
+}
+
+func TestClone_kinds(t *testing.T) {
+	n := 7
+	in := &cloneAll{
+		Ptr:    &n,
+		Slice:  []string{"a"},
+		Map:    map[string]int{"k": 1},
+		Arr:    [2]int{1, 2},
+		Nested: sampleA(),
+		Any:    sampleA(),
+		priv:   9,
+	}
+	got := Clone(in)
+	if got == in || got.Ptr == in.Ptr || got.Slice[0] != "a" || got.Map["k"] != 1 || got.Arr != in.Arr {
+		t.Fatalf("Clone() = %#v", got)
+	}
+	if got.NilPtr != nil || got.NilSlice != nil || got.NilMap != nil || got.NilAny != nil {
+		t.Fatalf("Clone() did not preserve nils: %#v", got)
+	}
+	if got.Nested.StrPtr == in.Nested.StrPtr || got.priv != 9 {
+		t.Fatalf("Clone() nested/unexported = %#v", got)
 	}
 }
 
