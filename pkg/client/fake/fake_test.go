@@ -64,11 +64,13 @@ var _ = Describe("NewFakeClient", func() {
 			Expect(list.Items).To(BeEmpty())
 		})
 		It("should return non-empty list", func() {
-			client := NewFakeClient(&types.V0042NodeList{Items: []types.V0042Node{
-				{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}},
-				{V0042Node: v0042.V0042Node{Name: ptr.To("node-1")}},
-				{V0042Node: v0042.V0042Node{Name: ptr.To("node-2")}},
-			}})
+			client := NewFakeClient(
+				&types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}},
+				&types.V0042NodeList{Items: []types.V0042Node{
+					{V0042Node: v0042.V0042Node{Name: ptr.To("node-1")}},
+					{V0042Node: v0042.V0042Node{Name: ptr.To("node-2")}},
+				}},
+			)
 			list := &types.V0042NodeList{}
 			err := client.List(ctx, list)
 			Expect(err).To(BeNil())

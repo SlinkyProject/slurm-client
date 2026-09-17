@@ -30,8 +30,8 @@ func (o *V0045Node) GetType() object.ObjectType {
 	return ObjectTypeV0045Node
 }
 
-// DeepCopyObject implements Object.
-func (o *V0045Node) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045Node) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -63,7 +63,7 @@ func (o *V0045NodeList) GetType() object.ObjectType {
 func (o *V0045NodeList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -77,8 +77,12 @@ func (o *V0045NodeList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0045NodeList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045NodeList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0045NodeList) DeepCopy() *V0045NodeList {
 	out := new(V0045NodeList)
 	out.Items = make([]V0045Node, len(o.Items))
 	for i, item := range o.Items {

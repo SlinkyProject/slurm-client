@@ -425,7 +425,7 @@ func Test_informerCache_GetRefreshCacheWithFullSyncQueue(t *testing.T) {
 
 			done := make(chan error, 1)
 			go func() {
-				got := tt.obj.DeepCopyObject()
+				got := tt.obj.DeepCopyObject().(object.Object)
 				done <- i.Get(ctx, tt.obj.GetKey(), got, &GetOptions{RefreshCache: true})
 			}()
 

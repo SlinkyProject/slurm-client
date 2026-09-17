@@ -33,8 +33,8 @@ func (o *V0043JobInfo) GetType() object.ObjectType {
 	return ObjectTypeV0043JobInfo
 }
 
-// DeepCopyObject implements Object.
-func (o *V0043JobInfo) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0043JobInfo) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -66,7 +66,7 @@ func (o *V0043JobInfoList) GetType() object.ObjectType {
 func (o *V0043JobInfoList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -80,8 +80,12 @@ func (o *V0043JobInfoList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0043JobInfoList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0043JobInfoList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0043JobInfoList) DeepCopy() *V0043JobInfoList {
 	out := new(V0043JobInfoList)
 	out.Items = make([]V0043JobInfo, len(o.Items))
 	for i, item := range o.Items {

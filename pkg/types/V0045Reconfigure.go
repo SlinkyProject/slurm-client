@@ -24,8 +24,8 @@ func (o *V0045Reconfigure) GetType() object.ObjectType {
 	return ObjectTypeV0045Reconfigure
 }
 
-// DeepCopyObject implements Object.
-func (o *V0045Reconfigure) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045Reconfigure) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -48,7 +48,7 @@ func (o *V0045ReconfigureList) GetType() object.ObjectType {
 func (o *V0045ReconfigureList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -62,8 +62,12 @@ func (o *V0045ReconfigureList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0045ReconfigureList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045ReconfigureList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0045ReconfigureList) DeepCopy() *V0045ReconfigureList {
 	out := new(V0045ReconfigureList)
 	out.Items = make([]V0045Reconfigure, len(o.Items))
 	for i, item := range o.Items {

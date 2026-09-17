@@ -8,13 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type fakeClient struct {
@@ -99,21 +99,12 @@ func (f *ClientBuilder) Build() client.Client {
 	cache := make(map[object.ObjectType]map[object.ObjectKey]object.Object)
 
 	for _, list := range f.initLists {
-		objType := list.GetType()
-		if cache[objType] == nil {
-			cache[objType] = make(map[object.ObjectKey]object.Object)
-		}
 		for _, obj := range list.GetItems() {
-			cache[objType][obj.GetKey()] = obj.DeepCopyObject()
+			store(cache, obj)
 		}
 	}
-
 	for _, obj := range f.initObject {
-		objType := obj.GetType()
-		if cache[objType] == nil {
-			cache[objType] = make(map[object.ObjectKey]object.Object)
-		}
-		cache[objType][obj.GetKey()] = obj.DeepCopyObject()
+		store(cache, obj)
 	}
 
 	var result client.Client = &fakeClient{
@@ -135,96 +126,7 @@ func (c *fakeClient) Get(ctx context.Context, key object.ObjectKey, obj object.O
 	if !exists {
 		return apierrors.ErrNotFound
 	}
-	switch o := obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042ControllerPing:
-		cache := entry.(*types.V0042ControllerPing)
-		*o = *cache
-	case *types.V0042JobInfo:
-		cache := entry.(*types.V0042JobInfo)
-		*o = *cache
-	case *types.V0042Node:
-		cache := entry.(*types.V0042Node)
-		*o = *cache
-	case *types.V0042PartitionInfo:
-		cache := entry.(*types.V0042PartitionInfo)
-		*o = *cache
-	case *types.V0042Stats:
-		cache := entry.(*types.V0042Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043ControllerPing:
-		cache := entry.(*types.V0043ControllerPing)
-		*o = *cache
-	case *types.V0043JobInfo:
-		cache := entry.(*types.V0043JobInfo)
-		*o = *cache
-	case *types.V0043Node:
-		cache := entry.(*types.V0043Node)
-		*o = *cache
-	case *types.V0043PartitionInfo:
-		cache := entry.(*types.V0043PartitionInfo)
-		*o = *cache
-	case *types.V0043Stats:
-		cache := entry.(*types.V0043Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044ControllerPing:
-		cache := entry.(*types.V0044ControllerPing)
-		*o = *cache
-	case *types.V0044JobInfo:
-		cache := entry.(*types.V0044JobInfo)
-		*o = *cache
-	case *types.V0044NodeResourceLayout:
-		cache := entry.(*types.V0044NodeResourceLayout)
-		*o = *cache
-	case *types.V0044Node:
-		cache := entry.(*types.V0044Node)
-		*o = *cache
-	case *types.V0044PartitionInfo:
-		cache := entry.(*types.V0044PartitionInfo)
-		*o = *cache
-	case *types.V0044ReservationInfo:
-		cache := entry.(*types.V0044ReservationInfo)
-		*o = *cache
-	case *types.V0044Stats:
-		cache := entry.(*types.V0044Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045ControllerPing:
-		cache := entry.(*types.V0045ControllerPing)
-		*o = *cache
-	case *types.V0045JobInfo:
-		cache := entry.(*types.V0045JobInfo)
-		*o = *cache
-	case *types.V0045NodeResourceLayout:
-		cache := entry.(*types.V0045NodeResourceLayout)
-		*o = *cache
-	case *types.V0045Node:
-		cache := entry.(*types.V0045Node)
-		*o = *cache
-	case *types.V0045PartitionInfo:
-		cache := entry.(*types.V0045PartitionInfo)
-		*o = *cache
-	case *types.V0045ReservationInfo:
-		cache := entry.(*types.V0045ReservationInfo)
-		*o = *cache
-	case *types.V0045Stats:
-		cache := entry.(*types.V0045Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
-		return apierrors.ErrNotImplemented
-	}
+	copyInto(obj, entry)
 	return nil
 }
 
@@ -242,10 +144,7 @@ func (c *fakeClient) Create(ctx context.Context, obj object.Object, req any, opt
 	if exists {
 		return errors.New(http.StatusText(http.StatusConflict))
 	}
-	if _, ok := c.cache[t]; !ok {
-		c.cache[t] = make(map[object.ObjectKey]object.Object)
-	}
-	c.cache[t][k] = obj.DeepCopyObject()
+	store(c.cache, obj)
 	return nil
 }
 
@@ -265,15 +164,12 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 	if _, ok := c.cache[t][k]; !ok {
 		return apierrors.ErrNotFound
 	}
-	if _, ok := c.cache[t]; !ok {
-		c.cache[t] = make(map[object.ObjectKey]object.Object)
-	}
 	if c.updateFn != nil {
 		if err := c.updateFn(ctx, obj, req, opts...); err != nil {
 			return err
 		}
 	}
-	c.cache[t][k] = obj.DeepCopyObject()
+	store(c.cache, obj)
 	return nil
 }
 
@@ -312,4 +208,16 @@ func (c *fakeClient) Stop() {
 		c.cancel()
 		c.cancel = nil
 	}
+}
+
+func store(cache map[object.ObjectType]map[object.ObjectKey]object.Object, obj object.Object) {
+	t := obj.GetType()
+	if cache[t] == nil {
+		cache[t] = make(map[object.ObjectKey]object.Object)
+	}
+	cache[t][obj.GetKey()] = obj.DeepCopyObject().(object.Object)
+}
+
+func copyInto(dst, src object.Object) {
+	reflect.ValueOf(dst).Elem().Set(reflect.ValueOf(src.DeepCopyObject()).Elem())
 }

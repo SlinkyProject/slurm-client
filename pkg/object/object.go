@@ -9,17 +9,16 @@ type ObjectKey string
 
 type RuntimeObject interface {
 	GetType() ObjectType
+	DeepCopyObject() RuntimeObject
 }
 
 type Object interface {
 	RuntimeObject
 	GetKey() ObjectKey
-	DeepCopyObject() Object
 }
 
 type ObjectList interface {
 	RuntimeObject
 	GetItems() []Object
 	AppendItem(Object)
-	DeepCopyObjectList() ObjectList
 }

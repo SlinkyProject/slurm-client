@@ -278,7 +278,7 @@ func TestV0045ControllerPingList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0045ControllerPingList_DeepCopyObjectList(t *testing.T) {
+func TestV0045ControllerPingList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0045ControllerPing
 	}
@@ -317,7 +317,7 @@ func TestV0045ControllerPingList_DeepCopyObjectList(t *testing.T) {
 			o := &V0045ControllerPingList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}
