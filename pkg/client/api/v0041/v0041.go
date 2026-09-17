@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"net/http"
 
-	api "github.com/SlinkyProject/slurm-client/api/v0041"
 	"k8s.io/utils/ptr"
+
+	api "github.com/SlinkyProject/slurm-client/api/v0041"
 )
 
 const (
