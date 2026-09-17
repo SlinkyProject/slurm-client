@@ -12,7 +12,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type PartitionInterface interface {
@@ -42,9 +41,8 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
 
-	out := &types.V0043PartitionInfo{}
-	utils.RemarshalOrDie(res.JSON200.Partitions[0], out)
-	return out, nil
+	out := types.V0043PartitionInfo{V0043PartitionInfo: res.JSON200.Partitions[0]}
+	return &out, nil
 }
 
 // ListPartitionInfo implements ClientInterface
@@ -67,7 +65,7 @@ func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0043Partit
 		Items: make([]types.V0043PartitionInfo, len(res.JSON200.Partitions)),
 	}
 	for i, item := range res.JSON200.Partitions {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0043PartitionInfo{V0043PartitionInfo: item}
 	}
 	return list, nil
 }
