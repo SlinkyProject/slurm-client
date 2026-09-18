@@ -181,11 +181,15 @@ func (c *client) Create(
 	if !ok || r.create == nil {
 		return apierrors.ErrNotImplemented
 	}
-	key, err := r.create(ctx, req)
+	key, err := r.create(ctx, obj, req)
 	if err != nil {
 		return err
 	}
-
+	if options.SkipReadAfterCreate {
+		return nil
+	}
+	// Keep the accepted identity on obj even if the read fails. Callers must
+	// not mistake a failed hydration for a rejected create and submit twice.
 	return c.Get(ctx, key, obj, &GetOptions{RefreshCache: true})
 }
 

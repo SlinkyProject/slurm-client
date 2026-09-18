@@ -96,6 +96,10 @@ var _ ClientOption = &ClientOptions{}
 // CreateOptions contains options for create requests. It's generally a subset
 // of metav1.CreateOptions.
 type CreateOptions struct {
+	// SkipReadAfterCreate returns once creation is acknowledged. Only the
+	// object's identity is populated; no follow-up GET or cache insertion occurs.
+	// The default reads the complete object back from Slurm.
+	SkipReadAfterCreate bool
 }
 
 // ApplyOptions applies the given create options on these options,
@@ -109,6 +113,7 @@ func (o *CreateOptions) ApplyOptions(opts []CreateOption) *CreateOptions {
 
 // ApplyToCreate implements CreateOption.
 func (o *CreateOptions) ApplyToCreate(co *CreateOptions) {
+	co.SkipReadAfterCreate = o.SkipReadAfterCreate
 }
 
 var _ CreateOption = &CreateOptions{}
