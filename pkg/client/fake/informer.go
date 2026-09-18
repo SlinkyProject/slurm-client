@@ -5,6 +5,9 @@ package fake
 
 import (
 	"context"
+	"fmt"
+	"slices"
+	"sync"
 	"time"
 
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
@@ -15,12 +18,70 @@ import (
 var _ client.InformerCache = &fakeInformer{}
 
 type fakeInformer struct {
+	mu         sync.RWMutex
+	indexes    map[string]client.IndexFunc
 	started    bool
 	reader     client.Reader
 	objectType object.ObjectType
 	syncPeriod time.Duration
 	handler    cache.ResourceEventHandler
 	hasSynced  bool
+}
+
+func (f *fakeInformer) AddIndex(name string, extract client.IndexFunc) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if name == "" || extract == nil {
+		return fmt.Errorf("index name and extractor must be set")
+	}
+	if _, exists := f.indexes[name]; exists {
+		return fmt.Errorf("index %q already exists", name)
+	}
+	f.indexes[name] = extract
+	return nil
+}
+
+// ByIndex evaluates the index against the fake store, including writes made
+// since registration. Production informers maintain the index incrementally.
+func (f *fakeInformer) ByIndex(ctx context.Context, name, value string, list object.ObjectList) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if list.GetType() != f.objectType {
+		return fmt.Errorf("index on %s cannot populate %s", f.objectType, list.GetType())
+	}
+	f.mu.RLock()
+	extract, exists := f.indexes[name]
+	f.mu.RUnlock()
+	if !exists {
+		return fmt.Errorf("index %q is not registered", name)
+	}
+	all := &indexObjects{objectType: f.objectType}
+	if err := f.reader.List(ctx, all); err != nil {
+		return err
+	}
+	for _, obj := range all.items {
+		if slices.Contains(extract(obj), value) {
+			list.AppendItem(obj.DeepCopyObject().(object.Object))
+		}
+	}
+	return nil
+}
+
+type indexObjects struct {
+	objectType object.ObjectType
+	items      []object.Object
+}
+
+func (l *indexObjects) GetType() object.ObjectType   { return l.objectType }
+func (l *indexObjects) GetItems() []object.Object    { return l.items }
+func (l *indexObjects) AppendItem(obj object.Object) { l.items = append(l.items, obj) }
+func (l *indexObjects) DeepCopyObject() object.RuntimeObject {
+	out := &indexObjects{objectType: l.objectType}
+	for _, obj := range l.items {
+		out.AppendItem(obj.DeepCopyObject().(object.Object))
+	}
+	return out
 }
 
 // Get implements [client.InformerCache].
@@ -62,6 +123,7 @@ func (f *fakeInformer) UnsetEventHandler() {
 
 func newInformer(objectType object.ObjectType, reader client.Reader, syncPeriod time.Duration) client.InformerCache {
 	return &fakeInformer{
+		indexes:    make(map[string]client.IndexFunc),
 		objectType: objectType,
 		reader:     reader,
 		syncPeriod: syncPeriod,

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync"
 
 	"github.com/SlinkyProject/slurm-client/pkg/client"
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
@@ -18,7 +19,9 @@ import (
 )
 
 type fakeClient struct {
-	cache map[object.ObjectType]map[object.ObjectKey]object.Object
+	informerMu sync.Mutex
+	informers  map[object.ObjectType]client.InformerCache
+	cache      map[object.ObjectType]map[object.ObjectKey]object.Object
 
 	updateFn updateFunc
 
@@ -174,7 +177,15 @@ func (c *fakeClient) Update(ctx context.Context, obj object.Object, req any, opt
 }
 
 func (c *fakeClient) GetInformer(obj object.ObjectType) client.InformerCache {
-	return newInformer(obj, c, client.DefaultWatchInterval)
+	c.informerMu.Lock()
+	defer c.informerMu.Unlock()
+	if c.informers == nil {
+		c.informers = make(map[object.ObjectType]client.InformerCache)
+	}
+	if c.informers[obj] == nil {
+		c.informers[obj] = newInformer(obj, c, client.DefaultWatchInterval)
+	}
+	return c.informers[obj]
 }
 
 func (c *fakeClient) GetServer() string {
