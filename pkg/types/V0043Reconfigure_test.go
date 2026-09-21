@@ -224,7 +224,7 @@ func TestV0043ReconfigureList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0043ReconfigureList_DeepCopyObjectList(t *testing.T) {
+func TestV0043ReconfigureList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0043Reconfigure
 	}
@@ -261,7 +261,7 @@ func TestV0043ReconfigureList_DeepCopyObjectList(t *testing.T) {
 			o := &V0043ReconfigureList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}

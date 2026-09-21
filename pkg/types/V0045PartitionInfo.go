@@ -30,8 +30,8 @@ func (o *V0045PartitionInfo) GetType() object.ObjectType {
 	return ObjectTypeV0045PartitionInfo
 }
 
-// DeepCopyObject implements Object.
-func (o *V0045PartitionInfo) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045PartitionInfo) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -66,7 +66,7 @@ func (o *V0045PartitionInfoList) GetType() object.ObjectType {
 func (o *V0045PartitionInfoList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -80,8 +80,8 @@ func (o *V0045PartitionInfoList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0045PartitionInfoList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045PartitionInfoList) DeepCopyObject() object.RuntimeObject {
 	out := new(V0045PartitionInfoList)
 	out.Items = make([]V0045PartitionInfo, len(o.Items))
 	for i, item := range o.Items {

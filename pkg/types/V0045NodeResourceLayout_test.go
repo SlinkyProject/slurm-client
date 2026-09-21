@@ -273,7 +273,7 @@ func TestV0045NodeResourceList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0045NodeResourceList_DeepCopyObjectList(t *testing.T) {
+func TestV0045NodeResourceList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0045NodeResourceLayout
 	}
@@ -312,7 +312,7 @@ func TestV0045NodeResourceList_DeepCopyObjectList(t *testing.T) {
 			o := &V0045NodeResourceLayoutList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}

@@ -278,7 +278,7 @@ func TestV0044ReservationInfoList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0044ReservationInfoList_DeepCopyObjectList(t *testing.T) {
+func TestV0044ReservationInfoList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0044ReservationInfo
 	}
@@ -317,7 +317,7 @@ func TestV0044ReservationInfoList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044ReservationInfoList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}

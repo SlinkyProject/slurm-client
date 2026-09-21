@@ -28,8 +28,8 @@ func (o *V0044NodeResourceLayout) GetType() object.ObjectType {
 	return ObjectTypeV0044NodeResourceLayout
 }
 
-// DeepCopyObject implements Object.
-func (o *V0044NodeResourceLayout) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0044NodeResourceLayout) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -52,7 +52,7 @@ func (o *V0044NodeResourceLayoutList) GetType() object.ObjectType {
 func (o *V0044NodeResourceLayoutList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -66,8 +66,12 @@ func (o *V0044NodeResourceLayoutList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0044NodeResourceLayoutList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0044NodeResourceLayoutList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0044NodeResourceLayoutList) DeepCopy() *V0044NodeResourceLayoutList {
 	out := new(V0044NodeResourceLayoutList)
 	out.Items = make([]V0044NodeResourceLayout, len(o.Items))
 	for i, item := range o.Items {

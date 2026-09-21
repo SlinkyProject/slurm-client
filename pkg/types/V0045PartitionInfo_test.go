@@ -338,7 +338,7 @@ func TestV0045PartitionInfoList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0045PartitionInfoList_DeepCopyObjectList(t *testing.T) {
+func TestV0045PartitionInfoList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0045PartitionInfo
 	}
@@ -377,7 +377,7 @@ func TestV0045PartitionInfoList_DeepCopyObjectList(t *testing.T) {
 			o := &V0045PartitionInfoList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}

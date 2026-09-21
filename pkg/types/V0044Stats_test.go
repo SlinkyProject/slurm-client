@@ -267,7 +267,7 @@ func TestV0044StatsList_AppendItem(t *testing.T) {
 	}
 }
 
-func TestV0044StatsList_DeepCopyObjectList(t *testing.T) {
+func TestV0044StatsList_DeepCopyObject(t *testing.T) {
 	type fields struct {
 		Items []V0044Stats
 	}
@@ -304,7 +304,7 @@ func TestV0044StatsList_DeepCopyObjectList(t *testing.T) {
 			o := &V0044StatsList{
 				Items: tt.fields.Items,
 			}
-			got := o.DeepCopyObjectList()
+			got := o.DeepCopyObject()
 			require.Equal(t, tt.want, got)
 		})
 	}

@@ -29,8 +29,8 @@ func (o *V0042ControllerPing) GetType() object.ObjectType {
 	return ObjectTypeV0042ControllerPing
 }
 
-// DeepCopyObject implements Object.
-func (o *V0042ControllerPing) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0042ControllerPing) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -53,7 +53,7 @@ func (o *V0042ControllerPingList) GetType() object.ObjectType {
 func (o *V0042ControllerPingList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -67,8 +67,12 @@ func (o *V0042ControllerPingList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0042ControllerPingList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0042ControllerPingList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0042ControllerPingList) DeepCopy() *V0042ControllerPingList {
 	out := new(V0042ControllerPingList)
 	out.Items = make([]V0042ControllerPing, len(o.Items))
 	for i, item := range o.Items {

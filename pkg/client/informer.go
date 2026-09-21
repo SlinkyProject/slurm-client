@@ -424,7 +424,7 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 		} else if now.After(entry.lastUpdate) {
 			e := event.Event{
 				Type:   event.Deleted,
-				Object: entry.object.DeepCopyObject(),
+				Object: entry.object.DeepCopyObject().(object.Object),
 			}
 			delete(i.cache, key)
 			delete(i.syncErrorGet, key)
@@ -441,13 +441,13 @@ func (i *informerCache) processObject(obj object.Object) {
 	if !ok || entry.object == nil {
 		i.cache[key] = &cacheEntry{
 			lastUpdate: now,
-			object:     obj.DeepCopyObject(),
+			object:     obj.DeepCopyObject().(object.Object),
 			dirty:      false,
 		}
 		delete(i.syncErrorGet, key)
 		e := event.Event{
 			Type:   event.Added,
-			Object: obj.DeepCopyObject(),
+			Object: obj.DeepCopyObject().(object.Object),
 		}
 		i.pushEvent(e)
 	} else if ok && entry.object != nil && !now.Before(entry.lastUpdate) {
@@ -455,11 +455,11 @@ func (i *informerCache) processObject(obj object.Object) {
 		entry.dirty = false
 		delete(i.syncErrorGet, key)
 		if !reflect.DeepEqual(entry.object, obj) {
-			entry.object = obj.DeepCopyObject()
+			entry.object = obj.DeepCopyObject().(object.Object)
 			e := event.Event{
 				Type:      event.Modified,
-				Object:    obj.DeepCopyObject(),
-				ObjectOld: entry.object.DeepCopyObject(),
+				Object:    obj.DeepCopyObject().(object.Object),
+				ObjectOld: entry.object.DeepCopyObject().(object.Object),
 			}
 			i.pushEvent(e)
 		}

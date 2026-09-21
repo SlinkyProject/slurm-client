@@ -29,8 +29,8 @@ func (o *V0045ReservationInfo) GetType() object.ObjectType {
 	return ObjectTypeV0045ReservationInfo
 }
 
-// DeepCopyObject implements Object.
-func (o *V0045ReservationInfo) DeepCopyObject() object.Object {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045ReservationInfo) DeepCopyObject() object.RuntimeObject {
 	return o.DeepCopy()
 }
 
@@ -53,7 +53,7 @@ func (o *V0045ReservationInfoList) GetType() object.ObjectType {
 func (o *V0045ReservationInfoList) GetItems() []object.Object {
 	list := make([]object.Object, len(o.Items))
 	for i, item := range o.Items {
-		list[i] = item.DeepCopyObject()
+		list[i] = item.DeepCopy()
 	}
 	return list
 }
@@ -67,8 +67,12 @@ func (o *V0045ReservationInfoList) AppendItem(object object.Object) {
 	}
 }
 
-// DeepCopyObjectList implements ObjectList.
-func (o *V0045ReservationInfoList) DeepCopyObjectList() object.ObjectList {
+// DeepCopyObject implements RuntimeObject.
+func (o *V0045ReservationInfoList) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *V0045ReservationInfoList) DeepCopy() *V0045ReservationInfoList {
 	out := new(V0045ReservationInfoList)
 	out.Items = make([]V0045ReservationInfo, len(o.Items))
 	for i, item := range o.Items {
