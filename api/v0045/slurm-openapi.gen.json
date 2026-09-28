@@ -4804,7 +4804,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "Query jobs updated more recently than this time (UNIX timestamp)",
+            "description": "Query nodes updated more recently than this time (UNIX timestamp)",
             "required": false,
             "schema": {
               "type": "string"
@@ -4924,7 +4924,7 @@
             "explode": false,
             "allowEmptyValue": false,
             "allowReserved": false,
-            "description": "Query jobs updated more recently than this time (UNIX timestamp)",
+            "description": "Query nodes updated more recently than this time (UNIX timestamp)",
             "required": false,
             "schema": {
               "type": "string"
@@ -14798,15 +14798,15 @@
       ],
       "version": {
         "major": "26",
-        "micro": "2",
+        "micro": "3",
         "minor": "05"
       },
-      "release": "26.05.2"
+      "release": "26.05.3"
     },
     "title": "Slurm REST API",
     "description": "API to access and control Slurm",
     "termsOfService": "https:\/\/github.com\/SchedMD\/slurm\/blob\/master\/DISCLAIMER",
-    "version": "Slurm-26.05.2"
+    "version": "Slurm-26.05.3"
   },
   "servers": [
     {

@@ -123,8 +123,8 @@ generate: ## Run all generate targets.
 .PHONY: generate-api-matrix
 generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	declare -A VERSION_MATRIX=( \
-		["ghcr.io/slinkyproject/slurmrestd:26.05.2-ubuntu26.04"]="" \
-		["ghcr.io/slinkyproject/slurmrestd:25.11.7-ubuntu24.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:26.05.3-ubuntu26.04"]="" \
+		["ghcr.io/slinkyproject/slurmrestd:25.11.8-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:25.05.8-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \
 	); \
@@ -133,7 +133,7 @@ generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 	done
 
 CONTAINER_TOOL ?= docker
-SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:26.05.2-ubuntu26.04
+SLURM_IMAGE ?= ghcr.io/slinkyproject/slurmrestd:26.05.3-ubuntu26.04
 SLURM_DATA_PARSER_OPTS ?=
 
 TEMPLATES_DIR = api/.template
