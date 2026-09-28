@@ -12,7 +12,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetNodeResourceLayout(t *testing.T) {
@@ -28,7 +27,7 @@ func TestSlurmClient_GetNodeResourceLayout(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044NodeResourceLayout
+		want    *api.V0044NodeResourceLayoutList
 		wantErr bool
 	}{
 		{
@@ -76,10 +75,8 @@ func TestSlurmClient_GetNodeResourceLayout(t *testing.T) {
 				ctx:   ctx,
 				jobId: "1",
 			},
-			want: &types.V0044NodeResourceLayout{
-				V0044NodeResourceLayoutList: api.V0044NodeResourceLayoutList{
-					{Node: "node1"},
-				},
+			want: &api.V0044NodeResourceLayoutList{
+				{Node: "node1"},
 			},
 			wantErr: false,
 		},

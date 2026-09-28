@@ -15,7 +15,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0043/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0043/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetStats(t *testing.T) {
@@ -29,7 +28,7 @@ func TestSlurmClient_GetStats(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0043Stats
+		want    *api.V0043StatsMsg
 		wantErr bool
 	}{
 		{
@@ -50,9 +49,7 @@ func TestSlurmClient_GetStats(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0043Stats{
-				V0043StatsMsg: api.V0043StatsMsg{},
-			},
+			want:    &api.V0043StatsMsg{},
 			wantErr: false,
 		},
 		{
@@ -128,7 +125,7 @@ func TestSlurmClient_ListStats(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0043StatsList
+		want    *api.V0043StatsMsgObjectList
 		wantErr bool
 	}{
 		{
@@ -149,10 +146,8 @@ func TestSlurmClient_ListStats(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0043StatsList{
-				Items: []types.V0043Stats{
-					{},
-				},
+			want: &api.V0043StatsMsgObjectList{
+				Items: []api.V0043StatsMsg{{}},
 			},
 			wantErr: false,
 		},

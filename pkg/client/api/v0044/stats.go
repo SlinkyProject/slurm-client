@@ -8,18 +8,18 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/SlinkyProject/slurm-client/pkg/types"
+	api "github.com/SlinkyProject/slurm-client/api/v0044"
 )
 
 type StatsInterface interface {
-	GetStats(ctx context.Context) (*types.V0044Stats, error)
-	ListStats(ctx context.Context) (*types.V0044StatsList, error)
+	GetStats(ctx context.Context) (*api.V0044StatsMsg, error)
+	ListStats(ctx context.Context) (*api.V0044StatsMsgObjectList, error)
 }
 
 var _ StatsInterface = &SlurmClient{}
 
 // GetStats implements ClientInterface
-func (c *SlurmClient) GetStats(ctx context.Context) (*types.V0044Stats, error) {
+func (c *SlurmClient) GetStats(ctx context.Context) (*api.V0044StatsMsg, error) {
 	res, err := c.SlurmV0044GetDiagWithResponse(ctx)
 	if err != nil {
 		return nil, err
@@ -30,20 +30,21 @@ func (c *SlurmClient) GetStats(ctx context.Context) (*types.V0044Stats, error) {
 		}
 		return nil, errors.Join(errs...)
 	}
-	out := types.V0044Stats{V0044StatsMsg: res.JSON200.Statistics}
+	out := res.JSON200.Statistics
 	return &out, nil
 }
 
 // ListStats implements ClientInterface
-func (c *SlurmClient) ListStats(ctx context.Context) (*types.V0044StatsList, error) {
-	res, err := c.GetStats(ctx)
+func (c *SlurmClient) ListStats(ctx context.Context) (*api.V0044StatsMsgObjectList, error) {
+	res, err := c.SlurmV0044GetDiagWithResponse(ctx)
 	if err != nil {
 		return nil, err
+	} else if res.StatusCode() != http.StatusOK {
+		errs := []error{errors.New(http.StatusText(res.StatusCode()))}
+		if res.JSONDefault != nil {
+			errs = append(errs, getOpenapiErrors(res.JSONDefault.Errors)...)
+		}
+		return nil, errors.Join(errs...)
 	}
-	list := &types.V0044StatsList{
-		Items: []types.V0044Stats{
-			*res,
-		},
-	}
-	return list, nil
+	return &api.V0044StatsMsgObjectList{Items: []api.V0044StatsMsg{res.JSON200.Statistics}}, nil
 }

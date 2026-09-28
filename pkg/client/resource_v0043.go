@@ -6,60 +6,60 @@ package client
 import (
 	"context"
 
+	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func init() {
-	addResource(types.ObjectTypeV0043ControllerPing, resource{
-		newObject: func() object.Object { return &types.V0043ControllerPing{} },
-		newList:   func() object.ObjectList { return &types.V0043ControllerPingList{} },
+	addResource(api.ObjectTypeV0043ControllerPing, resource{
+		newObject: func() object.Object { return &api.V0043ControllerPing{} },
+		newList:   func() object.ObjectList { return &api.V0043ControllerPingObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0043JobInfo, resource{
-		newObject: func() object.Object { return &types.V0043JobInfo{} },
-		newList:   func() object.ObjectList { return &types.V0043JobInfoList{} },
+	addResource(api.ObjectTypeV0043JobInfo, resource{
+		newObject: func() object.Object { return &api.V0043JobInfo{} },
+		newList:   func() object.ObjectList { return &api.V0043JobInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0043Node, resource{
-		newObject: func() object.Object { return &types.V0043Node{} },
-		newList:   func() object.ObjectList { return &types.V0043NodeList{} },
+	addResource(api.ObjectTypeV0043Node, resource{
+		newObject: func() object.Object { return &api.V0043Node{} },
+		newList:   func() object.ObjectList { return &api.V0043NodeObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0043PartitionInfo, resource{
-		newObject: func() object.Object { return &types.V0043PartitionInfo{} },
-		newList:   func() object.ObjectList { return &types.V0043PartitionInfoList{} },
+	addResource(api.ObjectTypeV0043PartitionInfo, resource{
+		newObject: func() object.Object { return &api.V0043PartitionInfo{} },
+		newList:   func() object.ObjectList { return &api.V0043PartitionInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0043Stats, resource{
-		newObject: func() object.Object { return &types.V0043Stats{} },
-		newList:   func() object.ObjectList { return &types.V0043StatsList{} },
+	addResource(api.ObjectTypeV0043StatsMsg, resource{
+		newObject: func() object.Object { return &api.V0043StatsMsg{} },
+		newList:   func() object.ObjectList { return &api.V0043StatsMsgObjectList{} },
 		cacheable: true,
 	})
 }
 
 func bindV0043(dst map[object.ObjectType]resource, c v0043.ClientInterface) {
-	setOps(dst, types.ObjectTypeV0043ControllerPing, resource{
+	setOps(dst, api.ObjectTypeV0043ControllerPing, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043ControllerPing, error) {
+			return getInto(obj, func() (*api.V0043ControllerPing, error) {
 				return c.GetControllerPing(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043ControllerPingList, error) {
+			return listInto(list, func() (*api.V0043ControllerPingObjectList, error) {
 				return c.ListControllerPing(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0043JobInfo, resource{
+	setOps(dst, api.ObjectTypeV0043JobInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043JobInfo, error) {
+			return getInto(obj, func() (*api.V0043JobInfo, error) {
 				return c.GetJobInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043JobInfoList, error) {
+			return listInto(list, func() (*api.V0043JobInfoObjectList, error) {
 				return c.ListJobInfo(ctx)
 			})
 		},
@@ -73,14 +73,14 @@ func bindV0043(dst map[object.ObjectType]resource, c v0043.ClientInterface) {
 			return c.DeleteJobInfo(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0043Node, resource{
+	setOps(dst, api.ObjectTypeV0043Node, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043Node, error) {
+			return getInto(obj, func() (*api.V0043Node, error) {
 				return c.GetNode(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043NodeList, error) {
+			return listInto(list, func() (*api.V0043NodeObjectList, error) {
 				return c.ListNodes(ctx)
 			})
 		},
@@ -91,26 +91,26 @@ func bindV0043(dst map[object.ObjectType]resource, c v0043.ClientInterface) {
 			return c.DeleteNode(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0043PartitionInfo, resource{
+	setOps(dst, api.ObjectTypeV0043PartitionInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043PartitionInfo, error) {
+			return getInto(obj, func() (*api.V0043PartitionInfo, error) {
 				return c.GetPartitionInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043PartitionInfoList, error) {
+			return listInto(list, func() (*api.V0043PartitionInfoObjectList, error) {
 				return c.ListPartitionInfo(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0043Stats, resource{
+	setOps(dst, api.ObjectTypeV0043StatsMsg, resource{
 		get: func(ctx context.Context, _ object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043Stats, error) {
+			return getInto(obj, func() (*api.V0043StatsMsg, error) {
 				return c.GetStats(ctx)
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043StatsList, error) {
+			return listInto(list, func() (*api.V0043StatsMsgObjectList, error) {
 				return c.ListStats(ctx)
 			})
 		},

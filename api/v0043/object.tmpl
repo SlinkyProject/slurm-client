@@ -1,0 +1,199 @@
+{{ $cfg := opts }}
+{{ $prefix := schemaNameToTypeName $cfg.PackageName }}
+{{ $ping := printf "%sControllerPing" $prefix }}
+{{ $job := printf "%sJobInfo" $prefix }}
+{{ $node := printf "%sNode" $prefix }}
+{{ $layout := printf "%sNodeResourceLayoutList" $prefix }}
+{{ $part := printf "%sPartitionInfo" $prefix }}
+{{ $resv := printf "%sReservationInfo" $prefix }}
+{{ $stats := printf "%sStatsMsg" $prefix }}
+
+{{ $key := "" }}
+{{ $field := "" }}
+{{ $ptr := false }}
+{{ $emit := false }}
+{{range .Types}}
+{{ $typeName := .TypeName }}
+{{ $key = "" }}
+{{ $field = "" }}
+{{ $ptr = false }}
+{{ $emit = or (eq $typeName $ping) (eq $typeName $job) (eq $typeName $node) (eq $typeName $layout) (eq $typeName $part) (eq $typeName $resv) (eq $typeName $stats) }}
+{{/* GetKey priority is job_id, then name, then hostname. JobInfo has both job_id and name; Node lists hostname before name. */}}
+{{ if not .IsAlias }}
+{{ range .Schema.Properties }}
+{{ if and (not $key) (eq .JsonFieldName "job_id") (or (eq .GoTypeDef "*int32") (eq .GoTypeDef "int32") (eq .GoTypeDef "*int64") (eq .GoTypeDef "int64")) }}
+{{ $key = "job_id" }}
+{{ $field = .GoFieldName }}
+{{ $ptr = eq (slice .GoTypeDef 0 1) "*" }}
+{{ end }}
+{{ end }}
+{{ range .Schema.Properties }}
+{{ if and (not $key) (eq .JsonFieldName "name") (or (eq .GoTypeDef "string") (eq .GoTypeDef "*string")) }}
+{{ $key = "name" }}
+{{ $field = .GoFieldName }}
+{{ $ptr = eq (slice .GoTypeDef 0 1) "*" }}
+{{ end }}
+{{ end }}
+{{ range .Schema.Properties }}
+{{ if and (not $key) (eq .JsonFieldName "hostname") (or (eq .GoTypeDef "string") (eq .GoTypeDef "*string")) }}
+{{ $key = "name" }}
+{{ $field = .GoFieldName }}
+{{ $ptr = eq (slice .GoTypeDef 0 1) "*" }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if and $emit (eq $typeName $layout) }}
+{{ template "aliasObject" $typeName }}
+{{ else if $emit }}
+{{ template "runtimeObject" $typeName }}
+{{ if not $key }}
+func (o *{{ $typeName }}) GetKey() object.ObjectKey {
+	return ""
+}
+{{ else }}
+func (o *{{ $typeName }}) GetKey() object.ObjectKey {
+{{- if eq $key "job_id" }}
+{{- if $ptr }}
+	return object.ObjectKey(strconv.Itoa(int(ptr.Deref(o.{{ $field }}, 0))))
+{{- else }}
+	return object.ObjectKey(strconv.Itoa(int(o.{{ $field }})))
+{{- end }}
+{{- else if $ptr }}
+	return object.ObjectKey(ptr.Deref(o.{{ $field }}, ""))
+{{- else }}
+	return object.ObjectKey(o.{{ $field }})
+{{- end }}
+}
+{{ end }}
+
+var _ object.Object = (*{{ $typeName }})(nil)
+{{ template "objectList" $typeName }}
+{{ end }}
+{{ end }}
+
+{{ define "runtimeObject" }}
+const ObjectType{{ . }} object.ObjectType = "{{ . }}"
+
+func (o *{{ . }}) GetType() object.ObjectType {
+	return ObjectType{{ . }}
+}
+
+func (o *{{ . }}) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *{{ . }}) DeepCopy() *{{ . }} {
+	return utils.Clone(o)
+}
+{{ end }}
+
+{{ define "objectList" }}
+{{- $item := . }}
+{{- $list := printf "%sObjectList" $item }}
+type {{ $list }} struct {
+	Items []{{ $item }}
+}
+
+func (o *{{ $list }}) GetType() object.ObjectType {
+	return ObjectType{{ $item }}
+}
+
+func (o *{{ $list }}) GetItems() []object.Object {
+	list := make([]object.Object, len(o.Items))
+	for i, item := range o.Items {
+		list[i] = item.DeepCopy()
+	}
+	return list
+}
+
+func (o *{{ $list }}) AppendItem(obj object.Object) {
+	item, ok := obj.(*{{ $item }})
+	if !ok {
+		return
+	}
+	o.Items = append(o.Items, *item.DeepCopy())
+}
+
+func (o *{{ $list }}) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *{{ $list }}) DeepCopy() *{{ $list }} {
+	out := new({{ $list }})
+	out.Items = make([]{{ $item }}, len(o.Items))
+	for i, item := range o.Items {
+		out.Items[i] = *item.DeepCopy()
+	}
+	return out
+}
+
+var _ object.ObjectList = (*{{ $list }})(nil)
+{{ end }}
+
+{{ define "aliasObject" }}
+{{- $name := . }}
+{{- $obj := printf "%sObject" $name }}
+{{- $list := printf "%sObjectList" $name }}
+// {{ $name }} is a type alias; must use new type pattern to define methods.
+type {{ $obj }} {{ $name }}
+
+const ObjectType{{ $name }} object.ObjectType = "{{ $name }}"
+
+func (o *{{ $obj }}) GetType() object.ObjectType {
+	return ObjectType{{ $name }}
+}
+
+func (o *{{ $obj }}) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *{{ $obj }}) DeepCopy() *{{ $obj }} {
+	return utils.Clone(o)
+}
+
+// The response field is a collection; no valid key.
+func (o *{{ $obj }}) GetKey() object.ObjectKey {
+	return "0"
+}
+
+var _ object.Object = (*{{ $obj }})(nil)
+
+type {{ $list }} struct {
+	Items []{{ $obj }}
+}
+
+func (o *{{ $list }}) GetType() object.ObjectType {
+	return ObjectType{{ $name }}
+}
+
+func (o *{{ $list }}) GetItems() []object.Object {
+	list := make([]object.Object, len(o.Items))
+	for i, item := range o.Items {
+		list[i] = item.DeepCopy()
+	}
+	return list
+}
+
+func (o *{{ $list }}) AppendItem(obj object.Object) {
+	item, ok := obj.(*{{ $obj }})
+	if !ok {
+		return
+	}
+	o.Items = append(o.Items, *item.DeepCopy())
+}
+
+func (o *{{ $list }}) DeepCopyObject() object.RuntimeObject {
+	return o.DeepCopy()
+}
+
+func (o *{{ $list }}) DeepCopy() *{{ $list }} {
+	out := new({{ $list }})
+	out.Items = make([]{{ $obj }}, len(o.Items))
+	for i, item := range o.Items {
+		out.Items[i] = *item.DeepCopy()
+	}
+	return out
+}
+
+var _ object.ObjectList = (*{{ $list }})(nil)
+{{ end }}

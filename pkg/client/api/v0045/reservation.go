@@ -10,15 +10,14 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type ReservationInterface interface {
 	CreateReservationInfo(ctx context.Context, req any) (string, error)
 	UpdateReservationInfo(ctx context.Context, name string, req any) error
 	DeleteReservationInfo(ctx context.Context, name string) error
-	GetReservationInfo(ctx context.Context, name string) (*types.V0045ReservationInfo, error)
-	ListReservationInfo(ctx context.Context) (*types.V0045ReservationInfoList, error)
+	GetReservationInfo(ctx context.Context, name string) (*api.V0045ReservationInfo, error)
+	ListReservationInfo(ctx context.Context) (*api.V0045ReservationInfoObjectList, error)
 }
 
 var _ ReservationInterface = &SlurmClient{}
@@ -93,7 +92,7 @@ func (c *SlurmClient) UpdateReservationInfo(ctx context.Context, name string, re
 }
 
 // GetReservationInfo implements ClientInterface
-func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*types.V0045ReservationInfo, error) {
+func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*api.V0045ReservationInfo, error) {
 	params := &api.SlurmV0045GetReservationParams{}
 	res, err := c.SlurmV0045GetReservationWithResponse(ctx, name, params)
 	if err != nil {
@@ -112,12 +111,12 @@ func (c *SlurmClient) GetReservationInfo(ctx context.Context, name string) (*typ
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := types.V0045ReservationInfo{V0045ReservationInfo: res.JSON200.Reservations[0]}
+	out := res.JSON200.Reservations[0]
 	return &out, nil
 }
 
 // ListReservationInfo implements ClientInterface
-func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*types.V0045ReservationInfoList, error) {
+func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*api.V0045ReservationInfoObjectList, error) {
 	params := &api.SlurmV0045GetReservationsParams{}
 	res, err := c.SlurmV0045GetReservationsWithResponse(ctx, params)
 	if err != nil {
@@ -132,11 +131,5 @@ func (c *SlurmClient) ListReservationInfo(ctx context.Context) (*types.V0045Rese
 		return nil, errors.Join(errs...)
 	}
 
-	list := &types.V0045ReservationInfoList{
-		Items: make([]types.V0045ReservationInfo, len(res.JSON200.Reservations)),
-	}
-	for i, item := range res.JSON200.Reservations {
-		list.Items[i] = types.V0045ReservationInfo{V0045ReservationInfo: item}
-	}
-	return list, nil
+	return &api.V0045ReservationInfoObjectList{Items: res.JSON200.Reservations}, nil
 }

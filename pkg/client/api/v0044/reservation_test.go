@@ -16,7 +16,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetReservationInfo(t *testing.T) {
@@ -31,7 +30,7 @@ func TestSlurmClient_GetReservationInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044ReservationInfo
+		want    *api.V0044ReservationInfo
 		wantErr bool
 	}{
 		{
@@ -69,10 +68,8 @@ func TestSlurmClient_GetReservationInfo(t *testing.T) {
 				ctx:  context.Background(),
 				name: "reservation-0",
 			},
-			want: &types.V0044ReservationInfo{
-				V0044ReservationInfo: api.V0044ReservationInfo{
-					Name: ptr.To("reservation-0"),
-				},
+			want: &api.V0044ReservationInfo{
+				Name: ptr.To("reservation-0"),
 			},
 			wantErr: false,
 		},
@@ -151,7 +148,7 @@ func TestSlurmClient_ListReservationInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044ReservationInfoList
+		want    *api.V0044ReservationInfoObjectList
 		wantErr bool
 	}{
 		{
@@ -162,9 +159,7 @@ func TestSlurmClient_ListReservationInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044ReservationInfoList{
-				Items: make([]types.V0044ReservationInfo, 0),
-			},
+			want:    &api.V0044ReservationInfoObjectList{},
 			wantErr: false,
 		},
 		{
@@ -191,11 +186,11 @@ func TestSlurmClient_ListReservationInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044ReservationInfoList{
-				Items: []types.V0044ReservationInfo{
-					{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("reservation-0")}},
-					{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("reservation-1")}},
-					{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("reservation-2")}},
+			want: &api.V0044ReservationInfoObjectList{
+				Items: []api.V0044ReservationInfo{
+					{Name: ptr.To("reservation-0")},
+					{Name: ptr.To("reservation-1")},
+					{Name: ptr.To("reservation-2")},
 				},
 			},
 			wantErr: false,

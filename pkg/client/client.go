@@ -385,7 +385,7 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 }
 
 func normalizeObjectType(objectType object.ObjectType) object.ObjectType {
-	return object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
+	return object.ObjectType(strings.TrimSuffix(string(objectType), "ObjectList"))
 }
 
 // Start implements Client.

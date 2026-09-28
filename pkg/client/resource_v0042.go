@@ -6,60 +6,60 @@ package client
 import (
 	"context"
 
-	api "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
+	api "github.com/SlinkyProject/slurm-client/api/v0042"
+	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func init() {
-	addResource(types.ObjectTypeV0042ControllerPing, resource{
-		newObject: func() object.Object { return &types.V0042ControllerPing{} },
-		newList:   func() object.ObjectList { return &types.V0042ControllerPingList{} },
+	addResource(api.ObjectTypeV0042ControllerPing, resource{
+		newObject: func() object.Object { return &api.V0042ControllerPing{} },
+		newList:   func() object.ObjectList { return &api.V0042ControllerPingObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0042JobInfo, resource{
-		newObject: func() object.Object { return &types.V0042JobInfo{} },
-		newList:   func() object.ObjectList { return &types.V0042JobInfoList{} },
+	addResource(api.ObjectTypeV0042JobInfo, resource{
+		newObject: func() object.Object { return &api.V0042JobInfo{} },
+		newList:   func() object.ObjectList { return &api.V0042JobInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0042Node, resource{
-		newObject: func() object.Object { return &types.V0042Node{} },
-		newList:   func() object.ObjectList { return &types.V0042NodeList{} },
+	addResource(api.ObjectTypeV0042Node, resource{
+		newObject: func() object.Object { return &api.V0042Node{} },
+		newList:   func() object.ObjectList { return &api.V0042NodeObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0042PartitionInfo, resource{
-		newObject: func() object.Object { return &types.V0042PartitionInfo{} },
-		newList:   func() object.ObjectList { return &types.V0042PartitionInfoList{} },
+	addResource(api.ObjectTypeV0042PartitionInfo, resource{
+		newObject: func() object.Object { return &api.V0042PartitionInfo{} },
+		newList:   func() object.ObjectList { return &api.V0042PartitionInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0042Stats, resource{
-		newObject: func() object.Object { return &types.V0042Stats{} },
-		newList:   func() object.ObjectList { return &types.V0042StatsList{} },
+	addResource(api.ObjectTypeV0042StatsMsg, resource{
+		newObject: func() object.Object { return &api.V0042StatsMsg{} },
+		newList:   func() object.ObjectList { return &api.V0042StatsMsgObjectList{} },
 		cacheable: true,
 	})
 }
 
-func bindV0042(dst map[object.ObjectType]resource, c api.ClientInterface) {
-	setOps(dst, types.ObjectTypeV0042ControllerPing, resource{
+func bindV0042(dst map[object.ObjectType]resource, c v0042.ClientInterface) {
+	setOps(dst, api.ObjectTypeV0042ControllerPing, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042ControllerPing, error) {
+			return getInto(obj, func() (*api.V0042ControllerPing, error) {
 				return c.GetControllerPing(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042ControllerPingList, error) {
+			return listInto(list, func() (*api.V0042ControllerPingObjectList, error) {
 				return c.ListControllerPing(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0042JobInfo, resource{
+	setOps(dst, api.ObjectTypeV0042JobInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042JobInfo, error) {
+			return getInto(obj, func() (*api.V0042JobInfo, error) {
 				return c.GetJobInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042JobInfoList, error) {
+			return listInto(list, func() (*api.V0042JobInfoObjectList, error) {
 				return c.ListJobInfo(ctx)
 			})
 		},
@@ -73,14 +73,14 @@ func bindV0042(dst map[object.ObjectType]resource, c api.ClientInterface) {
 			return c.DeleteJobInfo(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0042Node, resource{
+	setOps(dst, api.ObjectTypeV0042Node, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042Node, error) {
+			return getInto(obj, func() (*api.V0042Node, error) {
 				return c.GetNode(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042NodeList, error) {
+			return listInto(list, func() (*api.V0042NodeObjectList, error) {
 				return c.ListNodes(ctx)
 			})
 		},
@@ -91,26 +91,26 @@ func bindV0042(dst map[object.ObjectType]resource, c api.ClientInterface) {
 			return c.DeleteNode(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0042PartitionInfo, resource{
+	setOps(dst, api.ObjectTypeV0042PartitionInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042PartitionInfo, error) {
+			return getInto(obj, func() (*api.V0042PartitionInfo, error) {
 				return c.GetPartitionInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042PartitionInfoList, error) {
+			return listInto(list, func() (*api.V0042PartitionInfoObjectList, error) {
 				return c.ListPartitionInfo(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0042Stats, resource{
+	setOps(dst, api.ObjectTypeV0042StatsMsg, resource{
 		get: func(ctx context.Context, _ object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042Stats, error) {
+			return getInto(obj, func() (*api.V0042StatsMsg, error) {
 				return c.GetStats(ctx)
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042StatsList, error) {
+			return listInto(list, func() (*api.V0042StatsMsgObjectList, error) {
 				return c.ListStats(ctx)
 			})
 		},

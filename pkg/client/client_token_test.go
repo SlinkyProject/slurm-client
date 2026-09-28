@@ -11,8 +11,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 var _ = Describe("Token provider", func() {
@@ -28,9 +28,9 @@ var _ = Describe("Token provider", func() {
 		})
 		Expect(err).NotTo(HaveOccurred())
 
-		list := &types.V0045ControllerPingList{}
+		list := &api.V0045ControllerPingObjectList{}
 		Expect(slurmClient.List(specCtx, list, &ListOptions{SkipCache: true})).To(Succeed())
-		Expect(list.Items).NotTo(BeEmpty())
+		Expect(list.GetItems()).NotTo(BeEmpty())
 
 		replaceTokenFile(tokenPath, "")
 		Expect(slurmClient.List(specCtx, list, &ListOptions{SkipCache: true})).To(MatchError(ContainSubstring("token file")))
@@ -40,7 +40,7 @@ var _ = Describe("Token provider", func() {
 		replaceTokenFile(tokenPath, rotatedToken)
 
 		Expect(slurmClient.List(specCtx, list, &ListOptions{SkipCache: true})).To(Succeed())
-		Expect(list.Items).NotTo(BeEmpty())
+		Expect(list.GetItems()).NotTo(BeEmpty())
 		Expect(slurmClient.GetToken()).To(Equal(rotatedToken))
 	}, SpecTimeout(testTimeout))
 })

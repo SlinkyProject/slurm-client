@@ -15,7 +15,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetControllerPing(t *testing.T) {
@@ -30,7 +29,7 @@ func TestSlurmClient_GetControllerPing(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044ControllerPing
+		want    *api.V0044ControllerPing
 		wantErr bool
 	}{
 		{
@@ -68,10 +67,8 @@ func TestSlurmClient_GetControllerPing(t *testing.T) {
 				ctx:  context.Background(),
 				host: "controller-0",
 			},
-			want: &types.V0044ControllerPing{
-				V0044ControllerPing: api.V0044ControllerPing{
-					Hostname: ptr.To("controller-0"),
-				},
+			want: &api.V0044ControllerPing{
+				Hostname: ptr.To("controller-0"),
 			},
 			wantErr: false,
 		},
@@ -150,7 +147,7 @@ func TestSlurmClient_ListControllerPing(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044ControllerPingList
+		want    *api.V0044ControllerPingObjectList
 		wantErr bool
 	}{
 		{
@@ -161,9 +158,7 @@ func TestSlurmClient_ListControllerPing(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044ControllerPingList{
-				Items: make([]types.V0044ControllerPing, 0),
-			},
+			want:    &api.V0044ControllerPingObjectList{},
 			wantErr: false,
 		},
 		{
@@ -189,10 +184,10 @@ func TestSlurmClient_ListControllerPing(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044ControllerPingList{
-				Items: []types.V0044ControllerPing{
-					{V0044ControllerPing: api.V0044ControllerPing{Hostname: ptr.To("controller-0")}},
-					{V0044ControllerPing: api.V0044ControllerPing{Hostname: ptr.To("controller-1")}},
+			want: &api.V0044ControllerPingObjectList{
+				Items: []api.V0044ControllerPing{
+					{Hostname: ptr.To("controller-0")},
+					{Hostname: ptr.To("controller-1")},
 				},
 			},
 			wantErr: false,

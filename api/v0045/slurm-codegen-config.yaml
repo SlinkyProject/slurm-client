@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/v2.8.0/configuration-schema.json
+package: v0045
+generate:
+  client: true
+  embedded-spec: true
+  models: true
+output: slurm.gen.go
+output-options:
+  skip-fmt: false
+  skip-prune: true

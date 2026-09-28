@@ -130,7 +130,7 @@ Create Slurm resources via client handle.
 
 ```golang
 // Create job via V0044 endpoint
-jobInfo := &types.V0044JobInfo{}
+jobInfo := &v0044.V0044JobInfo{}
 req := v0044.V0044JobSubmitReq{
 	Job: &v0044.V0044JobDescMsg{
 		CurrentWorkingDirectory: ptr.To("/tmp"),
@@ -147,7 +147,7 @@ if err := slurmClient.Create(ctx, jobInfo, req); err != nil {
 
 ```golang
 // Create job via V0043 endpoint
-jobInfo := &types.V0043JobInfo{}
+jobInfo := &v0043.V0043JobInfo{}
 req := v0043.V0043JobSubmitReq{
 	Job: &v0043.V0043JobDescMsg{
 		CurrentWorkingDirectory: ptr.To("/tmp"),
@@ -168,10 +168,8 @@ Delete Slurm resource via client handle.
 
 ```golang
 // Delete job via V0044 endpoint
-jobInfo := &types.V0044JobInfo{
-	V0044JobInfo: v0044.V0044JobInfo{
-		JobId: ptr.To("1"),
-	},
+jobInfo := &v0044.V0044JobInfo{
+	JobId: ptr.To[int32](1),
 }
 if err := slurmClient.Delete(ctx, jobInfo); err != nil {
 	return err
@@ -180,10 +178,8 @@ if err := slurmClient.Delete(ctx, jobInfo); err != nil {
 
 ```golang
 // Delete job via V0043 endpoint
-jobInfo := &types.V0043JobInfo{
-	V0043JobInfo: v0043.V0043JobInfo{
-		JobId: ptr.To("1"),
-	},
+jobInfo := &v0043.V0043JobInfo{
+	JobId: ptr.To[int32](1),
 }
 if err := slurmClient.Delete(ctx, jobInfo); err != nil {
 	return err
@@ -196,7 +192,7 @@ Get Slurm resource via client handle.
 
 ```golang
 // Fetch node via V0044 endpoint
-node := &types.V0044Node{}
+node := &v0044.V0044Node{}
 key := object.ObjectKey("node-0")
 if err := slurmClient.Get(ctx, key, node); err != nil {
 	return err
@@ -205,7 +201,7 @@ if err := slurmClient.Get(ctx, key, node); err != nil {
 
 ```golang
 // Fetch node via V0043 endpoint
-node := &types.V0043Node{}
+node := &v0043.V0043Node{}
 key := object.ObjectKey("node-0")
 if err := slurmClient.Get(ctx, key, node); err != nil {
 	return err
@@ -218,7 +214,7 @@ List Slurm resources via client handle.
 
 ```golang
 // Fetch list of nodes via V0044 endpoint
-nodeList := &types.V0044NodeList{}
+nodeList := &v0044.V0044NodeObjectList{}
 if err := slurmClient.List(ctx, nodeList); err != nil {
 	return err
 }
@@ -226,7 +222,7 @@ if err := slurmClient.List(ctx, nodeList); err != nil {
 
 ```golang
 // Fetch list of nodes via V0043 endpoint
-nodeList := &types.V0043NodeList{}
+nodeList := &v0043.V0043NodeObjectList{}
 if err := slurmClient.List(ctx, nodeList); err != nil {
 	return err
 }
@@ -238,7 +234,7 @@ Update Slurm resource via client handle.
 
 ```golang
 // Update job via V0044 endpoint
-jobInfo := &types.V0044JobInfo{}
+jobInfo := &v0044.V0044JobInfo{}
 req := &v0044.V0044JobDescMsg{
 	Comment: ptr.To("updated comment")
 }
@@ -249,7 +245,7 @@ if err := slurmClient.Update(ctx, jobInfo, req); err != nil {
 
 ```golang
 // Update job via V0043 endpoint
-jobInfo := &types.V0043JobInfo{}
+jobInfo := &v0043.V0043JobInfo{}
 req := &v0043.V0043JobDescMsg{
 	Comment: ptr.To("updated comment")
 }

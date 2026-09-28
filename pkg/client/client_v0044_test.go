@@ -16,7 +16,6 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 var _ = Describe("Client v0044", func() {
@@ -41,7 +40,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044ControllerPing{},
+					&api.V0044ControllerPing{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -58,7 +57,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044ControllerPing{}
+				obj := &api.V0044ControllerPing{}
 				key := object.ObjectKey("slurmctld")
 				err := cl.Get(ctx, key, obj)
 				Expect(err).NotTo(HaveOccurred())
@@ -68,7 +67,7 @@ var _ = Describe("Client v0044", func() {
 		Context("List", func() {
 			It("should return a non-empty list ", func(ctx SpecContext) {
 				By("listing all objects")
-				list := &types.V0044ControllerPingList{}
+				list := &api.V0044ControllerPingObjectList{}
 				err := cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -92,7 +91,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044JobInfo{},
+					&api.V0044JobInfo{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -109,11 +108,11 @@ var _ = Describe("Client v0044", func() {
 		Context("Create", func() {
 			It("should create a new object", func(ctx SpecContext) {
 				By("creating the object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
-				actual := &types.V0044JobInfo{}
+				actual := &api.V0044JobInfo{}
 				err = cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -122,7 +121,7 @@ var _ = Describe("Client v0044", func() {
 			}, SpecTimeout(testTimeout))
 			It("should fail if the object request is invalid", func(ctx SpecContext) {
 				By("creating the object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				req := api.V0044JobSubmitReq{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
@@ -132,13 +131,13 @@ var _ = Describe("Client v0044", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0044JobInfo{V0044JobInfo: api.V0044JobInfo{JobId: ptr.To[int32](0)}}
+				obj := &api.V0044JobInfo{JobId: ptr.To[int32](0)}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should delete a new object", func(ctx SpecContext) {
 				By("initially creating an object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -155,13 +154,13 @@ var _ = Describe("Client v0044", func() {
 
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0044JobInfo{V0044JobInfo: api.V0044JobInfo{JobId: ptr.To[int32](0)}}
+				obj := &api.V0044JobInfo{JobId: ptr.To[int32](0)}
 				err := cl.Update(ctx, obj, updateReq)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should update the existing object", func(ctx SpecContext) {
 				By("creating the object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -177,29 +176,29 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should return ErrNotFound from cache if the object does not exist", func(ctx SpecContext) {
 				By("waiting for the informer cache to start")
-				Eventually(cl.GetInformer(types.ObjectTypeV0044JobInfo).HasStarted).Should(BeTrue())
+				Eventually(cl.GetInformer(api.ObjectTypeV0044JobInfo).HasStarted).Should(BeTrue())
 
 				By("fetching a non-existent object from cache")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				key := object.ObjectKey("2147483647")
 				err := cl.Get(ctx, key, obj)
 				Expect(errors.Is(err, apierrors.ErrNotFound)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
 			It("should return ErrNotFound from the live API if the object does not exist", func(ctx SpecContext) {
 				By("fetching a non-existent object from the live API")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				key := object.ObjectKey("2147483647")
 				err := cl.Get(ctx, key, obj, &GetOptions{SkipCache: true})
 				Expect(errors.Is(err, apierrors.ErrNotFound)).To(BeTrue())
 			}, SpecTimeout(testTimeout))
 			It("should fetch an existing object for a go struct", func(ctx SpecContext) {
 				By("initially creating an object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("fetching the created the object")
-				actual := &types.V0044JobInfo{}
+				actual := &api.V0044JobInfo{}
 				err = cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -211,23 +210,23 @@ var _ = Describe("Client v0044", func() {
 		Context("List", func() {
 			It("should return a list", func(ctx SpecContext) {
 				By("listing all objects")
-				list := &types.V0044JobInfoList{}
+				list := &api.V0044JobInfoObjectList{}
 				err := cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should return a non-empty", func(ctx SpecContext) {
 				By("initially creating an object")
-				obj := &types.V0044JobInfo{}
+				obj := &api.V0044JobInfo{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("listing all objects")
-				list := &types.V0044JobInfoList{}
+				list := &api.V0044JobInfoObjectList{}
 				err = cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("validating no objects are returned")
-				Expect(list.Items).NotTo(BeEmpty())
+				Expect(list.GetItems()).NotTo(BeEmpty())
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -262,7 +261,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fetch an existing object for a go struct", func(ctx SpecContext) {
 				By("creating the job object")
-				job := &types.V0044JobInfo{}
+				job := &api.V0044JobInfo{}
 				err := cl.Create(ctx, job, req)
 				Expect(err).NotTo(HaveOccurred())
 				defer func() {
@@ -271,14 +270,14 @@ var _ = Describe("Client v0044", func() {
 				}()
 
 				By("fetching the job resource layout")
-				layout := &types.V0044NodeResourceLayout{}
+				layout := &api.V0044NodeResourceLayoutListObject{}
 				Eventually(func(g Gomega) {
 					// Job must be running otherwise Get() will always return an error.
 					g.Expect(cl.Get(ctx, job.GetKey(), layout)).To(Succeed())
 				}, testTimeout, 2*time.Second).Should(Succeed())
 
 				By("checking the layout is not empty")
-				Expect(layout).ToNot(BeEquivalentTo(&types.V0044NodeResourceLayout{}))
+				Expect(layout).ToNot(BeEquivalentTo(&api.V0044NodeResourceLayoutListObject{}))
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -290,7 +289,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044Node{},
+					&api.V0044Node{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -307,7 +306,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
+				obj := &api.V0044Node{Name: ptr.To("does-not-exist")}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -320,13 +319,13 @@ var _ = Describe("Client v0044", func() {
 
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
+				obj := &api.V0044Node{Name: ptr.To("does-not-exist")}
 				err := cl.Update(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should update the existing object", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("slurmd")}}
+				obj := &api.V0044Node{Name: ptr.To("slurmd")}
 				err := cl.Update(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -338,15 +337,15 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("does-not-exist")}}
-				actual := &types.V0044Node{}
+				obj := &api.V0044Node{Name: ptr.To("does-not-exist")}
+				actual := &api.V0044Node{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should return existing object", func(ctx SpecContext) {
 				By("fetching existent object")
-				obj := &types.V0044Node{V0044Node: api.V0044Node{Name: ptr.To("slurmd")}}
-				actual := &types.V0044Node{}
+				obj := &api.V0044Node{Name: ptr.To("slurmd")}
+				actual := &api.V0044Node{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).NotTo(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -355,10 +354,10 @@ var _ = Describe("Client v0044", func() {
 		Context("List", func() {
 			It("should return a list", func(ctx SpecContext) {
 				By("listing all objects")
-				list := &types.V0044NodeList{}
+				list := &api.V0044NodeObjectList{}
 				err := cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(list.Items).NotTo(BeEmpty())
+				Expect(list.GetItems()).NotTo(BeEmpty())
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -370,7 +369,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044PartitionInfo{},
+					&api.V0044PartitionInfo{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -387,15 +386,15 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044PartitionInfo{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("does-not-exist")}}
-				actual := &types.V0044PartitionInfo{}
+				obj := &api.V0044PartitionInfo{Name: ptr.To("does-not-exist")}
+				actual := &api.V0044PartitionInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should return existing object", func(ctx SpecContext) {
 				By("fetching existent object")
-				obj := &types.V0044PartitionInfo{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("all")}}
-				actual := &types.V0044PartitionInfo{}
+				obj := &api.V0044PartitionInfo{Name: ptr.To("all")}
+				actual := &api.V0044PartitionInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).NotTo(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -404,10 +403,10 @@ var _ = Describe("Client v0044", func() {
 		Context("List", func() {
 			It("should return a list", func(ctx SpecContext) {
 				By("listing all objects")
-				list := &types.V0044PartitionInfoList{}
+				list := &api.V0044PartitionInfoObjectList{}
 				err := cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(list.Items).NotTo(BeEmpty())
+				Expect(list.GetItems()).NotTo(BeEmpty())
 			}, SpecTimeout(testTimeout))
 		})
 	})
@@ -435,7 +434,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044ReservationInfo{},
+					&api.V0044ReservationInfo{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -453,7 +452,7 @@ var _ = Describe("Client v0044", func() {
 			It("should create a new object", func(ctx SpecContext) {
 				const reservationName = "create-v44"
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{}
 				req := req // shallow copy and scope variable
 				req.Name = ptr.To(reservationName)
 				err := cl.Create(ctx, obj, req)
@@ -465,7 +464,7 @@ var _ = Describe("Client v0044", func() {
 			}, SpecTimeout(testTimeout))
 			It("should fail if the object request is invalid", func(ctx SpecContext) {
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{}
 				req := api.V0044ReservationDescMsg{}
 				err := cl.Create(ctx, obj, req)
 				Expect(err).To(HaveOccurred())
@@ -475,14 +474,14 @@ var _ = Describe("Client v0044", func() {
 		Context("Delete", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("deleting the object")
-				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}}
+				obj := &api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}
 				err := cl.Delete(ctx, obj)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should delete an existing object", func(ctx SpecContext) {
 				const reservationName = "delete-v44"
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{}
 				req := req // shallow copy and scope variable
 				req.Name = ptr.To(reservationName)
 				err := cl.Create(ctx, obj, req)
@@ -502,14 +501,14 @@ var _ = Describe("Client v0044", func() {
 			}
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("update the object")
-				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}}
+				obj := &api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}
 				err := cl.Update(ctx, obj, updateReq)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should update the existing object", func(ctx SpecContext) {
 				const reservationName = "update-v44"
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{}
 				req := req // shallow copy and scope variable
 				req.Name = ptr.To(reservationName)
 				err := cl.Create(ctx, obj, req)
@@ -528,22 +527,22 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fail if the object does not exist", func(ctx SpecContext) {
 				By("fetching non-existent object")
-				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}}
-				actual := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{Name: ptr.To("does-not-exist")}
+				actual := &api.V0044ReservationInfo{}
 				err := cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).To(HaveOccurred())
 			}, SpecTimeout(testTimeout))
 			It("should return existing object", func(ctx SpecContext) {
 				const reservationName = "get-v44"
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{}
+				obj := &api.V0044ReservationInfo{}
 				req := req // shallow copy and scope variable
 				req.Name = ptr.To(reservationName)
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("fetching existing object")
-				actual := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To(reservationName)}}
+				actual := &api.V0044ReservationInfo{Name: ptr.To(reservationName)}
 				err = cl.Get(ctx, obj.GetKey(), actual)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -557,17 +556,17 @@ var _ = Describe("Client v0044", func() {
 			It("should return a list", func(ctx SpecContext) {
 				const reservationName = "list-v44"
 				By("creating the object")
-				obj := &types.V0044ReservationInfo{V0044ReservationInfo: api.V0044ReservationInfo{Name: ptr.To(reservationName)}}
+				obj := &api.V0044ReservationInfo{Name: ptr.To(reservationName)}
 				req := req // shallow copy and scope variable
 				req.Name = ptr.To(reservationName)
 				err := cl.Create(ctx, obj, req)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("listing all objects")
-				list := &types.V0044ReservationInfoList{}
+				list := &api.V0044ReservationInfoObjectList{}
 				err = cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(list.Items).NotTo(BeEmpty())
+				Expect(list.GetItems()).NotTo(BeEmpty())
 
 				By("deleting the object")
 				err = cl.Delete(ctx, obj)
@@ -583,7 +582,7 @@ var _ = Describe("Client v0044", func() {
 			var err error
 			cl, err = NewClient(cfg, &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0044Stats{},
+					&api.V0044StatsMsg{},
 				},
 				CacheSyncPeriod: cacheSyncPeriod,
 			})
@@ -600,7 +599,7 @@ var _ = Describe("Client v0044", func() {
 		Context("Get", func() {
 			It("should fetch stats", func(ctx SpecContext) {
 				By("fetching data")
-				obj := &types.V0044Stats{}
+				obj := &api.V0044StatsMsg{}
 				err := cl.Get(ctx, obj.GetKey(), obj)
 				Expect(err).NotTo(HaveOccurred())
 			}, SpecTimeout(testTimeout))
@@ -609,10 +608,10 @@ var _ = Describe("Client v0044", func() {
 		Context("List", func() {
 			It("should return a list", func(ctx SpecContext) {
 				By("listing all objects")
-				list := &types.V0044StatsList{}
+				list := &api.V0044StatsMsgObjectList{}
 				err := cl.List(ctx, list)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(list.Items).NotTo(BeEmpty())
+				Expect(list.GetItems()).NotTo(BeEmpty())
 			}, SpecTimeout(testTimeout))
 		})
 	})

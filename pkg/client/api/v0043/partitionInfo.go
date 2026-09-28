@@ -10,18 +10,17 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type PartitionInterface interface {
-	GetPartitionInfo(ctx context.Context, name string) (*types.V0043PartitionInfo, error)
-	ListPartitionInfo(ctx context.Context) (*types.V0043PartitionInfoList, error)
+	GetPartitionInfo(ctx context.Context, name string) (*api.V0043PartitionInfo, error)
+	ListPartitionInfo(ctx context.Context) (*api.V0043PartitionInfoObjectList, error)
 }
 
 var _ PartitionInterface = &SlurmClient{}
 
 // GetPartitionInfo implements ClientInterface
-func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types.V0043PartitionInfo, error) {
+func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*api.V0043PartitionInfo, error) {
 	params := &api.SlurmV0043GetPartitionParams{}
 	res, err := c.SlurmV0043GetPartitionWithResponse(ctx, name, params)
 	if err != nil {
@@ -40,12 +39,12 @@ func (c *SlurmClient) GetPartitionInfo(ctx context.Context, name string) (*types
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := types.V0043PartitionInfo{V0043PartitionInfo: res.JSON200.Partitions[0]}
+	out := res.JSON200.Partitions[0]
 	return &out, nil
 }
 
 // ListPartitionInfo implements ClientInterface
-func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0043PartitionInfoList, error) {
+func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*api.V0043PartitionInfoObjectList, error) {
 	params := &api.SlurmV0043GetPartitionsParams{}
 	res, err := c.SlurmV0043GetPartitionsWithResponse(ctx, params)
 	if err != nil {
@@ -60,11 +59,5 @@ func (c *SlurmClient) ListPartitionInfo(ctx context.Context) (*types.V0043Partit
 		return nil, errors.Join(errs...)
 	}
 
-	list := &types.V0043PartitionInfoList{
-		Items: make([]types.V0043PartitionInfo, len(res.JSON200.Partitions)),
-	}
-	for i, item := range res.JSON200.Partitions {
-		list.Items[i] = types.V0043PartitionInfo{V0043PartitionInfo: item}
-	}
-	return list, nil
+	return &api.V0043PartitionInfoObjectList{Items: res.JSON200.Partitions}, nil
 }

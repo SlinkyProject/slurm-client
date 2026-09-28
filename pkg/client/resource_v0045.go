@@ -6,68 +6,68 @@ package client
 import (
 	"context"
 
+	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	v0045 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func init() {
-	addResource(types.ObjectTypeV0045ControllerPing, resource{
-		newObject: func() object.Object { return &types.V0045ControllerPing{} },
-		newList:   func() object.ObjectList { return &types.V0045ControllerPingList{} },
+	addResource(api.ObjectTypeV0045ControllerPing, resource{
+		newObject: func() object.Object { return &api.V0045ControllerPing{} },
+		newList:   func() object.ObjectList { return &api.V0045ControllerPingObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0045JobInfo, resource{
-		newObject: func() object.Object { return &types.V0045JobInfo{} },
-		newList:   func() object.ObjectList { return &types.V0045JobInfoList{} },
+	addResource(api.ObjectTypeV0045JobInfo, resource{
+		newObject: func() object.Object { return &api.V0045JobInfo{} },
+		newList:   func() object.ObjectList { return &api.V0045JobInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0045Node, resource{
-		newObject: func() object.Object { return &types.V0045Node{} },
-		newList:   func() object.ObjectList { return &types.V0045NodeList{} },
+	addResource(api.ObjectTypeV0045Node, resource{
+		newObject: func() object.Object { return &api.V0045Node{} },
+		newList:   func() object.ObjectList { return &api.V0045NodeObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0045NodeResourceLayout, resource{
-		newObject: func() object.Object { return &types.V0045NodeResourceLayout{} },
+	addResource(api.ObjectTypeV0045NodeResourceLayoutList, resource{
+		newObject: func() object.Object { return &api.V0045NodeResourceLayoutListObject{} },
 	})
-	addResource(types.ObjectTypeV0045PartitionInfo, resource{
-		newObject: func() object.Object { return &types.V0045PartitionInfo{} },
-		newList:   func() object.ObjectList { return &types.V0045PartitionInfoList{} },
+	addResource(api.ObjectTypeV0045PartitionInfo, resource{
+		newObject: func() object.Object { return &api.V0045PartitionInfo{} },
+		newList:   func() object.ObjectList { return &api.V0045PartitionInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0045ReservationInfo, resource{
-		newObject: func() object.Object { return &types.V0045ReservationInfo{} },
-		newList:   func() object.ObjectList { return &types.V0045ReservationInfoList{} },
+	addResource(api.ObjectTypeV0045ReservationInfo, resource{
+		newObject: func() object.Object { return &api.V0045ReservationInfo{} },
+		newList:   func() object.ObjectList { return &api.V0045ReservationInfoObjectList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0045Stats, resource{
-		newObject: func() object.Object { return &types.V0045Stats{} },
-		newList:   func() object.ObjectList { return &types.V0045StatsList{} },
+	addResource(api.ObjectTypeV0045StatsMsg, resource{
+		newObject: func() object.Object { return &api.V0045StatsMsg{} },
+		newList:   func() object.ObjectList { return &api.V0045StatsMsgObjectList{} },
 		cacheable: true,
 	})
 }
 
 func bindV0045(dst map[object.ObjectType]resource, c v0045.ClientInterface) {
-	setOps(dst, types.ObjectTypeV0045ControllerPing, resource{
+	setOps(dst, api.ObjectTypeV0045ControllerPing, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045ControllerPing, error) {
+			return getInto(obj, func() (*api.V0045ControllerPing, error) {
 				return c.GetControllerPing(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045ControllerPingList, error) {
+			return listInto(list, func() (*api.V0045ControllerPingObjectList, error) {
 				return c.ListControllerPing(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045JobInfo, resource{
+	setOps(dst, api.ObjectTypeV0045JobInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045JobInfo, error) {
+			return getInto(obj, func() (*api.V0045JobInfo, error) {
 				return c.GetJobInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045JobInfoList, error) {
+			return listInto(list, func() (*api.V0045JobInfoObjectList, error) {
 				return c.ListJobInfo(ctx)
 			})
 		},
@@ -81,14 +81,14 @@ func bindV0045(dst map[object.ObjectType]resource, c v0045.ClientInterface) {
 			return c.DeleteJobInfo(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045Node, resource{
+	setOps(dst, api.ObjectTypeV0045Node, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045Node, error) {
+			return getInto(obj, func() (*api.V0045Node, error) {
 				return c.GetNode(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045NodeList, error) {
+			return listInto(list, func() (*api.V0045NodeObjectList, error) {
 				return c.ListNodes(ctx)
 			})
 		},
@@ -102,33 +102,38 @@ func bindV0045(dst map[object.ObjectType]resource, c v0045.ClientInterface) {
 			return c.DeleteNode(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045NodeResourceLayout, resource{
+	setOps(dst, api.ObjectTypeV0045NodeResourceLayoutList, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045NodeResourceLayout, error) {
-				return c.GetNodeResourceLayout(ctx, string(key))
+			return getInto(obj, func() (*api.V0045NodeResourceLayoutListObject, error) {
+				nodes, err := c.GetNodeResourceLayout(ctx, string(key))
+				if err != nil {
+					return nil, err
+				}
+				out := api.V0045NodeResourceLayoutListObject(*nodes)
+				return &out, nil
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045PartitionInfo, resource{
+	setOps(dst, api.ObjectTypeV0045PartitionInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045PartitionInfo, error) {
+			return getInto(obj, func() (*api.V0045PartitionInfo, error) {
 				return c.GetPartitionInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045PartitionInfoList, error) {
+			return listInto(list, func() (*api.V0045PartitionInfoObjectList, error) {
 				return c.ListPartitionInfo(ctx)
 			})
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045ReservationInfo, resource{
+	setOps(dst, api.ObjectTypeV0045ReservationInfo, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045ReservationInfo, error) {
+			return getInto(obj, func() (*api.V0045ReservationInfo, error) {
 				return c.GetReservationInfo(ctx, string(key))
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045ReservationInfoList, error) {
+			return listInto(list, func() (*api.V0045ReservationInfoObjectList, error) {
 				return c.ListReservationInfo(ctx)
 			})
 		},
@@ -142,14 +147,14 @@ func bindV0045(dst map[object.ObjectType]resource, c v0045.ClientInterface) {
 			return c.DeleteReservationInfo(ctx, key)
 		},
 	})
-	setOps(dst, types.ObjectTypeV0045Stats, resource{
+	setOps(dst, api.ObjectTypeV0045StatsMsg, resource{
 		get: func(ctx context.Context, _ object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0045Stats, error) {
+			return getInto(obj, func() (*api.V0045StatsMsg, error) {
 				return c.GetStats(ctx)
 			})
 		},
 		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0045StatsList, error) {
+			return listInto(list, func() (*api.V0045StatsMsgObjectList, error) {
 				return c.ListStats(ctx)
 			})
 		},
