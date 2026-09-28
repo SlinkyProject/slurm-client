@@ -27,7 +27,6 @@ import (
 	tokenprovider "github.com/SlinkyProject/slurm-client/pkg/client/token"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 // Config holds the common attributes that can be passed to a Slurm client on
@@ -73,6 +72,7 @@ type client struct {
 	v0043Client v0043.ClientInterface
 	v0044Client v0044.ClientInterface
 	v0045Client v0045.ClientInterface
+	resources   map[object.ObjectType]resource
 
 	config Config
 
@@ -92,14 +92,6 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 	// Apply options
 	options := &ClientOptions{
 		CacheSyncPeriod: defaultSyncPeriod,
-		DisableFor: []object.Object{
-			&types.V0045NodeResourceLayout{},
-			&types.V0045Reconfigure{},
-			&types.V0044NodeResourceLayout{},
-			&types.V0044Reconfigure{},
-			&types.V0043Reconfigure{},
-			&types.V0042Reconfigure{},
-		},
 	}
 	options.ApplyOptions(opts)
 
@@ -120,6 +112,13 @@ func NewClient(config *Config, opts ...ClientOption) (Client, error) {
 
 	for _, obj := range options.EnableFor {
 		c.GetInformer(obj.GetType())
+	}
+	for _, res := range c.resources {
+		if res.cacheable {
+			continue
+		}
+		objectType := normalizeObjectType(res.newObject().GetType())
+		c.uncached.Insert(objectType)
 	}
 	for _, obj := range options.DisableFor {
 		c.uncached.Insert(obj.GetType())
@@ -156,6 +155,12 @@ func (c *client) createApiClients() error {
 		return fmt.Errorf("unable to create client: %w", err)
 	}
 
+	c.resources = cloneCatalog()
+	bindV0042(c.resources, c.v0042Client)
+	bindV0043(c.resources, c.v0043Client)
+	bindV0044(c.resources, c.v0044Client)
+	bindV0045(c.resources, c.v0045Client)
+
 	return nil
 }
 
@@ -170,63 +175,13 @@ func (c *client) Create(
 	options := &CreateOptions{}
 	options.ApplyOptions(opts)
 
-	var err error
-	var key object.ObjectKey
-	switch obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042JobInfo:
-		var jobId *int32
-		jobId, err = c.v0042Client.CreateJobInfo(ctx, req)
-		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043JobInfo:
-		var jobId *int32
-		jobId, err = c.v0043Client.CreateJobInfo(ctx, req)
-		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044JobInfo:
-		var jobId *int32
-		jobId, err = c.v0044Client.CreateJobInfo(ctx, req)
-		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
-
-	case *types.V0044ReservationInfo:
-		var reservationName string
-		reservationName, err = c.v0044Client.CreateReservationInfo(ctx, req)
-		key = object.ObjectKey(reservationName)
-
-	case *types.V0044Node:
-		var nodeName *string
-		nodeName, err = c.v0044Client.CreateNewNode(ctx, req)
-		key = object.ObjectKey(ptr.Deref(nodeName, ""))
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045JobInfo:
-		var jobId *int32
-		jobId, err = c.v0045Client.CreateJobInfo(ctx, req)
-		key = object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(jobId, 0)))
-
-	case *types.V0045ReservationInfo:
-		var reservationName string
-		reservationName, err = c.v0045Client.CreateReservationInfo(ctx, req)
-		key = object.ObjectKey(reservationName)
-
-	case *types.V0045Node:
-		var nodeName *string
-		nodeName, err = c.v0045Client.CreateNewNode(ctx, req)
-		key = object.ObjectKey(ptr.Deref(nodeName, ""))
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
+	c.mu.RLock()
+	r, ok := c.resources[obj.GetType()]
+	c.mu.RUnlock()
+	if !ok || r.create == nil {
 		return apierrors.ErrNotImplemented
 	}
-
+	key, err := r.create(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -244,52 +199,17 @@ func (c *client) Delete(
 	options := &DeleteOptions{}
 	options.ApplyOptions(opts)
 
-	var err error
-	key := string(obj.GetKey())
-	switch obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042JobInfo:
-		err = c.v0042Client.DeleteJobInfo(ctx, key)
-	case *types.V0042Node:
-		err = c.v0042Client.DeleteNode(ctx, key)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043JobInfo:
-		err = c.v0043Client.DeleteJobInfo(ctx, key)
-	case *types.V0043Node:
-		err = c.v0043Client.DeleteNode(ctx, key)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044JobInfo:
-		err = c.v0044Client.DeleteJobInfo(ctx, key)
-	case *types.V0044Node:
-		err = c.v0044Client.DeleteNode(ctx, key)
-	case *types.V0044ReservationInfo:
-		err = c.v0044Client.DeleteReservationInfo(ctx, key)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045JobInfo:
-		err = c.v0045Client.DeleteJobInfo(ctx, key)
-	case *types.V0045Node:
-		err = c.v0045Client.DeleteNode(ctx, key)
-	case *types.V0045ReservationInfo:
-		err = c.v0045Client.DeleteReservationInfo(ctx, key)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
+	c.mu.RLock()
+	r, ok := c.resources[obj.GetType()]
+	c.mu.RUnlock()
+	if !ok || r.delete == nil {
 		return apierrors.ErrNotImplemented
 	}
-
-	if err != nil {
+	if err := r.delete(ctx, string(obj.GetKey())); err != nil {
 		return err
 	}
 
-	err = c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
+	err := c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
 	if err != nil {
 		// We expect the error to always be NotFound because we deleted the
 		// object from Slurm then attempted to Get the deleted object with
@@ -313,48 +233,13 @@ func (c *client) Update(
 	options := &UpdateOptions{}
 	options.ApplyOptions(opts)
 
-	var err error
-	key := string(obj.GetKey())
-	switch obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042JobInfo:
-		err = c.v0042Client.UpdateJobInfo(ctx, key, req)
-	case *types.V0042Node:
-		err = c.v0042Client.UpdateNode(ctx, key, req)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043JobInfo:
-		err = c.v0043Client.UpdateJobInfo(ctx, key, req)
-	case *types.V0043Node:
-		err = c.v0043Client.UpdateNode(ctx, key, req)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044JobInfo:
-		err = c.v0044Client.UpdateJobInfo(ctx, key, req)
-	case *types.V0044Node:
-		err = c.v0044Client.UpdateNode(ctx, key, req)
-	case *types.V0044ReservationInfo:
-		err = c.v0044Client.UpdateReservationInfo(ctx, key, req)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045JobInfo:
-		err = c.v0045Client.UpdateJobInfo(ctx, key, req)
-	case *types.V0045Node:
-		err = c.v0045Client.UpdateNode(ctx, key, req)
-	case *types.V0045ReservationInfo:
-		err = c.v0045Client.UpdateReservationInfo(ctx, key, req)
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
+	c.mu.RLock()
+	r, ok := c.resources[obj.GetType()]
+	c.mu.RUnlock()
+	if !ok || r.update == nil {
 		return apierrors.ErrNotImplemented
 	}
-
-	if err != nil {
+	if err := r.update(ctx, string(obj.GetKey()), req); err != nil {
 		return err
 	}
 
@@ -381,194 +266,13 @@ func (c *client) Get(
 		}
 	}
 
-	switch o := obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042ControllerPing:
-		out, err := c.v0042Client.GetControllerPing(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0042JobInfo:
-		out, err := c.v0042Client.GetJobInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0042Node:
-		out, err := c.v0042Client.GetNode(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0042PartitionInfo:
-		out, err := c.v0042Client.GetPartitionInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0042Reconfigure:
-		out, err := c.v0042Client.GetReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0042Stats:
-		out, err := c.v0042Client.GetStats(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043ControllerPing:
-		out, err := c.v0043Client.GetControllerPing(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0043JobInfo:
-		out, err := c.v0043Client.GetJobInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0043Node:
-		out, err := c.v0043Client.GetNode(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0043PartitionInfo:
-		out, err := c.v0043Client.GetPartitionInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0043Reconfigure:
-		out, err := c.v0043Client.GetReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0043Stats:
-		out, err := c.v0043Client.GetStats(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044ControllerPing:
-		out, err := c.v0044Client.GetControllerPing(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044JobInfo:
-		out, err := c.v0044Client.GetJobInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044NodeResourceLayout:
-		out, err := c.v0044Client.GetNodeResourceLayout(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044Node:
-		out, err := c.v0044Client.GetNode(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044PartitionInfo:
-		out, err := c.v0044Client.GetPartitionInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044Reconfigure:
-		out, err := c.v0044Client.GetReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044ReservationInfo:
-		out, err := c.v0044Client.GetReservationInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0044Stats:
-		out, err := c.v0044Client.GetStats(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045ControllerPing:
-		out, err := c.v0045Client.GetControllerPing(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045JobInfo:
-		out, err := c.v0045Client.GetJobInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045NodeResourceLayout:
-		out, err := c.v0045Client.GetNodeResourceLayout(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045Node:
-		out, err := c.v0045Client.GetNode(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045PartitionInfo:
-		out, err := c.v0045Client.GetPartitionInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045Reconfigure:
-		out, err := c.v0045Client.GetReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045ReservationInfo:
-		out, err := c.v0045Client.GetReservationInfo(ctx, string(key))
-		if err != nil {
-			return err
-		}
-		*o = *out
-	case *types.V0045Stats:
-		out, err := c.v0045Client.GetStats(ctx)
-		if err != nil {
-			return err
-		}
-		*o = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
+	c.mu.RLock()
+	r, ok := c.resources[obj.GetType()]
+	c.mu.RUnlock()
+	if !ok || r.get == nil {
 		return apierrors.ErrNotImplemented
 	}
-
-	return nil
+	return r.get(ctx, key, obj)
 }
 
 // List implements Client.
@@ -590,183 +294,13 @@ func (c *client) List(
 		}
 	}
 
-	// Determine ObjectList type
-	switch objList := list.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042ControllerPingList:
-		out, err := c.v0042Client.ListControllerPing(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0042JobInfoList:
-		out, err := c.v0042Client.ListJobInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0042NodeList:
-		out, err := c.v0042Client.ListNodes(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0042PartitionInfoList:
-		out, err := c.v0042Client.ListPartitionInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0042ReconfigureList:
-		out, err := c.v0042Client.ListReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0042StatsList:
-		out, err := c.v0042Client.ListStats(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043ControllerPingList:
-		out, err := c.v0043Client.ListControllerPing(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0043JobInfoList:
-		out, err := c.v0043Client.ListJobInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0043NodeList:
-		out, err := c.v0043Client.ListNodes(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0043PartitionInfoList:
-		out, err := c.v0043Client.ListPartitionInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0043ReconfigureList:
-		out, err := c.v0043Client.ListReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0043StatsList:
-		out, err := c.v0043Client.ListStats(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044ControllerPingList:
-		out, err := c.v0044Client.ListControllerPing(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044JobInfoList:
-		out, err := c.v0044Client.ListJobInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044NodeList:
-		out, err := c.v0044Client.ListNodes(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044PartitionInfoList:
-		out, err := c.v0044Client.ListPartitionInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044ReconfigureList:
-		out, err := c.v0044Client.ListReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044ReservationInfoList:
-		out, err := c.v0044Client.ListReservationInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0044StatsList:
-		out, err := c.v0044Client.ListStats(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045ControllerPingList:
-		out, err := c.v0045Client.ListControllerPing(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045JobInfoList:
-		out, err := c.v0045Client.ListJobInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045NodeList:
-		out, err := c.v0045Client.ListNodes(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045PartitionInfoList:
-		out, err := c.v0045Client.ListPartitionInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045ReconfigureList:
-		out, err := c.v0045Client.ListReconfigure(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045ReservationInfoList:
-		out, err := c.v0045Client.ListReservationInfo(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-	case *types.V0045StatsList:
-		out, err := c.v0045Client.ListStats(ctx)
-		if err != nil {
-			return err
-		}
-		*objList = *out
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
+	c.mu.RLock()
+	r, ok := c.resources[list.GetType()]
+	c.mu.RUnlock()
+	if !ok || r.list == nil {
 		return apierrors.ErrNotImplemented
 	}
-
-	return nil
+	return r.list(ctx, list)
 }
 
 // GetServer returns the client server.
@@ -822,11 +356,17 @@ func (c *client) resolveToken(ctx context.Context) (string, error) {
 func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	objectType = normalizeObjectType(objectType)
 
-	if !c.uncached.Has(objectType) {
+	c.mu.RLock()
+	if r, ok := c.resources[objectType]; !ok || !r.cacheable {
+		defer c.mu.RUnlock()
 		return nil
 	}
 
-	c.mu.RLock()
+	if c.uncached.Has(objectType) {
+		defer c.mu.RUnlock()
+		return nil
+	}
+
 	if informerCache, ok := c.informers[objectType]; ok {
 		defer c.mu.RUnlock()
 		return informerCache
