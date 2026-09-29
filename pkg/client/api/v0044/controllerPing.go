@@ -12,7 +12,6 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type ControllerPingInfoInterface interface {
@@ -53,7 +52,7 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0044Contr
 		Items: make([]types.V0044ControllerPing, len(res.JSON200.Pings)),
 	}
 	for i, item := range res.JSON200.Pings {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0044ControllerPing{V0044ControllerPing: item}
 	}
 	return list, nil
 }
