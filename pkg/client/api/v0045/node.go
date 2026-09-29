@@ -114,9 +114,8 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
 
-	out := &types.V0045Node{}
-	utils.RemarshalOrDie(res.JSON200.Nodes[0], out)
-	return out, nil
+	out := types.V0045Node{V0045Node: res.JSON200.Nodes[0]}
+	return &out, nil
 }
 
 // ListNodes implements ClientInterface
@@ -139,7 +138,7 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0045NodeList, erro
 		Items: make([]types.V0045Node, len(res.JSON200.Nodes)),
 	}
 	for i, item := range res.JSON200.Nodes {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0045Node{V0045Node: item}
 	}
 	return list, nil
 }

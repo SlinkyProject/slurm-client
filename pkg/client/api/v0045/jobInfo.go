@@ -12,7 +12,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type JobInfoInterface interface {
@@ -112,9 +111,8 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
 
-	out := &types.V0045JobInfo{}
-	utils.RemarshalOrDie(res.JSON200.Jobs[0], out)
-	return out, nil
+	out := types.V0045JobInfo{V0045JobInfo: res.JSON200.Jobs[0]}
+	return &out, nil
 }
 
 // ListJobInfo implements ClientInterface
@@ -137,7 +135,7 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0045JobInfoList,
 		Items: make([]types.V0045JobInfo, len(res.JSON200.Jobs)),
 	}
 	for i, item := range res.JSON200.Jobs {
-		utils.RemarshalOrDie(item, &list.Items[i])
+		list.Items[i] = types.V0045JobInfo{V0045JobInfo: item}
 	}
 	return list, nil
 }
