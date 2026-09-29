@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/SlinkyProject/slurm-client/pkg/types"
-	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
 type StatsInterface interface {
@@ -31,9 +30,8 @@ func (c *SlurmClient) GetStats(ctx context.Context) (*types.V0044Stats, error) {
 		}
 		return nil, errors.Join(errs...)
 	}
-	out := &types.V0044Stats{}
-	utils.RemarshalOrDie(res.JSON200.Statistics, out)
-	return out, nil
+	out := types.V0044Stats{V0044StatsMsg: res.JSON200.Statistics}
+	return &out, nil
 }
 
 // ListStats implements ClientInterface

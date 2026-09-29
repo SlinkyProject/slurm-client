@@ -34,9 +34,7 @@ func (o *V0045NodeResourceLayout) DeepCopyObject() object.RuntimeObject {
 }
 
 func (o *V0045NodeResourceLayout) DeepCopy() *V0045NodeResourceLayout {
-	out := new(V0045NodeResourceLayout)
-	utils.RemarshalOrDie(o, out)
-	return out
+	return utils.Clone(o)
 }
 
 type V0045NodeResourceLayoutList struct {
@@ -59,11 +57,11 @@ func (o *V0045NodeResourceLayoutList) GetItems() []object.Object {
 
 // AppendItem implements ObjectList.
 func (o *V0045NodeResourceLayoutList) AppendItem(object object.Object) {
-	out, ok := object.(*V0045NodeResourceLayout)
-	if ok {
-		utils.RemarshalOrDie(object, out)
-		o.Items = append(o.Items, *out)
+	item, ok := object.(*V0045NodeResourceLayout)
+	if !ok {
+		return
 	}
+	o.Items = append(o.Items, *item.DeepCopy())
 }
 
 // DeepCopyObject implements RuntimeObject.
