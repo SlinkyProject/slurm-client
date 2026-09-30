@@ -12,11 +12,12 @@ import (
 	"sync"
 	"testing"
 
+	"k8s.io/utils/ptr"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"k8s.io/utils/ptr"
 )
 
 func indexJob(id int32, owners string) *api.V0044JobInfo {

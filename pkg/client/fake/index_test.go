@@ -4,10 +4,12 @@
 package fake
 
 import (
+	"testing"
+
+	"k8s.io/utils/ptr"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"k8s.io/utils/ptr"
-	"testing"
 )
 
 func TestFakeInformerIndex(t *testing.T) {
