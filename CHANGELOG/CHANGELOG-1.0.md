@@ -1,3 +1,15 @@
+## v1.0.7
+
+### Added
+
+- Expand Slurm host lists with correct padding and ordering.
+- Compress host lists while preserving node names and ordering.
+
+### Fixed
+
+- Drastically improved performance of new type pattern object creation from
+  Slurm API.
+
 ## v1.0.6
 
 ### Fixed
