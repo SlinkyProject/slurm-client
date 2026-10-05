@@ -412,44 +412,6 @@ var _ = Describe("Client v0044", func() {
 		})
 	})
 
-	Describe("V0044Reconfigure", func() {
-		var cl Client
-
-		BeforeEach(func() {
-			var err error
-			cl, err = NewClient(cfg, &ClientOptions{
-				CacheSyncPeriod: cacheSyncPeriod,
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(cl).NotTo(BeNil())
-
-			go cl.Start(context.TODO())
-
-			DeferCleanup(func() {
-				cl.Stop()
-			})
-		})
-
-		Context("Get", func() {
-			It("should reconfigure", func(ctx SpecContext) {
-				By("making request")
-				obj := &types.V0044Reconfigure{}
-				err := cl.Get(ctx, obj.GetKey(), obj)
-				Expect(err).NotTo(HaveOccurred())
-			}, SpecTimeout(testTimeout))
-		})
-
-		Context("List", func() {
-			It("should reconfigure", func(ctx SpecContext) {
-				By("making requests")
-				list := &types.V0044ReconfigureList{}
-				err := cl.List(ctx, list)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(list.Items).NotTo(BeEmpty())
-			}, SpecTimeout(testTimeout))
-		})
-	})
-
 	Describe("V0044ReservationInfo", func() {
 		var cl Client
 

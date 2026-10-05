@@ -6,7 +6,7 @@ package client
 import (
 	"context"
 
-	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
+	api "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
@@ -32,9 +32,6 @@ func init() {
 		newList:   func() object.ObjectList { return &types.V0042PartitionInfoList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0042Reconfigure, resource{
-		newObject: func() object.Object { return &types.V0042Reconfigure{} },
-	})
 	addResource(types.ObjectTypeV0042Stats, resource{
 		newObject: func() object.Object { return &types.V0042Stats{} },
 		newList:   func() object.ObjectList { return &types.V0042StatsList{} },
@@ -42,7 +39,7 @@ func init() {
 	})
 }
 
-func bindV0042(dst map[object.ObjectType]resource, c v0042.ClientInterface) {
+func bindV0042(dst map[object.ObjectType]resource, c api.ClientInterface) {
 	setOps(dst, types.ObjectTypeV0042ControllerPing, resource{
 		get: func(ctx context.Context, key object.ObjectKey, obj object.Object) error {
 			return getInto(obj, func() (*types.V0042ControllerPing, error) {
@@ -103,18 +100,6 @@ func bindV0042(dst map[object.ObjectType]resource, c v0042.ClientInterface) {
 		list: func(ctx context.Context, list object.ObjectList) error {
 			return listInto(list, func() (*types.V0042PartitionInfoList, error) {
 				return c.ListPartitionInfo(ctx)
-			})
-		},
-	})
-	setOps(dst, types.ObjectTypeV0042Reconfigure, resource{
-		get: func(ctx context.Context, _ object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0042Reconfigure, error) {
-				return c.GetReconfigure(ctx)
-			})
-		},
-		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0042ReconfigureList, error) {
-				return c.ListReconfigure(ctx)
 			})
 		},
 	})

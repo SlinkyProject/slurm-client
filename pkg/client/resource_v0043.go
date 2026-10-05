@@ -32,9 +32,6 @@ func init() {
 		newList:   func() object.ObjectList { return &types.V0043PartitionInfoList{} },
 		cacheable: true,
 	})
-	addResource(types.ObjectTypeV0043Reconfigure, resource{
-		newObject: func() object.Object { return &types.V0043Reconfigure{} },
-	})
 	addResource(types.ObjectTypeV0043Stats, resource{
 		newObject: func() object.Object { return &types.V0043Stats{} },
 		newList:   func() object.ObjectList { return &types.V0043StatsList{} },
@@ -103,18 +100,6 @@ func bindV0043(dst map[object.ObjectType]resource, c v0043.ClientInterface) {
 		list: func(ctx context.Context, list object.ObjectList) error {
 			return listInto(list, func() (*types.V0043PartitionInfoList, error) {
 				return c.ListPartitionInfo(ctx)
-			})
-		},
-	})
-	setOps(dst, types.ObjectTypeV0043Reconfigure, resource{
-		get: func(ctx context.Context, _ object.ObjectKey, obj object.Object) error {
-			return getInto(obj, func() (*types.V0043Reconfigure, error) {
-				return c.GetReconfigure(ctx)
-			})
-		},
-		list: func(ctx context.Context, list object.ObjectList) error {
-			return listInto(list, func() (*types.V0043ReconfigureList, error) {
-				return c.ListReconfigure(ctx)
 			})
 		},
 	})

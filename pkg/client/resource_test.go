@@ -20,7 +20,7 @@ func TestResourceCatalog(t *testing.T) {
 	for typ, r := range resourceCatalog {
 		require.NotNil(t, r.newObject)
 		require.Equal(t, typ, r.newObject().GetType())
-		uncached := strings.HasSuffix(string(typ), "Reconfigure") || strings.HasSuffix(string(typ), "NodeResourceLayoutList")
+		uncached := strings.HasSuffix(string(typ), "NodeResourceLayoutList")
 		require.Equal(t, !uncached, r.cacheable)
 		if uncached {
 			require.Nil(t, r.newList)
