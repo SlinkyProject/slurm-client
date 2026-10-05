@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -143,53 +142,6 @@ func TestV0045Node_DeepCopy(t *testing.T) {
 			}
 			got := o.DeepCopy()
 			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestV0045Node_GetStateAsSet(t *testing.T) {
-	type fields struct {
-		V0045Node api.V0045Node
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   set.Set[api.V0045NodeState]
-	}{
-		{
-			name: "empty",
-			fields: fields{
-				V0045Node: api.V0045Node{},
-			},
-			want: set.New[api.V0045NodeState](),
-		},
-		{
-			name: "single",
-			fields: fields{
-				V0045Node: api.V0045Node{
-					State: ptr.To([]api.V0045NodeState{api.V0045NodeStateIDLE}),
-				},
-			},
-			want: set.New(api.V0045NodeStateIDLE),
-		},
-		{
-			name: "multiple",
-			fields: fields{
-				V0045Node: api.V0045Node{
-					State: ptr.To([]api.V0045NodeState{api.V0045NodeStateIDLE, api.V0045NodeStateDRAIN}),
-				},
-			},
-			want: set.New(api.V0045NodeStateIDLE, api.V0045NodeStateDRAIN),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			o := &V0045Node{
-				V0045Node: tt.fields.V0045Node,
-			}
-			if got := o.GetStateAsSet(); !tt.want.Equal(got) {
-				t.Errorf("V0045Node.GetStateAsSet() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

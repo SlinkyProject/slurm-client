@@ -5,7 +5,6 @@ package types
 
 import (
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -37,18 +36,6 @@ func (o *V0042PartitionInfo) DeepCopyObject() object.RuntimeObject {
 
 func (o *V0042PartitionInfo) DeepCopy() *V0042PartitionInfo {
 	return utils.Clone(o)
-}
-
-func (o *V0042PartitionInfo) GetStateAsSet() set.Set[api.V0042PartitionInfoPartitionState] {
-	out := make(set.Set[api.V0042PartitionInfoPartitionState])
-	if o.Partition == nil {
-		return out
-	}
-	states := ptr.Deref(o.Partition.State, []api.V0042PartitionInfoPartitionState{})
-	for _, s := range states {
-		out.Insert(s)
-	}
-	return out
 }
 
 type V0042PartitionInfoList struct {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -143,61 +142,6 @@ func TestV0043PartitionInfo_DeepCopy(t *testing.T) {
 			}
 			got := o.DeepCopy()
 			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestV0043PartitionInfo_GetStateAsSet(t *testing.T) {
-	type fields struct {
-		V0043PartitionInfo api.V0043PartitionInfo
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   set.Set[api.V0043PartitionInfoPartitionState]
-	}{
-		{
-			name: "empty",
-			fields: fields{
-				V0043PartitionInfo: api.V0043PartitionInfo{},
-			},
-			want: set.New[api.V0043PartitionInfoPartitionState](),
-		},
-		{
-			name: "single",
-			fields: fields{
-				V0043PartitionInfo: api.V0043PartitionInfo{
-					Partition: &struct {
-						State *[]api.V0043PartitionInfoPartitionState "json:\"state,omitempty\""
-					}{
-						State: ptr.To([]api.V0043PartitionInfoPartitionState{api.V0043PartitionInfoPartitionStateUP}),
-					},
-				},
-			},
-			want: set.New(api.V0043PartitionInfoPartitionStateUP),
-		},
-		{
-			name: "multiple",
-			fields: fields{
-				V0043PartitionInfo: api.V0043PartitionInfo{
-					Partition: &struct {
-						State *[]api.V0043PartitionInfoPartitionState "json:\"state,omitempty\""
-					}{
-						State: ptr.To([]api.V0043PartitionInfoPartitionState{api.V0043PartitionInfoPartitionStateUP, api.V0043PartitionInfoPartitionStateDRAIN}),
-					},
-				},
-			},
-			want: set.New(api.V0043PartitionInfoPartitionStateUP, api.V0043PartitionInfoPartitionStateDRAIN),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			o := &V0043PartitionInfo{
-				V0043PartitionInfo: tt.fields.V0043PartitionInfo,
-			}
-			if got := o.GetStateAsSet(); !tt.want.Equal(got) {
-				t.Errorf("V0043PartitionInfo.GetStateAsSet() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

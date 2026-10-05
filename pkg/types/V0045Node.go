@@ -5,7 +5,6 @@ package types
 
 import (
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -37,15 +36,6 @@ func (o *V0045Node) DeepCopyObject() object.RuntimeObject {
 
 func (o *V0045Node) DeepCopy() *V0045Node {
 	return utils.Clone(o)
-}
-
-func (o *V0045Node) GetStateAsSet() set.Set[api.V0045NodeState] {
-	out := make(set.Set[api.V0045NodeState])
-	states := ptr.Deref(o.State, []api.V0045NodeState{})
-	for _, s := range states {
-		out.Insert(s)
-	}
-	return out
 }
 
 type V0045NodeList struct {

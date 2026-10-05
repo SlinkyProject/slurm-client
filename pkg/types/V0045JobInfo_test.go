@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -143,53 +142,6 @@ func TestV0045JobInfo_DeepCopy(t *testing.T) {
 			}
 			got := o.DeepCopy()
 			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestV0045JobInfo_GetStateAsSet(t *testing.T) {
-	type fields struct {
-		V0045JobInfo api.V0045JobInfo
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   set.Set[api.V0045JobInfoJobState]
-	}{
-		{
-			name: "empty",
-			fields: fields{
-				V0045JobInfo: api.V0045JobInfo{},
-			},
-			want: set.New[api.V0045JobInfoJobState](),
-		},
-		{
-			name: "single",
-			fields: fields{
-				V0045JobInfo: api.V0045JobInfo{
-					JobState: ptr.To([]api.V0045JobInfoJobState{api.V0045JobInfoJobStatePENDING}),
-				},
-			},
-			want: set.New(api.V0045JobInfoJobStatePENDING),
-		},
-		{
-			name: "multiple",
-			fields: fields{
-				V0045JobInfo: api.V0045JobInfo{
-					JobState: ptr.To([]api.V0045JobInfoJobState{api.V0045JobInfoJobStateRUNNING, api.V0045JobInfoJobStateREQUEUEFED}),
-				},
-			},
-			want: set.New(api.V0045JobInfoJobStateRUNNING, api.V0045JobInfoJobStateREQUEUEFED),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			o := &V0045JobInfo{
-				V0045JobInfo: tt.fields.V0045JobInfo,
-			}
-			if got := o.GetStateAsSet(); !tt.want.Equal(got) {
-				t.Errorf("V0045JobInfo.GetStateAsSet() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

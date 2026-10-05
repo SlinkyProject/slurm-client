@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -40,15 +39,6 @@ func (o *V0043JobInfo) DeepCopyObject() object.RuntimeObject {
 
 func (o *V0043JobInfo) DeepCopy() *V0043JobInfo {
 	return utils.Clone(o)
-}
-
-func (o *V0043JobInfo) GetStateAsSet() set.Set[api.V0043JobInfoJobState] {
-	out := make(set.Set[api.V0043JobInfoJobState])
-	states := ptr.Deref(o.JobState, []api.V0043JobInfoJobState{})
-	for _, s := range states {
-		out.Insert(s)
-	}
-	return out
 }
 
 type V0043JobInfoList struct {

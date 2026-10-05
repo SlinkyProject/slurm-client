@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
-	"k8s.io/utils/set"
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
@@ -143,65 +142,6 @@ func TestV0045PartitionInfo_DeepCopy(t *testing.T) {
 			}
 			got := o.DeepCopy()
 			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestV0045PartitionInfo_GetStateAsSet(t *testing.T) {
-	type fields struct {
-		V0045PartitionInfo api.V0045PartitionInfo
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   set.Set[api.V0045PartitionInfoPartitionState]
-	}{
-		{
-			name: "empty",
-			fields: fields{
-				V0045PartitionInfo: api.V0045PartitionInfo{},
-			},
-			want: set.New[api.V0045PartitionInfoPartitionState](),
-		},
-		{
-			name: "single",
-			fields: fields{
-				V0045PartitionInfo: api.V0045PartitionInfo{
-					Partition: &struct {
-						Exclusive     *string                                 "json:\"exclusive,omitempty\""
-						Oversubscribe *string                                 "json:\"oversubscribe,omitempty\""
-						State         *[]api.V0045PartitionInfoPartitionState "json:\"state,omitempty\""
-					}{
-						State: ptr.To([]api.V0045PartitionInfoPartitionState{api.V0045PartitionInfoPartitionStateUP}),
-					},
-				},
-			},
-			want: set.New(api.V0045PartitionInfoPartitionStateUP),
-		},
-		{
-			name: "multiple",
-			fields: fields{
-				V0045PartitionInfo: api.V0045PartitionInfo{
-					Partition: &struct {
-						Exclusive     *string                                 "json:\"exclusive,omitempty\""
-						Oversubscribe *string                                 "json:\"oversubscribe,omitempty\""
-						State         *[]api.V0045PartitionInfoPartitionState "json:\"state,omitempty\""
-					}{
-						State: ptr.To([]api.V0045PartitionInfoPartitionState{api.V0045PartitionInfoPartitionStateUP, api.V0045PartitionInfoPartitionStateDRAIN}),
-					},
-				},
-			},
-			want: set.New(api.V0045PartitionInfoPartitionStateUP, api.V0045PartitionInfoPartitionStateDRAIN),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			o := &V0045PartitionInfo{
-				V0045PartitionInfo: tt.fields.V0045PartitionInfo,
-			}
-			if got := o.GetStateAsSet(); !tt.want.Equal(got) {
-				t.Errorf("V0045PartitionInfo.GetStateAsSet() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

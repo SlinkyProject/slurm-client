@@ -4,10 +4,19 @@
 package utils
 
 import (
+	"cmp"
 	"errors"
 	"reflect"
 	"regexp"
+
+	"k8s.io/utils/ptr"
+	"k8s.io/utils/set"
 )
+
+// GetStateAsSet returns states as a set. A nil pointer is an empty set.
+func GetStateAsSet[T cmp.Ordered](states *[]T) set.Set[T] {
+	return set.New(ptr.Deref(states, nil)...)
+}
 
 // Clone returns a deep copy of in.
 func Clone[T any](in *T) *T {
