@@ -374,7 +374,7 @@ func (c *client) Get(
 
 	if !options.SkipCache {
 		objectType := obj.GetType()
-		objectType = object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
+		objectType = normalizeObjectType(objectType)
 		informerCache := c.GetInformer(objectType)
 		if informerCache.HasStarted() && !c.uncached.Has(objectType) {
 			return informerCache.Get(ctx, key, obj, opts...)
@@ -583,7 +583,7 @@ func (c *client) List(
 
 	if !options.SkipCache {
 		objectType := list.GetType()
-		objectType = object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
+		objectType = normalizeObjectType(objectType)
 		informerCache := c.GetInformer(objectType)
 		if informerCache.HasStarted() && !c.uncached.Has(objectType) {
 			return informerCache.List(ctx, list, opts...)
@@ -820,7 +820,7 @@ func (c *client) resolveToken(ctx context.Context) (string, error) {
 
 // GetInformer implements Client.
 func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
-	objectType = object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
+	objectType = normalizeObjectType(objectType)
 
 	c.mu.RLock()
 	if informerCache, ok := c.informers[objectType]; ok {
@@ -838,6 +838,10 @@ func (c *client) GetInformer(objectType object.ObjectType) InformerCache {
 	// Ensure informer cache exists
 	c.informers[objectType] = newInformer(objectType, c, c.cacheSyncPeriod)
 	return c.informers[objectType]
+}
+
+func normalizeObjectType(objectType object.ObjectType) object.ObjectType {
+	return object.ObjectType(strings.TrimSuffix(string(objectType), "List"))
 }
 
 // Start implements Client.
