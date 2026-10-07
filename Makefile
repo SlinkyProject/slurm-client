@@ -142,16 +142,24 @@ OAPI_CODEGEN_VERSION ?= v2.8.0
 
 .PHONY: generate-api
 generate-api: ## Generate Slurm OpenAPI spec file.
-ifeq ($(SLURM_DATA_PARSER), )
-	@$(eval SLURM_DATA_PARSER = $(shell \
+	$(eval CONTAINER_OUTPUT := $(shell \
 		$(CONTAINER_TOOL) run --rm \
 			--volume ./hack/etc/slurm:/etc/slurm --volume ./:/workspace --workdir /workspace \
 			--env SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv \
 			--user 65534:65534 \
 			${SLURM_IMAGE} \
-			-d list 2>&1 | grep -Eo 'data_parser/.+' | sort -u | tail -n 1 | sed -e 's/data_parser\///g'))
-endif
-	@$(eval SLURM_GO_MODULE := $(shell echo ${SLURM_DATA_PARSER} | sed -e 's/\.//g'))
+			-d list 2>&1))
+	$(eval SLURM_DATA_PARSER := $(shell echo "$(CONTAINER_OUTPUT)" | grep -Eo 'data_parser/v[0-9\.]+' | sort -u | tail -n 1 | sed -e 's/data_parser\///g'))
+	@if [ -z "$(SLURM_DATA_PARSER)" ]; then \
+		echo "Error: Failed to extract SLURM_DATA_PARSER."; \
+		echo "Full container output was:"; \
+		echo "----------------------------------------"; \
+		echo "$(CONTAINER_OUTPUT)"; \
+		echo "----------------------------------------"; \
+		exit 1; \
+	fi
+	$(eval SLURM_GO_MODULE := $(shell echo ${SLURM_DATA_PARSER} | sed -e 's/\.//g'))
+	test -n "$(SLURM_GO_MODULE)"
 	mkdir -p api/${SLURM_GO_MODULE}
 	$(CONTAINER_TOOL) run --rm \
 		--volume ./:/workspace --workdir /workspace \
