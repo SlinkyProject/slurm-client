@@ -579,4 +579,9 @@ func (f *emptyClient) Start(ctx context.Context) {
 func (f *emptyClient) Stop() {
 }
 
+// Stop implements Client.
+func (f *emptyClient) Versioned() VersionedClients {
+	return VersionedClients{}
+}
+
 var _ Client = &emptyClient{}
