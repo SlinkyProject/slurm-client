@@ -126,7 +126,7 @@ generate-api-matrix: ## Generate Slurm OpenAPI spec files by matrix.
 		["ghcr.io/slinkyproject/slurmrestd:26.05.3-ubuntu26.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:25.11.8-ubuntu24.04"]="" \
 		["ghcr.io/slinkyproject/slurmrestd:25.05.8-ubuntu24.04"]="" \
-		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \
+# 		["ghcr.io/slinkyproject/slurmrestd:24.11.6-ubuntu24.04"]="+inline_enums" \
 	); \
 	for key in $${!VERSION_MATRIX[@]}; do \
 		$(MAKE) generate-api SLURM_IMAGE=$${key} SLURM_DATA_PARSER_OPTS=$${VERSION_MATRIX[$${key}]} ; \
