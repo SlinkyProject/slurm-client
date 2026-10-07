@@ -5,9 +5,9 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
 
 	"k8s.io/utils/ptr"
@@ -102,7 +102,8 @@ func jobKey(id *int32, err error) (object.ObjectKey, error) {
 	if err != nil {
 		return "", err
 	}
-	return object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(id, 0))), nil
+	jobId := ptr.Deref(id, 0)
+	return object.ObjectKey(strconv.Itoa(int(jobId))), nil
 }
 
 func nodeKey(name *string, err error) (object.ObjectKey, error) {

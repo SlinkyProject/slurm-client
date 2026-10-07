@@ -4,7 +4,7 @@
 package types
 
 import (
-	"fmt"
+	"strconv"
 
 	"k8s.io/utils/ptr"
 
@@ -24,7 +24,7 @@ type V0045JobInfo struct {
 // GetKey implements Object.
 func (o *V0045JobInfo) GetKey() object.ObjectKey {
 	jobId := ptr.Deref(o.JobId, 0)
-	return object.ObjectKey(fmt.Sprintf("%d", jobId))
+	return object.ObjectKey(strconv.Itoa(int(jobId)))
 }
 
 // GetType implements Object.
