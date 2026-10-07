@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	apiv0045 "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 )
 
@@ -75,6 +76,22 @@ func TestNewClient(t *testing.T) {
 				return
 			}
 		})
+	}
+}
+
+func TestGetInformerForCacheableObject(t *testing.T) {
+	cl, err := NewClient(&Config{
+		Server:        "http://bar",
+		TokenProvider: token.StaticProvider("foo"),
+	})
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	if cl.GetInformer(apiv0045.ObjectTypeV0045JobInfo) == nil {
+		t.Fatal("GetInformer(JobInfo) = nil")
+	}
+	if cl.GetInformer(apiv0045.ObjectTypeV0045NodeResourceLayoutList) != nil {
+		t.Fatal("GetInformer(NodeResourceLayoutList) != nil")
 	}
 }
 
