@@ -9,8 +9,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	apiv0042 "github.com/SlinkyProject/slurm-client/api/v0042"
+	apiv0043 "github.com/SlinkyProject/slurm-client/api/v0043"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestClientOptions_ApplyOptions(t *testing.T) {
@@ -41,10 +42,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 				opts: []ClientOption{
 					&ClientOptions{
 						EnableFor: []object.Object{
-							&types.V0043Node{},
+							&apiv0043.V0043Node{},
 						},
 						DisableFor: []object.Object{
-							&types.V0042Node{},
+							&apiv0042.V0042Node{},
 						},
 						CacheSyncPeriod: 2 * time.Second,
 					},
@@ -52,10 +53,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 			},
 			want: &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0043Node{},
+					&apiv0043.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0042Node{},
+					&apiv0042.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},
@@ -64,10 +65,10 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 			name: "Overwrite existing options",
 			fields: fields{
 				EnableFor: []object.Object{
-					&types.V0043Node{},
+					&apiv0043.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0042Node{},
+					&apiv0042.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},
@@ -75,22 +76,22 @@ func TestClientOptions_ApplyOptions(t *testing.T) {
 				opts: []ClientOption{
 					&ClientOptions{
 						EnableFor: []object.Object{
-							&types.V0043Node{},
+							&apiv0043.V0043Node{},
 						},
 						DisableFor: []object.Object{
-							&types.V0042Node{},
+							&apiv0042.V0042Node{},
 						},
 						CacheSyncPeriod: 2 * time.Second},
 				},
 			},
 			want: &ClientOptions{
 				EnableFor: []object.Object{
-					&types.V0043Node{},
-					&types.V0043Node{},
+					&apiv0043.V0043Node{},
+					&apiv0043.V0043Node{},
 				},
 				DisableFor: []object.Object{
-					&types.V0042Node{},
-					&types.V0042Node{},
+					&apiv0042.V0042Node{},
+					&apiv0042.V0042Node{},
 				},
 				CacheSyncPeriod: 2 * time.Second,
 			},

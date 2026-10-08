@@ -5,6 +5,9 @@ package utils
 
 import (
 	"testing"
+
+	"k8s.io/utils/ptr"
+	"k8s.io/utils/set"
 )
 
 type ObjectA struct {
@@ -24,6 +27,16 @@ func sampleA() ObjectA {
 		StrPtr: new("bar"),
 		Int:    1,
 		IntPtr: new(int32(2)),
+	}
+}
+
+func TestGetStateAsSet(t *testing.T) {
+	if got := GetStateAsSet[string](nil); !set.New[string]().Equal(got) {
+		t.Fatalf("GetStateAsSet(nil) = %v", got)
+	}
+	states := ptr.To([]string{"IDLE", "DRAIN"})
+	if got := GetStateAsSet(states); !set.New("IDLE", "DRAIN").Equal(got) {
+		t.Fatalf("GetStateAsSet() = %v", got)
 	}
 }
 

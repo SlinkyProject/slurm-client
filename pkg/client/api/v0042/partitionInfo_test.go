@@ -15,7 +15,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0042/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0042/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetPartitionInfo(t *testing.T) {
@@ -30,7 +29,7 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0042PartitionInfo
+		want    *api.V0042PartitionInfo
 		wantErr bool
 	}{
 		{
@@ -68,10 +67,8 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 				ctx:  context.Background(),
 				name: "partition-0",
 			},
-			want: &types.V0042PartitionInfo{
-				V0042PartitionInfo: api.V0042PartitionInfo{
-					Name: ptr.To("partition-0"),
-				},
+			want: &api.V0042PartitionInfo{
+				Name: ptr.To("partition-0"),
 			},
 			wantErr: false,
 		},
@@ -150,7 +147,7 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0042PartitionInfoList
+		want    *api.V0042PartitionInfoObjectList
 		wantErr bool
 	}{
 		{
@@ -161,9 +158,7 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0042PartitionInfoList{
-				Items: make([]types.V0042PartitionInfo, 0),
-			},
+			want:    &api.V0042PartitionInfoObjectList{},
 			wantErr: false,
 		},
 		{
@@ -190,11 +185,11 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0042PartitionInfoList{
-				Items: []types.V0042PartitionInfo{
-					{V0042PartitionInfo: api.V0042PartitionInfo{Name: ptr.To("partition-0")}},
-					{V0042PartitionInfo: api.V0042PartitionInfo{Name: ptr.To("partition-1")}},
-					{V0042PartitionInfo: api.V0042PartitionInfo{Name: ptr.To("partition-2")}},
+			want: &api.V0042PartitionInfoObjectList{
+				Items: []api.V0042PartitionInfo{
+					{Name: new("partition-0")},
+					{Name: new("partition-1")},
+					{Name: new("partition-2")},
 				},
 			},
 			wantErr: false,

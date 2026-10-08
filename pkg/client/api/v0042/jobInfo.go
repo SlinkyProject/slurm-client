@@ -10,15 +10,14 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type JobInfoInterface interface {
 	CreateJobInfo(ctx context.Context, req any) (*int32, error)
 	DeleteJobInfo(ctx context.Context, jobId string) error
 	UpdateJobInfo(ctx context.Context, jobId string, req any) error
-	GetJobInfo(ctx context.Context, jobId string) (*types.V0042JobInfo, error)
-	ListJobInfo(ctx context.Context) (*types.V0042JobInfoList, error)
+	GetJobInfo(ctx context.Context, jobId string) (*api.V0042JobInfo, error)
+	ListJobInfo(ctx context.Context) (*api.V0042JobInfoObjectList, error)
 }
 
 var _ JobInfoInterface = &SlurmClient{}
@@ -86,7 +85,7 @@ func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) 
 }
 
 // GetJobInfo implements ClientInterface
-func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V0042JobInfo, error) {
+func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*api.V0042JobInfo, error) {
 	params := &api.SlurmV0042GetJobParams{}
 	res, err := c.SlurmV0042GetJobWithResponse(ctx, jobId, params)
 	if err != nil {
@@ -105,12 +104,12 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*types.V004
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := types.V0042JobInfo{V0042JobInfo: res.JSON200.Jobs[0]}
+	out := res.JSON200.Jobs[0]
 	return &out, nil
 }
 
 // ListJobInfo implements ClientInterface
-func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0042JobInfoList, error) {
+func (c *SlurmClient) ListJobInfo(ctx context.Context) (*api.V0042JobInfoObjectList, error) {
 	params := &api.SlurmV0042GetJobsParams{}
 	res, err := c.SlurmV0042GetJobsWithResponse(ctx, params)
 	if err != nil {
@@ -125,11 +124,5 @@ func (c *SlurmClient) ListJobInfo(ctx context.Context) (*types.V0042JobInfoList,
 		return nil, errors.Join(errs...)
 	}
 
-	list := &types.V0042JobInfoList{
-		Items: make([]types.V0042JobInfo, len(res.JSON200.Jobs)),
-	}
-	for i, item := range res.JSON200.Jobs {
-		list.Items[i] = types.V0042JobInfo{V0042JobInfo: item}
-	}
-	return list, nil
+	return &api.V0042JobInfoObjectList{Items: res.JSON200.Jobs}, nil
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/client/interceptor"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 var _ = Describe("NewFakeClient", func() {
@@ -28,14 +27,14 @@ var _ = Describe("NewFakeClient", func() {
 	Context("Get", func() {
 		It("should return Not Found", func() {
 			client := NewFakeClient()
-			obj := &types.V0042Node{}
+			obj := &v0042.V0042Node{}
 			key := object.ObjectKey("node-0")
 			err := client.Get(ctx, key, obj)
 			Expect(err).To(HaveOccurred())
 		})
 		It("should return Found object", func() {
-			client := NewFakeClient(&types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}})
-			obj := &types.V0042Node{}
+			client := NewFakeClient(&v0042.V0042Node{Name: ptr.To("node-0")})
+			obj := &v0042.V0042Node{}
 			key := object.ObjectKey("node-0")
 			err := client.Get(ctx, key, obj)
 			Expect(err).NotTo(HaveOccurred())
@@ -48,7 +47,7 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			obj := &types.V0042Node{}
+			obj := &v0042.V0042Node{}
 			key := object.ObjectKey("node-0")
 			err := client.Get(ctx, key, obj)
 			Expect(err).To(HaveOccurred())
@@ -58,23 +57,23 @@ var _ = Describe("NewFakeClient", func() {
 	Context("List", func() {
 		It("should return empty list", func() {
 			client := NewFakeClient()
-			list := &types.V0042NodeList{}
+			list := &v0042.V0042NodeObjectList{}
 			err := client.List(ctx, list)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(list.Items).To(BeEmpty())
+			Expect(list.GetItems()).To(BeEmpty())
 		})
 		It("should return non-empty list", func() {
 			client := NewFakeClient(
-				&types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}},
-				&types.V0042NodeList{Items: []types.V0042Node{
-					{V0042Node: v0042.V0042Node{Name: ptr.To("node-1")}},
-					{V0042Node: v0042.V0042Node{Name: ptr.To("node-2")}},
+				&v0042.V0042Node{Name: ptr.To("node-0")},
+				&v0042.V0042NodeObjectList{Items: []v0042.V0042Node{
+					v0042.V0042Node{Name: ptr.To("node-1")},
+					v0042.V0042Node{Name: ptr.To("node-2")},
 				}},
 			)
-			list := &types.V0042NodeList{}
+			list := &v0042.V0042NodeObjectList{}
 			err := client.List(ctx, list)
 			Expect(err).To(BeNil())
-			Expect(list.Items).To(HaveLen(3))
+			Expect(list.GetItems()).To(HaveLen(3))
 		})
 		It("should return error", func() {
 			client := NewClientBuilder().
@@ -84,7 +83,7 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			list := &types.V0042NodeList{}
+			list := &v0042.V0042NodeObjectList{}
 			err := client.List(ctx, list)
 			Expect(err).To(HaveOccurred())
 		})
@@ -93,12 +92,12 @@ var _ = Describe("NewFakeClient", func() {
 	Context("Create", func() {
 		It("should succeed", func() {
 			client := NewFakeClient()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			err := client.Create(ctx, obj, nil)
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should return conflict error", func() {
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			client := NewClientBuilder().WithObjects(obj).Build()
 			err := client.Create(ctx, obj, nil)
 			Expect(err).To(HaveOccurred())
@@ -111,7 +110,7 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			err := client.Create(ctx, obj, nil)
 			Expect(err).To(HaveOccurred())
 		})
@@ -119,14 +118,14 @@ var _ = Describe("NewFakeClient", func() {
 
 	Context("Delete", func() {
 		It("should succeed", func() {
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			client := NewClientBuilder().WithObjects(obj).Build()
 			err := client.Delete(ctx, obj)
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should return Not Found", func() {
 			client := NewFakeClient()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			err := client.Delete(ctx, obj)
 			Expect(err).To(HaveOccurred())
 		})
@@ -138,7 +137,7 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			err := client.Delete(ctx, obj)
 			Expect(err).To(HaveOccurred())
 		})
@@ -146,7 +145,7 @@ var _ = Describe("NewFakeClient", func() {
 
 	Context("Update", func() {
 		It("should update existing object", func() {
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			client := NewClientBuilder().WithObjects(obj).Build()
 			req := v0042.V0042UpdateNodeMsg{}
 			err := client.Update(ctx, obj, req)
@@ -154,10 +153,10 @@ var _ = Describe("NewFakeClient", func() {
 		})
 		It("should mutate object after update", func() {
 			comment := "test update with mutation"
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			updateFn := func(ctx context.Context, obj object.Object, req any, opts ...client.UpdateOption) error {
 				switch o := obj.(type) {
-				case *types.V0042Node:
+				case *v0042.V0042Node:
 					r, ok := req.(v0042.V0042UpdateNodeMsg)
 					if !ok {
 						return errors.New("failed to cast request object")
@@ -176,7 +175,7 @@ var _ = Describe("NewFakeClient", func() {
 		})
 		It("should return Not Found", func() {
 			client := NewFakeClient()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			req := v0042.V0042UpdateNodeMsg{}
 			err := client.Update(ctx, obj, req)
 			Expect(err).To(HaveOccurred())
@@ -189,7 +188,7 @@ var _ = Describe("NewFakeClient", func() {
 					},
 				}).
 				Build()
-			obj := &types.V0042Node{V0042Node: v0042.V0042Node{Name: ptr.To("node-0")}}
+			obj := &v0042.V0042Node{Name: ptr.To("node-0")}
 			req := v0042.V0042UpdateNodeMsg{}
 			err := client.Update(ctx, obj, req)
 			Expect(err).To(HaveOccurred())
@@ -199,7 +198,7 @@ var _ = Describe("NewFakeClient", func() {
 	// Context("GetInformer", func() {
 	// 	It("should return informer", func() {
 	// 		client := NewFakeClient()
-	// 		informer := client.GetInformer(types.ObjectTypeV0042Node)
+	// 		informer := client.GetInformer(v0042.ObjectTypeV0042Node)
 	// 		Expect(informer).NotTo(BeNil())
 	// 	})
 	// })

@@ -16,7 +16,6 @@ import (
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 const (
@@ -153,84 +152,11 @@ func (i *informerCache) doListInformer() {
 	i.dirty = true
 	i.mu.Unlock()
 
-	var list object.ObjectList
-	switch i.objectType {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0042ControllerPing:
-		list = &types.V0042ControllerPingList{}
-	case types.ObjectTypeV0042JobInfo:
-		list = &types.V0042JobInfoList{}
-	case types.ObjectTypeV0042Node:
-		list = &types.V0042NodeList{}
-	case types.ObjectTypeV0042PartitionInfo:
-		list = &types.V0042PartitionInfoList{}
-	case types.ObjectTypeV0042Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0042Stats:
-		list = &types.V0042StatsList{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0043ControllerPing:
-		list = &types.V0043ControllerPingList{}
-	case types.ObjectTypeV0043JobInfo:
-		list = &types.V0043JobInfoList{}
-	case types.ObjectTypeV0043Node:
-		list = &types.V0043NodeList{}
-	case types.ObjectTypeV0043PartitionInfo:
-		list = &types.V0043PartitionInfoList{}
-	case types.ObjectTypeV0043Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0043Stats:
-		list = &types.V0043StatsList{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0044ControllerPing:
-		list = &types.V0044ControllerPingList{}
-	case types.ObjectTypeV0044JobInfo:
-		list = &types.V0044JobInfoList{}
-	case types.ObjectTypeV0044Node:
-		list = &types.V0044NodeList{}
-	case types.ObjectTypeV0044PartitionInfo:
-		list = &types.V0044PartitionInfoList{}
-	case types.ObjectTypeV0044Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0044ReservationInfo:
-		list = &types.V0044ReservationInfoList{}
-	case types.ObjectTypeV0044NodeResourceLayout:
-		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0044Stats:
-		list = &types.V0044StatsList{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0045ControllerPing:
-		list = &types.V0045ControllerPingList{}
-	case types.ObjectTypeV0045JobInfo:
-		list = &types.V0045JobInfoList{}
-	case types.ObjectTypeV0045Node:
-		list = &types.V0045NodeList{}
-	case types.ObjectTypeV0045PartitionInfo:
-		list = &types.V0045PartitionInfoList{}
-	case types.ObjectTypeV0045Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0045ReservationInfo:
-		list = &types.V0045ReservationInfoList{}
-	case types.ObjectTypeV0045NodeResourceLayout:
-		panic("NodeResouceLayout is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0045Stats:
-		list = &types.V0045StatsList{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
-		// NOTE: We must handle every Slurm type otherwise panic.
-		// We cannot recover from here because the informer has started a
-		// number of go-routines that must all start and stop together.
-		panic(apierrors.ErrNotImplemented)
+	r, ok := resourceCatalog[i.objectType]
+	if !ok || !r.cacheable || r.newList == nil {
+		panic(fmt.Sprintf("doListInformer: attempting to cache '%s', this should never have happened.", i.objectType))
 	}
+	list := r.newList()
 
 	opts := &ListOptions{SkipCache: true}
 	err := i.reader.List(context.TODO(), list, opts)
@@ -286,80 +212,11 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	}
 	i.mu.Unlock()
 
-	var obj object.Object
-	switch i.objectType {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0042ControllerPing:
-		obj = &types.V0042ControllerPing{}
-	case types.ObjectTypeV0042JobInfo:
-		obj = &types.V0042JobInfo{}
-	case types.ObjectTypeV0042Node:
-		obj = &types.V0042Node{}
-	case types.ObjectTypeV0042PartitionInfo:
-		obj = &types.V0042PartitionInfo{}
-	case types.ObjectTypeV0042Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0042Stats:
-		obj = &types.V0042Stats{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0043ControllerPing:
-		obj = &types.V0043ControllerPing{}
-	case types.ObjectTypeV0043JobInfo:
-		obj = &types.V0043JobInfo{}
-	case types.ObjectTypeV0043Node:
-		obj = &types.V0043Node{}
-	case types.ObjectTypeV0043PartitionInfo:
-		obj = &types.V0043PartitionInfo{}
-	case types.ObjectTypeV0043Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0043Stats:
-		obj = &types.V0043Stats{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0044ControllerPing:
-		obj = &types.V0044ControllerPing{}
-	case types.ObjectTypeV0044JobInfo:
-		obj = &types.V0044JobInfo{}
-	case types.ObjectTypeV0044Node:
-		obj = &types.V0044Node{}
-	case types.ObjectTypeV0044PartitionInfo:
-		obj = &types.V0044PartitionInfo{}
-	case types.ObjectTypeV0044Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0044ReservationInfo:
-		obj = &types.V0044ReservationInfo{}
-	case types.ObjectTypeV0044Stats:
-		obj = &types.V0044Stats{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case types.ObjectTypeV0045ControllerPing:
-		obj = &types.V0045ControllerPing{}
-	case types.ObjectTypeV0045JobInfo:
-		obj = &types.V0045JobInfo{}
-	case types.ObjectTypeV0045Node:
-		obj = &types.V0045Node{}
-	case types.ObjectTypeV0045PartitionInfo:
-		obj = &types.V0045PartitionInfo{}
-	case types.ObjectTypeV0045Reconfigure:
-		panic("Reconfigure is not supported, this scenario should have been avoided.")
-	case types.ObjectTypeV0045ReservationInfo:
-		obj = &types.V0045ReservationInfo{}
-	case types.ObjectTypeV0045Stats:
-		obj = &types.V0045Stats{}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
-		// NOTE: We must handle every Slurm type otherwise panic.
-		// We cannot recover from here because the informer has started a
-		// number of go-routines that must all start and stop together.
-		panic("unhandled object type")
+	r, ok := resourceCatalog[i.objectType]
+	if !ok || !r.cacheable || r.newObject == nil {
+		panic(fmt.Sprintf("doGetInformer: attempting to cache '%s', this should never have happened.", i.objectType))
 	}
+	obj := r.newObject()
 
 	opts := &GetOptions{SkipCache: true}
 	err := i.reader.Get(context.TODO(), key, obj, opts)
@@ -563,89 +420,8 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		return apierrors.ErrNotFound
 	}
 
-	switch o := obj.(type) {
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0042ControllerPing:
-		cache := entry.object.(*types.V0042ControllerPing)
-		*o = *cache
-	case *types.V0042JobInfo:
-		cache := entry.object.(*types.V0042JobInfo)
-		*o = *cache
-	case *types.V0042Node:
-		cache := entry.object.(*types.V0042Node)
-		*o = *cache
-	case *types.V0042PartitionInfo:
-		cache := entry.object.(*types.V0042PartitionInfo)
-		*o = *cache
-	case *types.V0042Stats:
-		cache := entry.object.(*types.V0042Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0043ControllerPing:
-		cache := entry.object.(*types.V0043ControllerPing)
-		*o = *cache
-	case *types.V0043JobInfo:
-		cache := entry.object.(*types.V0043JobInfo)
-		*o = *cache
-	case *types.V0043Node:
-		cache := entry.object.(*types.V0043Node)
-		*o = *cache
-	case *types.V0043PartitionInfo:
-		cache := entry.object.(*types.V0043PartitionInfo)
-		*o = *cache
-	case *types.V0043Stats:
-		cache := entry.object.(*types.V0043Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0044ControllerPing:
-		cache := entry.object.(*types.V0044ControllerPing)
-		*o = *cache
-	case *types.V0044JobInfo:
-		cache := entry.object.(*types.V0044JobInfo)
-		*o = *cache
-	case *types.V0044Node:
-		cache := entry.object.(*types.V0044Node)
-		*o = *cache
-	case *types.V0044PartitionInfo:
-		cache := entry.object.(*types.V0044PartitionInfo)
-		*o = *cache
-	case *types.V0044ReservationInfo:
-		cache := entry.object.(*types.V0044ReservationInfo)
-		*o = *cache
-	case *types.V0044Stats:
-		cache := entry.object.(*types.V0044Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	case *types.V0045ControllerPing:
-		cache := entry.object.(*types.V0045ControllerPing)
-		*o = *cache
-	case *types.V0045JobInfo:
-		cache := entry.object.(*types.V0045JobInfo)
-		*o = *cache
-	case *types.V0045Node:
-		cache := entry.object.(*types.V0045Node)
-		*o = *cache
-	case *types.V0045PartitionInfo:
-		cache := entry.object.(*types.V0045PartitionInfo)
-		*o = *cache
-	case *types.V0045ReservationInfo:
-		cache := entry.object.(*types.V0045ReservationInfo)
-		*o = *cache
-	case *types.V0045Stats:
-		cache := entry.object.(*types.V0045Stats)
-		*o = *cache
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	default:
-		return apierrors.ErrNotImplemented
+	if err := copyObject(obj, entry.object); err != nil {
+		return err
 	}
 
 	return nil
@@ -703,4 +479,14 @@ func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Du
 		syncCh:       make(chan struct{}, 8),
 		syncObjCh:    make(chan object.ObjectKey, 8),
 	}
+}
+
+func copyObject(dst, src object.Object) error {
+	dv := reflect.ValueOf(dst)
+	sv := reflect.ValueOf(src)
+	if !dv.IsValid() || !sv.IsValid() || dv.Kind() != reflect.Pointer || dv.Type() != sv.Type() {
+		return apierrors.ErrNotImplemented
+	}
+	dv.Elem().Set(sv.Elem())
+	return nil
 }

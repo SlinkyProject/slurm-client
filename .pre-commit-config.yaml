@@ -109,3 +109,10 @@ repos:
         language: system
         require_serial: true
         pass_filenames: false
+      - id: make-generate
+        name: Make Generate
+        entry: make generate
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: (Makefile|api\/\.template\/.*)$

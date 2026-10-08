@@ -10,14 +10,13 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type NodeInterface interface {
 	DeleteNode(ctx context.Context, nodeName string) error
 	UpdateNode(ctx context.Context, nodeName string, req any) error
-	GetNode(ctx context.Context, nodeName string) (*types.V0043Node, error)
-	ListNodes(ctx context.Context) (*types.V0043NodeList, error)
+	GetNode(ctx context.Context, nodeName string) (*api.V0043Node, error)
+	ListNodes(ctx context.Context) (*api.V0043NodeObjectList, error)
 }
 
 var _ NodeInterface = &SlurmClient{}
@@ -64,7 +63,7 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) 
 }
 
 // GetNode implements ClientInterface
-func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V0043Node, error) {
+func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*api.V0043Node, error) {
 	params := &api.SlurmV0043GetNodeParams{}
 	res, err := c.SlurmV0043GetNodeWithResponse(ctx, nodeName, params)
 	if err != nil {
@@ -83,12 +82,12 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := types.V0043Node{V0043Node: res.JSON200.Nodes[0]}
+	out := res.JSON200.Nodes[0]
 	return &out, nil
 }
 
 // ListNodes implements ClientInterface
-func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0043NodeList, error) {
+func (c *SlurmClient) ListNodes(ctx context.Context) (*api.V0043NodeObjectList, error) {
 	params := &api.SlurmV0043GetNodesParams{}
 	res, err := c.SlurmV0043GetNodesWithResponse(ctx, params)
 	if err != nil {
@@ -103,11 +102,5 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0043NodeList, erro
 		return nil, errors.Join(errs...)
 	}
 
-	list := &types.V0043NodeList{
-		Items: make([]types.V0043Node, len(res.JSON200.Nodes)),
-	}
-	for i, item := range res.JSON200.Nodes {
-		list.Items[i] = types.V0043Node{V0043Node: item}
-	}
-	return list, nil
+	return &api.V0043NodeObjectList{Items: res.JSON200.Nodes}, nil
 }

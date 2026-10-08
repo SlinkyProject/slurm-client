@@ -10,17 +10,16 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type NodeResourceLayoutInterface interface {
-	GetNodeResourceLayout(ctx context.Context, jobId string) (*types.V0044NodeResourceLayout, error)
+	GetNodeResourceLayout(ctx context.Context, jobId string) (*api.V0044NodeResourceLayoutList, error)
 }
 
 var _ NodeResourceLayoutInterface = &SlurmClient{}
 
 // GetNodeResourceLayout implements ClientInterface
-func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (*types.V0044NodeResourceLayout, error) {
+func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (*api.V0044NodeResourceLayoutList, error) {
 	res, err := c.SlurmV0044GetResourcesWithResponse(ctx, jobId)
 	if err != nil {
 		return nil, err
@@ -38,9 +37,5 @@ func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := &types.V0044NodeResourceLayout{
-		V0044NodeResourceLayoutList: make([]api.V0044NodeResourceLayout, len(res.JSON200.Nodes)),
-	}
-	copy(out.V0044NodeResourceLayoutList, res.JSON200.Nodes)
-	return out, nil
+	return &res.JSON200.Nodes, nil
 }

@@ -15,7 +15,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_GetPartitionInfo(t *testing.T) {
@@ -30,7 +29,7 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044PartitionInfo
+		want    *api.V0044PartitionInfo
 		wantErr bool
 	}{
 		{
@@ -68,10 +67,8 @@ func TestSlurmClient_GetPartitionInfo(t *testing.T) {
 				ctx:  context.Background(),
 				name: "partition-0",
 			},
-			want: &types.V0044PartitionInfo{
-				V0044PartitionInfo: api.V0044PartitionInfo{
-					Name: ptr.To("partition-0"),
-				},
+			want: &api.V0044PartitionInfo{
+				Name: ptr.To("partition-0"),
 			},
 			wantErr: false,
 		},
@@ -150,7 +147,7 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044PartitionInfoList
+		want    *api.V0044PartitionInfoObjectList
 		wantErr bool
 	}{
 		{
@@ -161,9 +158,7 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044PartitionInfoList{
-				Items: make([]types.V0044PartitionInfo, 0),
-			},
+			want:    &api.V0044PartitionInfoObjectList{},
 			wantErr: false,
 		},
 		{
@@ -190,11 +185,11 @@ func TestSlurmClient_ListPartitionInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044PartitionInfoList{
-				Items: []types.V0044PartitionInfo{
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("partition-0")}},
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("partition-1")}},
-					{V0044PartitionInfo: api.V0044PartitionInfo{Name: ptr.To("partition-2")}},
+			want: &api.V0044PartitionInfoObjectList{
+				Items: []api.V0044PartitionInfo{
+					{Name: ptr.To("partition-0")},
+					{Name: ptr.To("partition-1")},
+					{Name: ptr.To("partition-2")},
 				},
 			},
 			wantErr: false,

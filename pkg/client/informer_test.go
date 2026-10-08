@@ -16,7 +16,6 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
@@ -52,15 +51,13 @@ func waitForEvents(t *testing.T, want int64, counts ...*int64) {
 }
 
 func Test_informerCache_processObjects(t *testing.T) {
-	node0 := &types.V0044Node{
-		V0044Node: api.V0044Node{
-			Name: ptr.To("node-0"),
-		},
+	node0 := &api.V0044Node{
+		Name: ptr.To("node-0"),
 	}
 	now := time.Now()
 	type testCase struct {
 		name          string
-		object        *types.V0044Node
+		object        *api.V0044Node
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		list          object.ObjectList
@@ -78,8 +75,8 @@ func Test_informerCache_processObjects(t *testing.T) {
 				object:     node0,
 				objectType: node0.GetType(),
 				cache:      make(map[object.ObjectKey]*cacheEntry),
-				list: &types.V0044NodeList{
-					Items: []types.V0044Node{
+				list: &api.V0044NodeObjectList{
+					Items: []api.V0044Node{
 						*node0.DeepCopy(),
 					},
 				},
@@ -103,8 +100,8 @@ func Test_informerCache_processObjects(t *testing.T) {
 						dirty: false,
 					},
 				},
-				list: &types.V0044NodeList{
-					Items: []types.V0044Node{
+				list: &api.V0044NodeObjectList{
+					Items: []api.V0044Node{
 						*node0.DeepCopy(),
 					},
 				},
@@ -124,8 +121,8 @@ func Test_informerCache_processObjects(t *testing.T) {
 						dirty:      false,
 					},
 				},
-				list: &types.V0044NodeList{
-					Items: []types.V0044Node{
+				list: &api.V0044NodeObjectList{
+					Items: []api.V0044Node{
 						*node0.DeepCopy(),
 					},
 				},
@@ -144,7 +141,7 @@ func Test_informerCache_processObjects(t *testing.T) {
 						dirty:      false,
 					},
 				},
-				list:          &types.V0044NodeList{},
+				list:          &api.V0044NodeObjectList{},
 				syncErr:       true,
 				wantCacheLen:  0,
 				wantDeleteCnt: 1,
@@ -161,8 +158,8 @@ func Test_informerCache_processObjects(t *testing.T) {
 						dirty: true,
 					},
 				},
-				list: &types.V0044NodeList{
-					Items: []types.V0044Node{},
+				list: &api.V0044NodeObjectList{
+					Items: []api.V0044Node{},
 				},
 				syncErr:      true,
 				wantCacheLen: 0,
@@ -224,15 +221,13 @@ func Test_informerCache_processObjects(t *testing.T) {
 }
 
 func Test_informerCache_processObject(t *testing.T) {
-	node0 := &types.V0044Node{
-		V0044Node: api.V0044Node{
-			Name: ptr.To("node-0"),
-		},
+	node0 := &api.V0044Node{
+		Name: ptr.To("node-0"),
 	}
 	oneHourAgo := time.Now().Add(time.Duration(-1) * time.Hour)
 	type testCase struct {
 		name          string
-		object        *types.V0044Node
+		object        *api.V0044Node
 		objectType    object.ObjectType
 		cache         map[object.ObjectKey]*cacheEntry
 		obj           object.Object
@@ -400,10 +395,8 @@ func Test_informerCache_GetRefreshCacheWithFullSyncQueue(t *testing.T) {
 	}
 	tests := []testCase{
 		func() testCase {
-			node := &types.V0044Node{
-				V0044Node: api.V0044Node{
-					Name: ptr.To("node-0"),
-				},
+			node := &api.V0044Node{
+				Name: ptr.To("node-0"),
 			}
 			return testCase{
 				name:    "full sync queue",
@@ -469,8 +462,8 @@ func Test_informerCache_ListRefreshCacheWithFullSyncQueue(t *testing.T) {
 	tests := []testCase{
 		{
 			name:       "full sync queue",
-			objectType: types.ObjectTypeV0044Node,
-			list:       &types.V0044NodeList{},
+			objectType: api.ObjectTypeV0044Node,
+			list:       &api.V0044NodeObjectList{},
 			wantErr:    context.DeadlineExceeded,
 		},
 	}

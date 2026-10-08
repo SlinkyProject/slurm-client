@@ -10,19 +10,19 @@ import (
 
 	"k8s.io/utils/ptr"
 
+	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 type ControllerPingInfoInterface interface {
-	GetControllerPing(ctx context.Context, host string) (*types.V0043ControllerPing, error)
-	ListControllerPing(ctx context.Context) (*types.V0043ControllerPingList, error)
+	GetControllerPing(ctx context.Context, host string) (*api.V0043ControllerPing, error)
+	ListControllerPing(ctx context.Context) (*api.V0043ControllerPingObjectList, error)
 }
 
 var _ ControllerPingInfoInterface = &SlurmClient{}
 
 // GetControllerPing implements ClientInterface
-func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*types.V0043ControllerPing, error) {
+func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*api.V0043ControllerPing, error) {
 	list, err := c.ListControllerPing(ctx)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (c *SlurmClient) GetControllerPing(ctx context.Context, host string) (*type
 }
 
 // ListControllerPing implements ClientInterface
-func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0043ControllerPingList, error) {
+func (c *SlurmClient) ListControllerPing(ctx context.Context) (*api.V0043ControllerPingObjectList, error) {
 	res, err := c.SlurmV0043GetPingWithResponse(ctx)
 	if err != nil {
 		return nil, err
@@ -48,11 +48,5 @@ func (c *SlurmClient) ListControllerPing(ctx context.Context) (*types.V0043Contr
 		}
 		return nil, errors.Join(errs...)
 	}
-	list := &types.V0043ControllerPingList{
-		Items: make([]types.V0043ControllerPing, len(res.JSON200.Pings)),
-	}
-	for i, item := range res.JSON200.Pings {
-		list.Items[i] = types.V0043ControllerPing{V0043ControllerPing: item}
-	}
-	return list, nil
+	return &api.V0043ControllerPingObjectList{Items: res.JSON200.Pings}, nil
 }

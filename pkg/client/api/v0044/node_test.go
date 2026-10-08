@@ -15,7 +15,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0044/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_CreateNewNode(t *testing.T) {
@@ -313,7 +312,7 @@ func TestSlurmClient_GetNode(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044Node
+		want    *api.V0044Node
 		wantErr bool
 	}{
 		{
@@ -351,10 +350,8 @@ func TestSlurmClient_GetNode(t *testing.T) {
 				ctx:      context.Background(),
 				nodeName: "node-0",
 			},
-			want: &types.V0044Node{
-				V0044Node: api.V0044Node{
-					Name: ptr.To("node-0"),
-				},
+			want: &api.V0044Node{
+				Name: ptr.To("node-0"),
 			},
 			wantErr: false,
 		},
@@ -433,7 +430,7 @@ func TestSlurmClient_ListNodes(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0044NodeList
+		want    *api.V0044NodeObjectList
 		wantErr bool
 	}{
 		{
@@ -444,9 +441,7 @@ func TestSlurmClient_ListNodes(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044NodeList{
-				Items: make([]types.V0044Node, 0),
-			},
+			want:    &api.V0044NodeObjectList{},
 			wantErr: false,
 		},
 		{
@@ -472,10 +467,10 @@ func TestSlurmClient_ListNodes(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0044NodeList{
-				Items: []types.V0044Node{
-					{V0044Node: api.V0044Node{Name: ptr.To("node-0")}},
-					{V0044Node: api.V0044Node{Name: ptr.To("node-1")}},
+			want: &api.V0044NodeObjectList{
+				Items: []api.V0044Node{
+					{Name: ptr.To("node-0")},
+					{Name: ptr.To("node-1")},
 				},
 			},
 			wantErr: false,

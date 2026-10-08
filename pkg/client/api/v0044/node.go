@@ -10,7 +10,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 	"github.com/SlinkyProject/slurm-client/pkg/utils"
 )
 
@@ -18,8 +17,8 @@ type NodeInterface interface {
 	CreateNewNode(ctx context.Context, req any) (*string, error)
 	DeleteNode(ctx context.Context, nodeName string) error
 	UpdateNode(ctx context.Context, nodeName string, req any) error
-	GetNode(ctx context.Context, nodeName string) (*types.V0044Node, error)
-	ListNodes(ctx context.Context) (*types.V0044NodeList, error)
+	GetNode(ctx context.Context, nodeName string) (*api.V0044Node, error)
+	ListNodes(ctx context.Context) (*api.V0044NodeObjectList, error)
 }
 
 var _ NodeInterface = &SlurmClient{}
@@ -94,7 +93,7 @@ func (c *SlurmClient) UpdateNode(ctx context.Context, nodeName string, req any) 
 }
 
 // GetNode implements ClientInterface
-func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V0044Node, error) {
+func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*api.V0044Node, error) {
 	params := &api.SlurmV0044GetNodeParams{}
 	res, err := c.SlurmV0044GetNodeWithResponse(ctx, nodeName, params)
 	if err != nil {
@@ -113,12 +112,12 @@ func (c *SlurmClient) GetNode(ctx context.Context, nodeName string) (*types.V004
 		return nil, apierrors.ErrNotFound
 	}
 
-	out := types.V0044Node{V0044Node: res.JSON200.Nodes[0]}
+	out := res.JSON200.Nodes[0]
 	return &out, nil
 }
 
 // ListNodes implements ClientInterface
-func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0044NodeList, error) {
+func (c *SlurmClient) ListNodes(ctx context.Context) (*api.V0044NodeObjectList, error) {
 	params := &api.SlurmV0044GetNodesParams{}
 	res, err := c.SlurmV0044GetNodesWithResponse(ctx, params)
 	if err != nil {
@@ -133,11 +132,5 @@ func (c *SlurmClient) ListNodes(ctx context.Context) (*types.V0044NodeList, erro
 		return nil, errors.Join(errs...)
 	}
 
-	list := &types.V0044NodeList{
-		Items: make([]types.V0044Node, len(res.JSON200.Nodes)),
-	}
-	for i, item := range res.JSON200.Nodes {
-		list.Items[i] = types.V0044Node{V0044Node: item}
-	}
-	return list, nil
+	return &api.V0044NodeObjectList{Items: res.JSON200.Nodes}, nil
 }

@@ -16,7 +16,6 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0045/fake"
 	"github.com/SlinkyProject/slurm-client/pkg/client/api/v0045/interceptor"
-	"github.com/SlinkyProject/slurm-client/pkg/types"
 )
 
 func TestSlurmClient_CreateJobInfo(t *testing.T) {
@@ -329,7 +328,7 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0045JobInfo
+		want    *api.V0045JobInfo
 		wantErr bool
 	}{
 		{
@@ -371,10 +370,8 @@ func TestSlurmClient_GetJobInfo(t *testing.T) {
 				ctx:   context.Background(),
 				jobId: "1",
 			},
-			want: &types.V0045JobInfo{
-				V0045JobInfo: api.V0045JobInfo{
-					JobId: ptr.To[int32](1),
-				},
+			want: &api.V0045JobInfo{
+				JobId: ptr.To[int32](1),
 			},
 			wantErr: false,
 		},
@@ -453,7 +450,7 @@ func TestSlurmClient_ListJobInfo(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.V0045JobInfoList
+		want    *api.V0045JobInfoObjectList
 		wantErr bool
 	}{
 		{
@@ -464,9 +461,7 @@ func TestSlurmClient_ListJobInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0045JobInfoList{
-				Items: make([]types.V0045JobInfo, 0),
-			},
+			want:    &api.V0045JobInfoObjectList{},
 			wantErr: false,
 		},
 		{
@@ -493,11 +488,11 @@ func TestSlurmClient_ListJobInfo(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			want: &types.V0045JobInfoList{
-				Items: []types.V0045JobInfo{
-					{V0045JobInfo: api.V0045JobInfo{JobId: ptr.To[int32](1)}},
-					{V0045JobInfo: api.V0045JobInfo{JobId: ptr.To[int32](2)}},
-					{V0045JobInfo: api.V0045JobInfo{JobId: ptr.To[int32](3)}},
+			want: &api.V0045JobInfoObjectList{
+				Items: []api.V0045JobInfo{
+					{JobId: ptr.To[int32](1)},
+					{JobId: ptr.To[int32](2)},
+					{JobId: ptr.To[int32](3)},
 				},
 			},
 			wantErr: false,

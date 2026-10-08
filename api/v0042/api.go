@@ -5,4 +5,5 @@ package v0042
 
 // Ref: https://slurm.schedmd.com/rest_api.html
 
-//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.8.0 -config oapi-codegen-config.yaml slurm-openapi.gen.json
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.8.0 -config slurm-codegen-config.yaml slurm-openapi.gen.json
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.8.0 -config object-codegen-config.yaml slurm-openapi.gen.json
