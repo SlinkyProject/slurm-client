@@ -62,6 +62,9 @@ type Client interface {
 
 	// GetToken returns the latest token successfully resolved by the provider.
 	GetToken() string
+
+	// Versioned returns a handle to call a specific raw versioned client.
+	Versioned() VersionedClients
 }
 
 // Informers knows how to create or fetch informers for different Objects.

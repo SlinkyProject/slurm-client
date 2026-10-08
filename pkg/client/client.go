@@ -15,6 +15,10 @@ import (
 	"k8s.io/utils/ptr"
 	"k8s.io/utils/set"
 
+	apiv0042 "github.com/SlinkyProject/slurm-client/api/v0042"
+	apiv0043 "github.com/SlinkyProject/slurm-client/api/v0043"
+	apiv0044 "github.com/SlinkyProject/slurm-client/api/v0044"
+	apiv0045 "github.com/SlinkyProject/slurm-client/api/v0045"
 	clientapi "github.com/SlinkyProject/slurm-client/pkg/client/api"
 	v0042 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0042"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
@@ -913,4 +917,53 @@ func (c *client) Stop() {
 
 	c.cancel()
 	c.started = false
+}
+
+// Versioned implements Client.
+func (c *client) Versioned() VersionedClients {
+	c.tokenMu.RLock()
+	defer c.tokenMu.RUnlock()
+	return VersionedClients{
+		c: c,
+	}
+}
+
+type VersionedClients struct {
+	c *client
+}
+
+func (v VersionedClients) V0042() apiv0042.ClientWithResponsesInterface {
+	if v.c == nil {
+		return nil
+	}
+	v.c.mu.RLock()
+	defer v.c.mu.RUnlock()
+	return v.c.v0042Client
+}
+
+func (v VersionedClients) V0043() apiv0043.ClientWithResponsesInterface {
+	if v.c == nil {
+		return nil
+	}
+	v.c.mu.RLock()
+	defer v.c.mu.RUnlock()
+	return v.c.v0043Client
+}
+
+func (v VersionedClients) V0044() apiv0044.ClientWithResponsesInterface {
+	if v.c == nil {
+		return nil
+	}
+	v.c.mu.RLock()
+	defer v.c.mu.RUnlock()
+	return v.c.v0044Client
+}
+
+func (v VersionedClients) V0045() apiv0045.ClientWithResponsesInterface {
+	if v.c == nil {
+		return nil
+	}
+	v.c.mu.RLock()
+	defer v.c.mu.RUnlock()
+	return v.c.v0045Client
 }

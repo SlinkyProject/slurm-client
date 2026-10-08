@@ -221,3 +221,7 @@ func store(cache map[object.ObjectType]map[object.ObjectKey]object.Object, obj o
 func copyInto(dst, src object.Object) {
 	reflect.ValueOf(dst).Elem().Set(reflect.ValueOf(src.DeepCopyObject()).Elem())
 }
+
+func (c *fakeClient) Versioned() client.VersionedClients {
+	return client.VersionedClients{}
+}
