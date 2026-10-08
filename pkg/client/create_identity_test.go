@@ -4,6 +4,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	apiv0044 "github.com/SlinkyProject/slurm-client/api/v0044"
 	apiv0045 "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -110,6 +112,80 @@ func TestCreateKeepsAcceptedIdentity(t *testing.T) {
 					t.Fatalf("POST=%d GET=%d", posts, gets)
 				}
 			})
+		}
+	}
+}
+
+func TestCreateInvalidJobID(t *testing.T) {
+	versions := []struct {
+		obj object.Object
+		req any
+	}{
+		{
+			obj: &apiv0042.V0042JobInfo{JobId: ptr.To(int32(42))},
+			req: apiv0042.V0042JobSubmitReq{},
+		},
+		{
+			obj: &apiv0043.V0043JobInfo{JobId: ptr.To(int32(42))},
+			req: apiv0043.V0043JobSubmitReq{},
+		},
+		{
+			obj: &apiv0044.V0044JobInfo{JobId: ptr.To(int32(42))},
+			req: apiv0044.V0044JobSubmitReq{},
+		},
+		{
+			obj: &apiv0045.V0045JobInfo{JobId: ptr.To(int32(42))},
+			req: apiv0045.V0045JobSubmitReq{},
+		},
+	}
+	responses := []struct {
+		name string
+		body string
+	}{
+		{name: "missing", body: `{}`},
+		{name: "null", body: `{"job_id":null}`},
+		{name: "zero", body: `{"job_id":0}`},
+		{name: "negative", body: `{"job_id":-1}`},
+	}
+	for _, version := range versions {
+		for _, response := range responses {
+			for _, skip := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%s/%s/skip=%v", version.obj.GetType(), response.name, skip), func(t *testing.T) {
+					posts, gets := 0, 0
+					transport := createTransport(func(r *http.Request) (*http.Response, error) {
+						if r.Method == http.MethodPost {
+							posts++
+						} else {
+							gets++
+						}
+						return &http.Response{
+							StatusCode: http.StatusOK,
+							Header:     http.Header{"Content-Type": {"application/json"}},
+							Body:       io.NopCloser(strings.NewReader(response.body)),
+							Request:    r,
+						}, nil
+					})
+					cl, err := NewClient(&Config{
+						Server:        "http://slurm",
+						TokenProvider: token.StaticProvider("test"),
+						HTTPClient:    &http.Client{Transport: transport},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					obj := version.obj.DeepCopyObject().(object.Object)
+					err = cl.Create(t.Context(), obj, version.req, &CreateOptions{SkipReadAfterCreate: skip})
+					if !errors.Is(err, apierrors.ErrInvalidJobID) {
+						t.Fatalf("Create() error = %v, want ErrInvalidJobID", err)
+					}
+					if posts != 1 || gets != 0 {
+						t.Fatalf("POST=%d GET=%d, want POST=1 GET=0", posts, gets)
+					}
+					if key := obj.GetKey(); key != version.obj.GetKey() {
+						t.Fatalf("invalid response changed the destination identity to %q", key)
+					}
+				})
+			}
 		}
 	}
 }

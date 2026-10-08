@@ -11,6 +11,11 @@ import (
 var (
 	ErrNotFound       = errors.New(http.StatusText(http.StatusNotFound))
 	ErrNotImplemented = errors.New(http.StatusText(http.StatusNotImplemented))
+
+	// ErrInvalidJobID means Slurm acknowledged a job submission without a positive
+	// job ID. The job may have been accepted, so callers must not automatically
+	// resubmit it in response to this error.
+	ErrInvalidJobID = errors.New("slurm acknowledged submission without a valid job ID")
 )
 
 // NewHTTPError returns the canonical client error for an HTTP status code.
