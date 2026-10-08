@@ -37,6 +37,10 @@ type Reader interface {
 type Writer interface {
 	// Create saves the object obj in the Slurm cluster. obj must be a
 	// struct pointer so that obj can be updated with the content returned by the Server.
+	// By default, Create reads the complete object back after creation. If that read
+	// fails, Create returns the read error and obj retains the identity Slurm accepted.
+	// Do not resubmit the create request in this case; retry Get using that identity.
+	// Set CreateOptions.SkipReadAfterCreate to return the identity without reading back.
 	Create(ctx context.Context, obj object.Object, req any, opts ...CreateOption) error
 
 	// Update updates the given obj in the Slurm cluster. obj must be a

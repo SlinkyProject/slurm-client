@@ -22,16 +22,26 @@ func TestCreateKeepsAcceptedIdentity(t *testing.T) {
 	for _, skip := range []bool{false, true} {
 		t.Run(fmt.Sprint(skip), func(t *testing.T) {
 			posts, gets := 0, 0
-			cl, err := NewClient(&Config{Server: "http://slurm", TokenProvider: token.StaticProvider("test"), HTTPClient: &http.Client{Transport: createTransport(func(r *http.Request) (*http.Response, error) {
-				code, body := 200, `{"job_id":42}`
+			transport := createTransport(func(r *http.Request) (*http.Response, error) {
+				code, body := http.StatusOK, `{"job_id":42}`
 				if r.Method == http.MethodPost {
 					posts++
 				} else {
 					gets++
-					code, body = 503, `{}`
+					code, body = http.StatusServiceUnavailable, `{}`
 				}
-				return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-			})}})
+				return &http.Response{
+					StatusCode: code,
+					Header:     http.Header{"Content-Type": {"application/json"}},
+					Body:       io.NopCloser(strings.NewReader(body)),
+					Request:    r,
+				}, nil
+			})
+			cl, err := NewClient(&Config{
+				Server:        "http://slurm",
+				TokenProvider: token.StaticProvider("test"),
+				HTTPClient:    &http.Client{Transport: transport},
+			})
 			if err != nil {
 				t.Fatal(err)
 			}

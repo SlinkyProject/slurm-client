@@ -21,7 +21,10 @@ import (
 )
 
 func indexJob(id int32, owners string) *api.V0044JobInfo {
-	return &api.V0044JobInfo{JobId: ptr.To(id), AdminComment: ptr.To(owners)}
+	return &api.V0044JobInfo{
+		JobId:        ptr.To(id),
+		AdminComment: ptr.To(owners),
+	}
 }
 func jobOwners(obj object.Object) []string {
 	value := ptr.Deref(obj.(*api.V0044JobInfo).AdminComment, "")
