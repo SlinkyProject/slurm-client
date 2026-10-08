@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -22,6 +23,8 @@ import (
 type resource struct {
 	newObject func() object.Object
 	newList   func() object.ObjectList
+	// listType identifies the built-in list, whose AppendItem deep-copies items.
+	listType  reflect.Type
 	cacheable bool
 	get       func(context.Context, object.ObjectKey, object.Object) error
 	list      func(context.Context, object.ObjectList) error
@@ -37,6 +40,9 @@ var resourceCatalog = map[object.ObjectType]resource{}
 func addResource(typ object.ObjectType, r resource) {
 	if _, ok := resourceCatalog[typ]; ok {
 		panic("duplicate resource " + typ)
+	}
+	if r.newList != nil {
+		r.listType = reflect.TypeOf(r.newList())
 	}
 	resourceCatalog[typ] = r
 }

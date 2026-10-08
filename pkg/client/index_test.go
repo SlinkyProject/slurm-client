@@ -157,6 +157,57 @@ func TestInformerIndexValidationAndCopies(t *testing.T) {
 	}
 }
 
+// shallowJobList overrides the built-in append to retain nested pointers.
+// Custom ObjectList implementations need not perform their own deep copy.
+type shallowJobList struct{ api.V0044JobInfoObjectList }
+
+func (l *shallowJobList) AppendItem(obj object.Object) {
+	l.Items = append(l.Items, *obj.(*api.V0044JobInfo))
+}
+
+func TestInformerCustomListCopies(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		read func(context.Context, *informerCache, object.ObjectList) error
+	}{
+		{
+			name: "List",
+			read: func(ctx context.Context, i *informerCache, list object.ObjectList) error {
+				return i.List(ctx, list)
+			},
+		},
+		{
+			name: "ByIndex",
+			read: func(ctx context.Context, i *informerCache, list object.ObjectList) error {
+				return i.ByIndex(ctx, "owners", "a", list)
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			i := readyIndexInformer()
+			i.processObject(indexJob(1, "a"))
+			if err := i.AddIndex("owners", jobOwners); err != nil {
+				t.Fatal(err)
+			}
+			list := &shallowJobList{}
+			if err := test.read(t.Context(), i, list); err != nil {
+				t.Fatal(err)
+			}
+			if len(list.Items) != 1 {
+				t.Fatalf("got %d jobs, want 1", len(list.Items))
+			}
+			*list.Items[0].AdminComment = "mutated result"
+			got := &api.V0044JobInfo{}
+			if err := i.Get(t.Context(), "1", got); err != nil {
+				t.Fatal(err)
+			}
+			if *got.AdminComment != "a" {
+				t.Fatal("custom list result aliases cache")
+			}
+		})
+	}
+}
+
 type missingIndexReader struct{ emptyClient }
 
 func (*missingIndexReader) Get(context.Context, object.ObjectKey, object.Object, ...GetOption) error {
@@ -222,6 +273,28 @@ func TestInformerUpdateEventOldAndNew(t *testing.T) {
 	}})
 	i.processObject(indexJob(1, "new"))
 	i.doHandler(<-i.eventCh)
+}
+
+func BenchmarkInformerList(b *testing.B) {
+	for _, size := range []int{800, 8000, 80000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			i := readyIndexInformer()
+			for n := range size {
+				i.processObject(indexJob(int32(n+1), fmt.Sprint(n)))
+			}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for b.Loop() {
+				jobs := &api.V0044JobInfoObjectList{}
+				if err := i.List(b.Context(), jobs); err != nil {
+					b.Fatal(err)
+				}
+				if len(jobs.Items) != size {
+					b.Fatalf("got %d jobs, want %d", len(jobs.Items), size)
+				}
+			}
+		})
+	}
 }
 
 func BenchmarkInformerByIndex(b *testing.B) {

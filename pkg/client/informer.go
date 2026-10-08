@@ -477,10 +477,19 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		if entry.object == nil {
 			continue
 		}
-		list.AppendItem(entry.object.DeepCopyObject().(object.Object))
+		appendCachedObject(list, entry.object)
 	}
 
 	return nil
+}
+
+// appendCachedObject lets registered lists make their own deep copy. Comparing
+// concrete types keeps custom wrappers that override AppendItem protected.
+func appendCachedObject(list object.ObjectList, obj object.Object) {
+	if reflect.TypeOf(list) != resourceCatalog[list.GetType()].listType {
+		obj = obj.DeepCopyObject().(object.Object)
+	}
+	list.AppendItem(obj)
 }
 
 func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Duration) InformerCache {

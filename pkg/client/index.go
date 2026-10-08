@@ -60,7 +60,7 @@ func (i *informerCache) ByIndex(ctx context.Context, name, value string, list ob
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 	for key := range i.indexes[name].values[value] {
-		list.AppendItem(i.cache[key].object.DeepCopyObject().(object.Object))
+		appendCachedObject(list, i.cache[key].object)
 	}
 	return nil
 }
