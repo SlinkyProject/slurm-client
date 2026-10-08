@@ -53,7 +53,7 @@ For complete license texts, please refer to the source repositories or the LICEN
 
 ### golang.org/x/text
 - Name: golang.org/x/text
-- Version: v0.40.0
+- Version: v0.41.0
 - License: BSD-3-Clause
 
 ### k8s.io/utils
