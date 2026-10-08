@@ -41,8 +41,6 @@ func (c *SlurmClient) GetNodeResourceLayout(ctx context.Context, jobId string) (
 	out := &types.V0044NodeResourceLayout{
 		V0044NodeResourceLayoutList: make([]api.V0044NodeResourceLayout, len(res.JSON200.Nodes)),
 	}
-	for i, item := range res.JSON200.Nodes {
-		out.V0044NodeResourceLayoutList[i] = item
-	}
+	copy(out.V0044NodeResourceLayoutList, res.JSON200.Nodes)
 	return out, nil
 }
