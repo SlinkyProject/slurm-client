@@ -4,7 +4,6 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,7 +17,6 @@ import (
 	apiv0044 "github.com/SlinkyProject/slurm-client/api/v0044"
 	apiv0045 "github.com/SlinkyProject/slurm-client/api/v0045"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
-	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -175,8 +173,9 @@ func TestCreateInvalidJobID(t *testing.T) {
 					}
 					obj := version.obj.DeepCopyObject().(object.Object)
 					err = cl.Create(t.Context(), obj, version.req, &CreateOptions{SkipReadAfterCreate: skip})
-					if !errors.Is(err, apierrors.ErrInvalidJobID) {
-						t.Fatalf("Create() error = %v, want ErrInvalidJobID", err)
+					wantErr := "slurm acknowledged submission without a valid key"
+					if err == nil || err.Error() != wantErr {
+						t.Fatalf("Create() error = %v, want %q", err, wantErr)
 					}
 					if posts != 1 || gets != 0 {
 						t.Fatalf("POST=%d GET=%d, want POST=1 GET=0", posts, gets)

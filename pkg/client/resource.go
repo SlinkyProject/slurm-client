@@ -5,6 +5,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"maps"
 	"reflect"
 	"slices"
@@ -109,7 +110,7 @@ func jobKey(id *int32, err error) (object.ObjectKey, error) {
 		return "", err
 	}
 	if id == nil || *id <= 0 {
-		return "", apierrors.ErrInvalidJobID
+		return "", errors.New("slurm acknowledged submission without a valid key")
 	}
 	jobId := *id
 	return object.ObjectKey(strconv.Itoa(int(jobId))), nil
