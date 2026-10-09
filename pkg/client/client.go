@@ -185,7 +185,12 @@ func (c *client) Create(
 	if err != nil {
 		return err
 	}
-
+	if err := obj.SetKey(key); err != nil {
+		return fmt.Errorf("set key for created object %q: %w", key, err)
+	}
+	if options.SkipReadAfterCreate {
+		return nil
+	}
 	return c.Get(ctx, key, obj, &GetOptions{RefreshCache: true})
 }
 

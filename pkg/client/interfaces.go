@@ -86,6 +86,26 @@ type Informers interface {
 type InformerCache interface {
 	Informer
 	Reader
+	Indexer
+}
+
+// IndexFunc extracts zero or more secondary keys from an object. It must be
+// deterministic, must not modify the object, and must not call back into the cache.
+// Return no keys for objects that do not belong in the index.
+type IndexFunc func(object.Object) []string
+
+// Indexer supports local secondary indexes over an informer's objects.
+type Indexer interface {
+	// AddIndex registers an index and indexes any existing objects atomically.
+	// Empty names, nil extractors, and duplicate names are rejected.
+	AddIndex(name string, extract IndexFunc) error
+
+	// ByIndex appends deep copies of matching cached objects to list. It has the
+	// same synchronization semantics as a cached List and makes no live request.
+	// The list must match the informer's object type. An unknown index is an error;
+	// a known index with no matches returns an empty result, not ErrNotFound.
+	// A cache miss is not proof that an object does not exist on the server.
+	ByIndex(ctx context.Context, name, value string, list object.ObjectList) error
 }
 
 // Informer - informer allows you interact with the underlying informer.

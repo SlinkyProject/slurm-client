@@ -11,12 +11,14 @@
 {{ $key := "" }}
 {{ $field := "" }}
 {{ $ptr := false }}
+{{ $bits := 32 }}
 {{ $emit := false }}
 {{range .Types}}
 {{ $typeName := .TypeName }}
 {{ $key = "" }}
 {{ $field = "" }}
 {{ $ptr = false }}
+{{ $bits = 32 }}
 {{ $emit = or (eq $typeName $ping) (eq $typeName $job) (eq $typeName $node) (eq $typeName $layout) (eq $typeName $part) (eq $typeName $resv) (eq $typeName $stats) }}
 {{/* GetKey priority is job_id, then name, then hostname. JobInfo has both job_id and name; Node lists hostname before name. */}}
 {{ if not .IsAlias }}
@@ -25,6 +27,9 @@
 {{ $key = "job_id" }}
 {{ $field = .GoFieldName }}
 {{ $ptr = eq (slice .GoTypeDef 0 1) "*" }}
+{{ if or (eq .GoTypeDef "*int64") (eq .GoTypeDef "int64") }}
+{{ $bits = 64 }}
+{{ end }}
 {{ end }}
 {{ end }}
 {{ range .Schema.Properties }}
@@ -65,6 +70,29 @@ func (o *{{ $typeName }}) GetKey() object.ObjectKey {
 {{- end }}
 }
 {{ end }}
+
+func (o *{{ $typeName }}) SetKey(key object.ObjectKey) error {
+{{- if not $key }}
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+{{- else if eq $key "job_id" }}
+	id, err := strconv.ParseInt(string(key), 10, {{ $bits }})
+	if err != nil {
+		return fmt.Errorf("invalid job key %q: %w", key, err)
+	}
+{{- if $ptr }}
+	o.{{ $field }} = ptr.To(int{{ $bits }}(id))
+{{- else }}
+	o.{{ $field }} = int{{ $bits }}(id)
+{{- end }}
+{{- else if $ptr }}
+	o.{{ $field }} = ptr.To(string(key))
+{{- else }}
+	o.{{ $field }} = string(key)
+{{- end }}
+	return nil
+}
 
 var _ object.Object = (*{{ $typeName }})(nil)
 {{ template "objectList" $typeName }}
@@ -154,6 +182,13 @@ func (o *{{ $obj }}) DeepCopy() *{{ $obj }} {
 // The response field is a collection; no valid key.
 func (o *{{ $obj }}) GetKey() object.ObjectKey {
 	return "0"
+}
+
+func (o *{{ $obj }}) SetKey(key object.ObjectKey) error {
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+	return nil
 }
 
 var _ object.Object = (*{{ $obj }})(nil)

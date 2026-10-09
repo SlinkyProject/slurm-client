@@ -5,6 +5,7 @@ package v0042
 
 import (
 	"fmt"
+	"strconv"
 
 	"k8s.io/utils/ptr"
 
@@ -28,6 +29,11 @@ func (o *V0042ControllerPing) DeepCopy() *V0042ControllerPing {
 
 func (o *V0042ControllerPing) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Hostname, ""))
+}
+
+func (o *V0042ControllerPing) SetKey(key object.ObjectKey) error {
+	o.Hostname = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0042ControllerPing)(nil)
@@ -86,7 +92,16 @@ func (o *V0042JobInfo) DeepCopy() *V0042JobInfo {
 }
 
 func (o *V0042JobInfo) GetKey() object.ObjectKey {
-	return object.ObjectKey(fmt.Sprintf("%d", ptr.Deref(o.JobId, 0)))
+	return object.ObjectKey(strconv.Itoa(int(ptr.Deref(o.JobId, 0))))
+}
+
+func (o *V0042JobInfo) SetKey(key object.ObjectKey) error {
+	id, err := strconv.ParseInt(string(key), 10, 32)
+	if err != nil {
+		return fmt.Errorf("invalid job key %q: %w", key, err)
+	}
+	o.JobId = ptr.To(int32(id))
+	return nil
 }
 
 var _ object.Object = (*V0042JobInfo)(nil)
@@ -148,6 +163,11 @@ func (o *V0042Node) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
 }
 
+func (o *V0042Node) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
+}
+
 var _ object.Object = (*V0042Node)(nil)
 
 type V0042NodeObjectList struct {
@@ -205,6 +225,11 @@ func (o *V0042PartitionInfo) DeepCopy() *V0042PartitionInfo {
 
 func (o *V0042PartitionInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
+}
+
+func (o *V0042PartitionInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0042PartitionInfo)(nil)
@@ -266,6 +291,11 @@ func (o *V0042ReservationInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
 }
 
+func (o *V0042ReservationInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
+}
+
 var _ object.Object = (*V0042ReservationInfo)(nil)
 
 type V0042ReservationInfoObjectList struct {
@@ -323,6 +353,13 @@ func (o *V0042StatsMsg) DeepCopy() *V0042StatsMsg {
 
 func (o *V0042StatsMsg) GetKey() object.ObjectKey {
 	return ""
+}
+
+func (o *V0042StatsMsg) SetKey(key object.ObjectKey) error {
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+	return nil
 }
 
 var _ object.Object = (*V0042StatsMsg)(nil)

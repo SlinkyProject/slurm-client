@@ -51,7 +51,8 @@ type informerCache struct {
 	mu sync.RWMutex
 
 	// cache holds the actual object cache.
-	cache map[object.ObjectKey]*cacheEntry
+	cache   map[object.ObjectKey]*cacheEntry
+	indexes map[string]*secondaryIndex
 
 	// started is true if the informers have been started.
 	started bool
@@ -227,7 +228,9 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	} else {
 		i.syncErrorGet[key] = nil
 	}
-	if i.syncErrorGet[key] == nil {
+	if errors.Is(err, apierrors.ErrNotFound) {
+		i.deleteObject(key)
+	} else if i.syncErrorGet[key] == nil {
 		i.processObject(obj)
 	}
 	i.mu.Unlock()
@@ -252,7 +255,7 @@ func (i *informerCache) doHandler(evt event.Event) {
 	case event.Added:
 		i.handler.OnAdd(evt.Object, !i.dirty)
 	case event.Modified:
-		i.handler.OnUpdate(evt.Object, evt.ObjectOld)
+		i.handler.OnUpdate(evt.ObjectOld, evt.Object)
 	case event.Deleted:
 		i.handler.OnDelete(evt.Object)
 	}
@@ -276,17 +279,23 @@ func (i *informerCache) processObjects(list object.ObjectList) {
 			continue
 		}
 		if entry.object == nil {
-			delete(i.cache, key)
-			delete(i.syncErrorGet, key)
+			i.deleteObject(key)
 		} else if now.After(entry.lastUpdate) {
-			e := event.Event{
-				Type:   event.Deleted,
-				Object: entry.object.DeepCopyObject().(object.Object),
-			}
-			delete(i.cache, key)
-			delete(i.syncErrorGet, key)
-			i.pushEvent(e)
+			i.deleteObject(key)
 		}
+	}
+}
+
+// deleteObject removes an object and its secondary keys under mu.
+func (i *informerCache) deleteObject(key object.ObjectKey) {
+	entry := i.cache[key]
+	for _, index := range i.indexes {
+		index.remove(key)
+	}
+	delete(i.cache, key)
+	delete(i.syncErrorGet, key)
+	if entry != nil && entry.object != nil {
+		i.pushEvent(event.Event{Type: event.Deleted, Object: entry.object.DeepCopyObject().(object.Object)})
 	}
 }
 
@@ -295,13 +304,16 @@ func (i *informerCache) processObject(obj object.Object) {
 	key := obj.GetKey()
 
 	entry, ok := i.cache[key]
-	if !ok || entry.object == nil {
+	if !ok || entry == nil || entry.object == nil {
 		i.cache[key] = &cacheEntry{
 			lastUpdate: now,
 			object:     obj.DeepCopyObject().(object.Object),
 			dirty:      false,
 		}
 		delete(i.syncErrorGet, key)
+		for _, index := range i.indexes {
+			index.update(i.cache[key].object)
+		}
 		e := event.Event{
 			Type:   event.Added,
 			Object: obj.DeepCopyObject().(object.Object),
@@ -312,11 +324,15 @@ func (i *informerCache) processObject(obj object.Object) {
 		entry.dirty = false
 		delete(i.syncErrorGet, key)
 		if !reflect.DeepEqual(entry.object, obj) {
+			old := entry.object
 			entry.object = obj.DeepCopyObject().(object.Object)
+			for _, index := range i.indexes {
+				index.update(entry.object)
+			}
 			e := event.Event{
 				Type:      event.Modified,
 				Object:    obj.DeepCopyObject().(object.Object),
-				ObjectOld: entry.object.DeepCopyObject().(object.Object),
+				ObjectOld: old.DeepCopyObject().(object.Object),
 			}
 			i.pushEvent(e)
 		}
@@ -420,7 +436,7 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 		return apierrors.ErrNotFound
 	}
 
-	if err := copyObject(obj, entry.object); err != nil {
+	if err := copyObject(obj, entry.object.DeepCopyObject().(object.Object)); err != nil {
 		return err
 	}
 
@@ -461,10 +477,19 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 		if entry.object == nil {
 			continue
 		}
-		list.AppendItem(entry.object)
+		appendCachedObject(list, entry.object)
 	}
 
 	return nil
+}
+
+// appendCachedObject lets registered lists make their own deep copy. Comparing
+// concrete types keeps custom wrappers that override AppendItem protected.
+func appendCachedObject(list object.ObjectList, obj object.Object) {
+	if reflect.TypeOf(list) != resourceCatalog[list.GetType()].listType {
+		obj = obj.DeepCopyObject().(object.Object)
+	}
+	list.AppendItem(obj)
 }
 
 func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Duration) InformerCache {

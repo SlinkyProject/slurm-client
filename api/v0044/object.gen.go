@@ -4,6 +4,7 @@
 package v0044
 
 import (
+	"fmt"
 	"strconv"
 
 	"k8s.io/utils/ptr"
@@ -28,6 +29,11 @@ func (o *V0044ControllerPing) DeepCopy() *V0044ControllerPing {
 
 func (o *V0044ControllerPing) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Hostname, ""))
+}
+
+func (o *V0044ControllerPing) SetKey(key object.ObjectKey) error {
+	o.Hostname = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0044ControllerPing)(nil)
@@ -89,6 +95,15 @@ func (o *V0044JobInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(strconv.Itoa(int(ptr.Deref(o.JobId, 0))))
 }
 
+func (o *V0044JobInfo) SetKey(key object.ObjectKey) error {
+	id, err := strconv.ParseInt(string(key), 10, 32)
+	if err != nil {
+		return fmt.Errorf("invalid job key %q: %w", key, err)
+	}
+	o.JobId = ptr.To(int32(id))
+	return nil
+}
+
 var _ object.Object = (*V0044JobInfo)(nil)
 
 type V0044JobInfoObjectList struct {
@@ -146,6 +161,11 @@ func (o *V0044Node) DeepCopy() *V0044Node {
 
 func (o *V0044Node) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
+}
+
+func (o *V0044Node) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0044Node)(nil)
@@ -211,6 +231,13 @@ func (o *V0044NodeResourceLayoutListObject) GetKey() object.ObjectKey {
 	return "0"
 }
 
+func (o *V0044NodeResourceLayoutListObject) SetKey(key object.ObjectKey) error {
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+	return nil
+}
+
 var _ object.Object = (*V0044NodeResourceLayoutListObject)(nil)
 
 type V0044NodeResourceLayoutListObjectList struct {
@@ -268,6 +295,11 @@ func (o *V0044PartitionInfo) DeepCopy() *V0044PartitionInfo {
 
 func (o *V0044PartitionInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
+}
+
+func (o *V0044PartitionInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0044PartitionInfo)(nil)
@@ -329,6 +361,11 @@ func (o *V0044ReservationInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
 }
 
+func (o *V0044ReservationInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
+}
+
 var _ object.Object = (*V0044ReservationInfo)(nil)
 
 type V0044ReservationInfoObjectList struct {
@@ -386,6 +423,13 @@ func (o *V0044StatsMsg) DeepCopy() *V0044StatsMsg {
 
 func (o *V0044StatsMsg) GetKey() object.ObjectKey {
 	return ""
+}
+
+func (o *V0044StatsMsg) SetKey(key object.ObjectKey) error {
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+	return nil
 }
 
 var _ object.Object = (*V0044StatsMsg)(nil)
