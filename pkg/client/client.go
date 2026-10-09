@@ -188,8 +188,6 @@ func (c *client) Create(
 	if options.SkipReadAfterCreate {
 		return nil
 	}
-	// Keep the accepted identity on obj even if the read fails. Callers must
-	// not mistake a failed hydration for a rejected create and submit twice.
 	return c.Get(ctx, key, obj, &GetOptions{RefreshCache: true})
 }
 
