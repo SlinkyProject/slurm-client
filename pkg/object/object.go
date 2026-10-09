@@ -15,6 +15,7 @@ type RuntimeObject interface {
 type Object interface {
 	RuntimeObject
 	GetKey() ObjectKey
+	SetKey(ObjectKey) error
 }
 
 type ObjectList interface {

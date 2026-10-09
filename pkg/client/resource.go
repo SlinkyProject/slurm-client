@@ -28,7 +28,7 @@ type resource struct {
 	cacheable bool
 	get       func(context.Context, object.ObjectKey, object.Object) error
 	list      func(context.Context, object.ObjectList) error
-	create    func(context.Context, object.Object, any) (object.ObjectKey, error)
+	create    func(context.Context, any) (object.ObjectKey, error)
 	update    func(context.Context, string, any) error
 	delete    func(context.Context, string) error
 }

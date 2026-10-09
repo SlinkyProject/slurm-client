@@ -4,6 +4,7 @@
 package v0043
 
 import (
+	"fmt"
 	"strconv"
 
 	"k8s.io/utils/ptr"
@@ -28,6 +29,11 @@ func (o *V0043ControllerPing) DeepCopy() *V0043ControllerPing {
 
 func (o *V0043ControllerPing) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Hostname, ""))
+}
+
+func (o *V0043ControllerPing) SetKey(key object.ObjectKey) error {
+	o.Hostname = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0043ControllerPing)(nil)
@@ -89,6 +95,15 @@ func (o *V0043JobInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(strconv.Itoa(int(ptr.Deref(o.JobId, 0))))
 }
 
+func (o *V0043JobInfo) SetKey(key object.ObjectKey) error {
+	id, err := strconv.ParseInt(string(key), 10, 32)
+	if err != nil {
+		return fmt.Errorf("invalid job key %q: %w", key, err)
+	}
+	o.JobId = ptr.To(int32(id))
+	return nil
+}
+
 var _ object.Object = (*V0043JobInfo)(nil)
 
 type V0043JobInfoObjectList struct {
@@ -146,6 +161,11 @@ func (o *V0043Node) DeepCopy() *V0043Node {
 
 func (o *V0043Node) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
+}
+
+func (o *V0043Node) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
 }
 
 var _ object.Object = (*V0043Node)(nil)
@@ -207,6 +227,11 @@ func (o *V0043PartitionInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
 }
 
+func (o *V0043PartitionInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
+}
+
 var _ object.Object = (*V0043PartitionInfo)(nil)
 
 type V0043PartitionInfoObjectList struct {
@@ -266,6 +291,11 @@ func (o *V0043ReservationInfo) GetKey() object.ObjectKey {
 	return object.ObjectKey(ptr.Deref(o.Name, ""))
 }
 
+func (o *V0043ReservationInfo) SetKey(key object.ObjectKey) error {
+	o.Name = ptr.To(string(key))
+	return nil
+}
+
 var _ object.Object = (*V0043ReservationInfo)(nil)
 
 type V0043ReservationInfoObjectList struct {
@@ -323,6 +353,13 @@ func (o *V0043StatsMsg) DeepCopy() *V0043StatsMsg {
 
 func (o *V0043StatsMsg) GetKey() object.ObjectKey {
 	return ""
+}
+
+func (o *V0043StatsMsg) SetKey(key object.ObjectKey) error {
+	if key != o.GetKey() {
+		return fmt.Errorf("%s has a fixed key %q", o.GetType(), o.GetKey())
+	}
+	return nil
 }
 
 var _ object.Object = (*V0043StatsMsg)(nil)

@@ -8,7 +8,6 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0043"
 	v0043 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0043"
-	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -64,17 +63,8 @@ func bindV0043(dst map[object.ObjectType]resource, c v0043.ClientInterface) {
 				return c.ListJobInfo(ctx)
 			})
 		},
-		create: func(ctx context.Context, obj object.Object, req any) (object.ObjectKey, error) {
-			dst, ok := obj.(*api.V0043JobInfo)
-			if !ok {
-				return "", apierrors.ErrNotImplemented
-			}
-			identity, err := c.CreateJobInfo(ctx, req)
-			key, err := jobKey(identity, err)
-			if err == nil {
-				dst.JobId = identity
-			}
-			return key, err
+		create: func(ctx context.Context, req any) (object.ObjectKey, error) {
+			return jobKey(c.CreateJobInfo(ctx, req))
 		},
 		update: func(ctx context.Context, key string, req any) error {
 			return c.UpdateJobInfo(ctx, key, req)

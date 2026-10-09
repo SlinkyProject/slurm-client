@@ -4,9 +4,11 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -24,6 +26,32 @@ import (
 type createTransport func(*http.Request) (*http.Response, error)
 
 func (f createTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func TestCreateSetKeyError(t *testing.T) {
+	for _, skip := range []bool{false, true} {
+		t.Run(fmt.Sprintf("skip=%v", skip), func(t *testing.T) {
+			obj := &apiv0045.V0045JobInfo{JobId: ptr.To(int32(42))}
+			creates := 0
+			cl := &client{resources: map[object.ObjectType]resource{
+				obj.GetType(): {
+					create: func(context.Context, any) (object.ObjectKey, error) {
+						creates++
+						return "invalid-key", nil
+					},
+					get: func(context.Context, object.ObjectKey, object.Object) error {
+						t.Fatal("read back after SetKey failed")
+						return nil
+					},
+				},
+			}}
+			err := cl.Create(t.Context(), obj, nil, &CreateOptions{SkipReadAfterCreate: skip})
+			require.ErrorIs(t, err, strconv.ErrSyntax)
+			require.ErrorContains(t, err, `set key for created object "invalid-key"`)
+			require.Equal(t, 1, creates)
+			require.Equal(t, object.ObjectKey("42"), obj.GetKey())
+		})
+	}
+}
 
 func TestCreateKeepsAcceptedIdentity(t *testing.T) {
 	cases := []struct {

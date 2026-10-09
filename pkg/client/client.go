@@ -181,9 +181,12 @@ func (c *client) Create(
 	if !ok || r.create == nil {
 		return apierrors.ErrNotImplemented
 	}
-	key, err := r.create(ctx, obj, req)
+	key, err := r.create(ctx, req)
 	if err != nil {
 		return err
+	}
+	if err := obj.SetKey(key); err != nil {
+		return fmt.Errorf("set key for created object %q: %w", key, err)
 	}
 	if options.SkipReadAfterCreate {
 		return nil

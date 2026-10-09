@@ -6,11 +6,8 @@ package client
 import (
 	"context"
 
-	"k8s.io/utils/ptr"
-
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	v0044 "github.com/SlinkyProject/slurm-client/pkg/client/api/v0044"
-	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -74,17 +71,8 @@ func bindV0044(dst map[object.ObjectType]resource, c v0044.ClientInterface) {
 				return c.ListJobInfo(ctx)
 			})
 		},
-		create: func(ctx context.Context, obj object.Object, req any) (object.ObjectKey, error) {
-			dst, ok := obj.(*api.V0044JobInfo)
-			if !ok {
-				return "", apierrors.ErrNotImplemented
-			}
-			identity, err := c.CreateJobInfo(ctx, req)
-			key, err := jobKey(identity, err)
-			if err == nil {
-				dst.JobId = identity
-			}
-			return key, err
+		create: func(ctx context.Context, req any) (object.ObjectKey, error) {
+			return jobKey(c.CreateJobInfo(ctx, req))
 		},
 		update: func(ctx context.Context, key string, req any) error {
 			return c.UpdateJobInfo(ctx, key, req)
@@ -104,17 +92,8 @@ func bindV0044(dst map[object.ObjectType]resource, c v0044.ClientInterface) {
 				return c.ListNodes(ctx)
 			})
 		},
-		create: func(ctx context.Context, obj object.Object, req any) (object.ObjectKey, error) {
-			dst, ok := obj.(*api.V0044Node)
-			if !ok {
-				return "", apierrors.ErrNotImplemented
-			}
-			identity, err := c.CreateNewNode(ctx, req)
-			key, err := nodeKey(identity, err)
-			if err == nil {
-				dst.Name = identity
-			}
-			return key, err
+		create: func(ctx context.Context, req any) (object.ObjectKey, error) {
+			return nodeKey(c.CreateNewNode(ctx, req))
 		},
 		update: func(ctx context.Context, key string, req any) error {
 			return c.UpdateNode(ctx, key, req)
@@ -158,17 +137,8 @@ func bindV0044(dst map[object.ObjectType]resource, c v0044.ClientInterface) {
 				return c.ListReservationInfo(ctx)
 			})
 		},
-		create: func(ctx context.Context, obj object.Object, req any) (object.ObjectKey, error) {
-			dst, ok := obj.(*api.V0044ReservationInfo)
-			if !ok {
-				return "", apierrors.ErrNotImplemented
-			}
-			identity, err := c.CreateReservationInfo(ctx, req)
-			key, err := nameKey(identity, err)
-			if err == nil {
-				dst.Name = ptr.To(identity)
-			}
-			return key, err
+		create: func(ctx context.Context, req any) (object.ObjectKey, error) {
+			return nameKey(c.CreateReservationInfo(ctx, req))
 		},
 		update: func(ctx context.Context, key string, req any) error {
 			return c.UpdateReservationInfo(ctx, key, req)
