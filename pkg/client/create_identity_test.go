@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 
 	apiv0042 "github.com/SlinkyProject/slurm-client/api/v0042"
@@ -95,20 +96,18 @@ func TestCreateKeepsAcceptedIdentity(t *testing.T) {
 					TokenProvider: token.StaticProvider("test"),
 					HTTPClient:    &http.Client{Transport: transport},
 				})
-				if err != nil {
-					t.Fatal(err)
-				}
+				require.NoError(t, err)
 				obj := tc.obj.DeepCopyObject().(object.Object)
 				err = cl.Create(t.Context(), obj, tc.req, &CreateOptions{SkipReadAfterCreate: skip})
-				if skip && err != nil || !skip && err == nil {
-					t.Fatalf("skip=%v: %v", skip, err)
+				if skip {
+					require.NoError(t, err)
+					require.Zero(t, gets)
+				} else {
+					require.Error(t, err)
+					require.Equal(t, 1, gets)
 				}
-				if key := obj.GetKey(); key != tc.key {
-					t.Fatalf("accepted identity = %q, want %q", key, tc.key)
-				}
-				if posts != 1 || skip && gets != 0 || !skip && gets != 1 {
-					t.Fatalf("POST=%d GET=%d", posts, gets)
-				}
+				require.Equal(t, tc.key, obj.GetKey(), "accepted identity")
+				require.Equal(t, 1, posts)
 			})
 		}
 	}
@@ -168,21 +167,14 @@ func TestCreateInvalidJobID(t *testing.T) {
 						TokenProvider: token.StaticProvider("test"),
 						HTTPClient:    &http.Client{Transport: transport},
 					})
-					if err != nil {
-						t.Fatal(err)
-					}
+					require.NoError(t, err)
 					obj := version.obj.DeepCopyObject().(object.Object)
 					err = cl.Create(t.Context(), obj, version.req, &CreateOptions{SkipReadAfterCreate: skip})
 					wantErr := "slurm acknowledged submission without a valid key"
-					if err == nil || err.Error() != wantErr {
-						t.Fatalf("Create() error = %v, want %q", err, wantErr)
-					}
-					if posts != 1 || gets != 0 {
-						t.Fatalf("POST=%d GET=%d, want POST=1 GET=0", posts, gets)
-					}
-					if key := obj.GetKey(); key != version.obj.GetKey() {
-						t.Fatalf("invalid response changed the destination identity to %q", key)
-					}
+					require.EqualError(t, err, wantErr)
+					require.Equal(t, 1, posts)
+					require.Zero(t, gets)
+					require.Equal(t, version.obj.GetKey(), obj.GetKey(), "invalid response changed the destination identity")
 				})
 			}
 		}
