@@ -129,6 +129,14 @@ var _ CreateOption = &CreateOptions{}
 // DeleteOptions contains options for delete requests. It's generally a subset
 // of metav1.DeleteOptions.
 type DeleteOptions struct {
+	// SkipReadAfterDelete, when true, returns once deletion is acknowledged.
+	// No follow-up GET or cache refresh occurs, and obj is left unchanged.
+	// Cached objects remain until an explicit cache refresh or informer sync
+	// observes the deletion.
+	//
+	// By default, Delete reads the object back from Slurm and ignores NotFound.
+	// Other read errors are returned even though deletion was acknowledged.
+	SkipReadAfterDelete bool
 }
 
 // ApplyOptions applies the given delete options on these options,
@@ -144,6 +152,7 @@ var _ DeleteOption = &DeleteOptions{}
 
 // ApplyToDelete implements DeleteOption.
 func (o *DeleteOptions) ApplyToDelete(do *DeleteOptions) {
+	do.SkipReadAfterDelete = o.SkipReadAfterDelete
 }
 
 // }}}
@@ -222,8 +231,16 @@ func (o *ListOptions) ApplyOptions(opts []ListOption) *ListOptions {
 
 // {{{ Update Options
 
-// UpdateOptions contains options for create requests.
+// UpdateOptions contains options for update requests.
 type UpdateOptions struct {
+	// SkipReadAfterUpdate, when true, returns once the update is acknowledged.
+	// No follow-up GET or cache refresh occurs, and obj is left unchanged.
+	// Cached objects remain unchanged until an explicit cache refresh or
+	// informer sync observes the update.
+	//
+	// By default, Update reads the complete object back from Slurm into obj.
+	// Read errors are returned even though the update was acknowledged.
+	SkipReadAfterUpdate bool
 }
 
 // ApplyOptions applies the given update options on these options,
@@ -239,6 +256,7 @@ var _ UpdateOption = &UpdateOptions{}
 
 // ApplyToUpdate implements UpdateOption.
 func (o *UpdateOptions) ApplyToUpdate(uo *UpdateOptions) {
+	uo.SkipReadAfterUpdate = o.SkipReadAfterUpdate
 }
 
 // }}}

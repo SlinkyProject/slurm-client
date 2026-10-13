@@ -213,6 +213,9 @@ func (c *client) Delete(
 	if err := r.delete(ctx, string(obj.GetKey())); err != nil {
 		return err
 	}
+	if options.SkipReadAfterDelete {
+		return nil
+	}
 
 	err := c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
 	if err != nil {
@@ -246,6 +249,9 @@ func (c *client) Update(
 	}
 	if err := r.update(ctx, string(obj.GetKey()), req); err != nil {
 		return err
+	}
+	if options.SkipReadAfterUpdate {
+		return nil
 	}
 
 	return c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
