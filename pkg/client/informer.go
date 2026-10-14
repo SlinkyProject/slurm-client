@@ -27,8 +27,8 @@ const (
 	// timeout so a very low CacheSyncPeriod still gets at least one poll inside its window.
 	// The check itself is a cheap map lookup under a read lock, so this can be much finer
 	// than syncPeriod without added cost; a coarse interval only adds pure latency to every
-	// RefreshCache/WaitRefreshCache caller, since Create and Update always wait on this
-	// internally after every write.
+	// RefreshCache/WaitRefreshCache caller, since writes wait on this internally unless
+	// their readback is skipped.
 	syncPollInterval = 50 * time.Millisecond
 )
 
