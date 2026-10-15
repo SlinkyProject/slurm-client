@@ -11,40 +11,25 @@ import (
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 )
 
-func TestNewHTTPError(t *testing.T) {
-	tests := []struct {
-		name       string
-		statusCode int
-		want       error
-	}{
-		{
-			name:       "Not Found",
-			statusCode: http.StatusNotFound,
-			want:       apierrors.ErrNotFound,
-		},
-		{
-			name:       "Not Implemented",
-			statusCode: http.StatusNotImplemented,
-			want:       apierrors.ErrNotImplemented,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := apierrors.NewHTTPError(tt.statusCode)
-			if !errors.Is(err, tt.want) {
-				t.Errorf("NewHTTPError() error = %v, want errors.Is(error, %v)", err, tt.want)
-			}
-		})
+func TestNewHTTPError_NotFound(t *testing.T) {
+	if err := apierrors.NewHTTPError(http.StatusNotFound); !errors.Is(err, apierrors.ErrNotFound) {
+		t.Errorf("NewHTTPError(404) error = %v, want ErrNotFound", err)
 	}
 }
 
 func TestNewHTTPError_UnmappedStatus(t *testing.T) {
-	err := apierrors.NewHTTPError(http.StatusInternalServerError)
-	if got, want := err.Error(), http.StatusText(http.StatusInternalServerError); got != want {
-		t.Errorf("NewHTTPError() error = %q, want %q", got, want)
-	}
-	if errors.Is(err, apierrors.ErrNotFound) {
-		t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrNotFound", err)
+	for _, statusCode := range []int{http.StatusInternalServerError, http.StatusNotImplemented} {
+		t.Run(http.StatusText(statusCode), func(t *testing.T) {
+			err := apierrors.NewHTTPError(statusCode)
+			if got, want := err.Error(), http.StatusText(statusCode); got != want {
+				t.Errorf("NewHTTPError() error = %q, want %q", got, want)
+			}
+			if errors.Is(err, apierrors.ErrNotFound) {
+				t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrNotFound", err)
+			}
+			if errors.Is(err, apierrors.ErrNotImplemented) {
+				t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrNotImplemented", err)
+			}
+		})
 	}
 }

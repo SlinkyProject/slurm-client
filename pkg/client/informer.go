@@ -510,7 +510,7 @@ func copyObject(dst, src object.Object) error {
 	dv := reflect.ValueOf(dst)
 	sv := reflect.ValueOf(src)
 	if !dv.IsValid() || !sv.IsValid() || dv.Kind() != reflect.Pointer || dv.Type() != sv.Type() {
-		return apierrors.ErrNotImplemented
+		return fmt.Errorf("cannot copy object of type %T into %T", src, dst)
 	}
 	dv.Elem().Set(sv.Elem())
 	return nil

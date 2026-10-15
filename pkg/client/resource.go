@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"maps"
 	"reflect"
 	"slices"
@@ -14,7 +15,6 @@ import (
 
 	"k8s.io/utils/ptr"
 
-	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
@@ -82,7 +82,7 @@ func uncachedObjects() []object.Object {
 func getInto[T any](obj object.Object, fetch func() (*T, error)) error {
 	dst, ok := any(obj).(*T)
 	if !ok {
-		return apierrors.ErrNotImplemented
+		return fmt.Errorf("expected object of type %T, got %T", dst, obj)
 	}
 	out, err := fetch()
 	if err != nil {
@@ -95,7 +95,7 @@ func getInto[T any](obj object.Object, fetch func() (*T, error)) error {
 func listInto[T any](list object.ObjectList, fetch func() (*T, error)) error {
 	dst, ok := any(list).(*T)
 	if !ok {
-		return apierrors.ErrNotImplemented
+		return fmt.Errorf("expected list of type %T, got %T", dst, list)
 	}
 	out, err := fetch()
 	if err != nil {
