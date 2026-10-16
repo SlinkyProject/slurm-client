@@ -253,7 +253,10 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 func (i *informerCache) doHandler(evt event.Event) {
 	switch evt.Type {
 	case event.Added:
-		i.handler.OnAdd(evt.Object, !i.dirty)
+		i.mu.RLock()
+		initial := !i.dirty
+		i.mu.RUnlock()
+		i.handler.OnAdd(evt.Object, initial)
 	case event.Modified:
 		i.handler.OnUpdate(evt.ObjectOld, evt.Object)
 	case event.Deleted:

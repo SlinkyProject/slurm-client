@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -15,8 +16,44 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
+	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
+
+// Add callbacks race with cache refreshes, and may themselves access the cache.
+// Capture the initial-list flag under the mutex, but release it before calling out.
+func TestInformerAddEventDuringRefresh(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	var calls atomic.Int32
+	i.SetEventHandler(cache.ResourceEventHandlerDetailedFuncs{
+		AddFunc: func(_ interface{}, _ bool) {
+			i.mu.Lock()
+			i.mu.Unlock()
+			calls.Add(1)
+		},
+	})
+	var wg sync.WaitGroup
+	start := make(chan struct{})
+	wg.Go(func() {
+		<-start
+		for n := range 1000 {
+			i.mu.Lock()
+			i.dirty = n%2 == 0
+			i.mu.Unlock()
+		}
+	})
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			i.doHandler(event.Event{Type: event.Added, Object: &api.V0044JobInfo{}})
+		}
+	})
+	close(start)
+	wg.Wait()
+	if got := calls.Load(); got != 1000 {
+		t.Fatalf("received %d add events, want 1000", got)
+	}
+}
 
 func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
 	fakeReader := &emptyClient{}
