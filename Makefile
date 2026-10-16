@@ -274,9 +274,9 @@ NOTICE: $(GO_LICENSES)
 CODECOV_PERCENT ?= 80.0
 
 .PHONY: test
-test: ## Run tests.
+test: ## Run tests with the race detector.
 	rm -f cover.out cover.html
-	go test `go list ./... | grep -v "slurm-client/api"` -v -coverprofile cover.out
+	go test -race `go list ./... | grep -v "slurm-client/api"` -v -coverprofile cover.out
 	go tool cover -func cover.out
 	go tool cover -html cover.out -o cover.html
 	@percentage=$$(go tool cover -func=cover.out | grep ^total | awk '{print $$3}' | tr -d '%'); \
