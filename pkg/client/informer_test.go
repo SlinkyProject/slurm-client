@@ -124,7 +124,7 @@ func TestInformerConcurrentHandlerRegistration(t *testing.T) {
 	for _, evt := range events {
 		i.doHandler(evt)
 	}
-	if got := calls.Load() - before; got != int32(len(events)) {
+	if got := int(calls.Load() - before); got != len(events) {
 		t.Fatalf("received %d callbacks after registering again, want %d", got, len(events))
 	}
 }
