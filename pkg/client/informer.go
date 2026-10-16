@@ -47,7 +47,7 @@ type informerCache struct {
 	// objectType tracks the object type this informer backs.
 	objectType object.ObjectType
 
-	// mu guards access to the map.
+	// mu guards the cache, sync state, and handler registration.
 	mu sync.RWMutex
 
 	// cache holds the actual object cache.
@@ -84,12 +84,14 @@ type informerCache struct {
 
 // SetEventHandler implements InformerCache.
 func (i *informerCache) SetEventHandler(handler cache.ResourceEventHandler) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
 	i.handler = handler
 }
 
 // UnsetEventHandler implements InformerCache.
 func (i *informerCache) UnsetEventHandler() {
-	i.handler = nil
+	i.SetEventHandler(nil)
 }
 
 // Run implements InformerCache.
@@ -240,9 +242,6 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 	for {
 		select {
 		case e := <-i.eventCh:
-			if i.handler == nil {
-				continue
-			}
 			go i.doHandler(e)
 		case <-stopCh:
 			return
@@ -251,19 +250,25 @@ func (i *informerCache) runHandler(stopCh <-chan struct{}) {
 }
 
 func (i *informerCache) doHandler(evt event.Event) {
+	i.mu.RLock()
+	handler := i.handler
+	initial := !i.dirty
+	i.mu.RUnlock()
+	if handler == nil {
+		return
+	}
+
 	switch evt.Type {
 	case event.Added:
-		i.mu.RLock()
-		initial := !i.dirty
-		i.mu.RUnlock()
-		i.handler.OnAdd(evt.Object, initial)
+		handler.OnAdd(evt.Object, initial)
 	case event.Modified:
-		i.handler.OnUpdate(evt.ObjectOld, evt.Object)
+		handler.OnUpdate(evt.ObjectOld, evt.Object)
 	case event.Deleted:
-		i.handler.OnDelete(evt.Object)
+		handler.OnDelete(evt.Object)
 	}
 }
 
+// pushEvent requires mu to be held by the cache mutation that emits the event.
 func (i *informerCache) pushEvent(e event.Event) {
 	if i.eventCh == nil || i.handler == nil {
 		return

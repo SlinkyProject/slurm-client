@@ -55,6 +55,80 @@ func TestInformerAddEventDuringRefresh(t *testing.T) {
 	}
 }
 
+func TestInformerHandlerCanUnregister(t *testing.T) {
+	for _, eventType := range []event.EventType{event.Added, event.Modified, event.Deleted} {
+		t.Run(string(eventType), func(t *testing.T) {
+			i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+			calls := 0
+			callback := func(any) {
+				i.UnsetEventHandler()
+				calls++
+			}
+			i.SetEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc:    callback,
+				UpdateFunc: func(_, obj any) { callback(obj) },
+				DeleteFunc: callback,
+			})
+			evt := event.Event{Type: eventType, Object: &api.V0044JobInfo{}, ObjectOld: &api.V0044JobInfo{}}
+			i.doHandler(evt)
+			i.doHandler(evt)
+			if calls != 1 {
+				t.Fatalf("received %d callbacks after unregistering, want 1", calls)
+			}
+		})
+	}
+}
+
+func TestInformerConcurrentHandlerRegistration(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	var calls atomic.Int32
+	callback := func(any) { calls.Add(1) }
+	handler := cache.ResourceEventHandlerFuncs{
+		AddFunc:    callback,
+		UpdateFunc: func(_, obj any) { callback(obj) },
+		DeleteFunc: callback,
+	}
+	events := []event.Event{
+		{Type: event.Added, Object: &api.V0044JobInfo{}},
+		{Type: event.Modified, Object: &api.V0044JobInfo{}, ObjectOld: &api.V0044JobInfo{}},
+		{Type: event.Deleted, Object: &api.V0044JobInfo{}},
+	}
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			i.SetEventHandler(handler)
+			i.UnsetEventHandler()
+		}
+	})
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			for _, evt := range events {
+				i.mu.Lock()
+				i.pushEvent(evt)
+				i.mu.Unlock()
+				select {
+				case queued := <-i.eventCh:
+					i.doHandler(queued)
+				default:
+				}
+			}
+		}
+	})
+	close(start)
+	wg.Wait()
+	i.SetEventHandler(handler)
+	before := calls.Load()
+	for _, evt := range events {
+		i.doHandler(evt)
+	}
+	if got := calls.Load() - before; got != int32(len(events)) {
+		t.Fatalf("received %d callbacks after registering again, want %d", got, len(events))
+	}
+}
+
 func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
 	fakeReader := &emptyClient{}
 	ic := newInformer(objectType, fakeReader, defaultSyncPeriod)

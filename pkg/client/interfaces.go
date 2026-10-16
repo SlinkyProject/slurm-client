@@ -115,6 +115,7 @@ type Informer interface {
 	SetEventHandler(handler cache.ResourceEventHandler)
 
 	// UnsetEventHandler unsets the event handler of the informer.
+	// Callbacks that have already captured the handler may still complete.
 	UnsetEventHandler()
 
 	// HasSynced return true if the informers underlying store has synced.
