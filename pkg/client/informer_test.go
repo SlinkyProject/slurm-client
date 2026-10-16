@@ -28,8 +28,8 @@ func TestInformerAddEventDuringRefresh(t *testing.T) {
 	i.SetEventHandler(cache.ResourceEventHandlerDetailedFuncs{
 		AddFunc: func(_ interface{}, _ bool) {
 			i.mu.Lock()
-			i.mu.Unlock()
 			calls.Add(1)
+			i.mu.Unlock()
 		},
 	})
 	var wg sync.WaitGroup
