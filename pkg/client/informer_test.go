@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -15,8 +16,118 @@ import (
 	api "github.com/SlinkyProject/slurm-client/api/v0044"
 	"github.com/SlinkyProject/slurm-client/pkg/cache"
 	"github.com/SlinkyProject/slurm-client/pkg/client/token"
+	"github.com/SlinkyProject/slurm-client/pkg/event"
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
+
+// Add callbacks race with cache refreshes, and may themselves access the cache.
+// Capture the initial-list flag under the mutex, but release it before calling out.
+func TestInformerAddEventDuringRefresh(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	var calls atomic.Int32
+	i.SetEventHandler(cache.ResourceEventHandlerDetailedFuncs{
+		AddFunc: func(_ interface{}, _ bool) {
+			i.mu.Lock()
+			calls.Add(1)
+			i.mu.Unlock()
+		},
+	})
+	var wg sync.WaitGroup
+	start := make(chan struct{})
+	wg.Go(func() {
+		<-start
+		for n := range 1000 {
+			i.mu.Lock()
+			i.dirty = n%2 == 0
+			i.mu.Unlock()
+		}
+	})
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			i.doHandler(event.Event{Type: event.Added, Object: &api.V0044JobInfo{}})
+		}
+	})
+	close(start)
+	wg.Wait()
+	if got := calls.Load(); got != 1000 {
+		t.Fatalf("received %d add events, want 1000", got)
+	}
+}
+
+func TestInformerHandlerCanUnregister(t *testing.T) {
+	for _, eventType := range []event.EventType{event.Added, event.Modified, event.Deleted} {
+		t.Run(string(eventType), func(t *testing.T) {
+			i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+			calls := 0
+			callback := func(any) {
+				i.UnsetEventHandler()
+				calls++
+			}
+			i.SetEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc:    callback,
+				UpdateFunc: func(_, obj any) { callback(obj) },
+				DeleteFunc: callback,
+			})
+			evt := event.Event{Type: eventType, Object: &api.V0044JobInfo{}, ObjectOld: &api.V0044JobInfo{}}
+			i.doHandler(evt)
+			i.doHandler(evt)
+			if calls != 1 {
+				t.Fatalf("received %d callbacks after unregistering, want 1", calls)
+			}
+		})
+	}
+}
+
+func TestInformerConcurrentHandlerRegistration(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	var calls atomic.Int32
+	callback := func(any) { calls.Add(1) }
+	handler := cache.ResourceEventHandlerFuncs{
+		AddFunc:    callback,
+		UpdateFunc: func(_, obj any) { callback(obj) },
+		DeleteFunc: callback,
+	}
+	events := []event.Event{
+		{Type: event.Added, Object: &api.V0044JobInfo{}},
+		{Type: event.Modified, Object: &api.V0044JobInfo{}, ObjectOld: &api.V0044JobInfo{}},
+		{Type: event.Deleted, Object: &api.V0044JobInfo{}},
+	}
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			i.SetEventHandler(handler)
+			i.UnsetEventHandler()
+		}
+	})
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			for _, evt := range events {
+				i.mu.Lock()
+				i.pushEvent(evt)
+				i.mu.Unlock()
+				select {
+				case queued := <-i.eventCh:
+					i.doHandler(queued)
+				default:
+				}
+			}
+		}
+	})
+	close(start)
+	wg.Wait()
+	i.SetEventHandler(handler)
+	before := calls.Load()
+	for _, evt := range events {
+		i.doHandler(evt)
+	}
+	if got := int(calls.Load() - before); got != len(events) {
+		t.Fatalf("received %d callbacks after registering again, want %d", got, len(events))
+	}
+}
 
 func newInformerWithData(objectType object.ObjectType, cache map[object.ObjectKey]*cacheEntry) *informerCache {
 	fakeReader := &emptyClient{}
