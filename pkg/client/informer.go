@@ -254,6 +254,26 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) (object.Object, erro
 	return obj, i.reader.Get(context.TODO(), key, obj, opts)
 }
 
+// refresh marks key dirty and queues a fetch without waiting for it to land.
+// It does nothing on a stopped informer, which has no fetcher to drain the queue.
+func (i *informerCache) refresh(ctx context.Context, key object.ObjectKey) error {
+	i.mu.Lock()
+	started := i.started
+	if started {
+		i.markDirty(key)
+	}
+	i.mu.Unlock()
+	if !started {
+		return nil
+	}
+	select {
+	case i.syncObjCh <- key:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 // markDirty requires i.mu to be held.
 func (i *informerCache) markDirty(key object.ObjectKey) {
 	if obj := i.cache[key]; obj != nil {
@@ -432,28 +452,14 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	options.ApplyOptions(opts)
 
 	if options.RefreshCache {
-		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and waitForSyncGet().
-		i.mu.Lock()
-		if obj := i.cache[key]; obj != nil {
-			obj.dirty = true
-		} else {
-			i.cache[key] = &cacheEntry{dirty: true}
-		}
-		i.mu.Unlock()
-
-		select {
-		case i.syncObjCh <- key:
-		case <-ctx.Done():
-			return ctx.Err()
+		// refresh marks dirty before the sync request, so waitForSyncGet
+		// cannot see a clean entry before the receiver picks up the key.
+		if err := i.refresh(ctx, key); err != nil {
+			return err
 		}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
-		if obj := i.cache[key]; obj != nil {
-			obj.dirty = true
-		} else {
-			i.cache[key] = &cacheEntry{dirty: true}
-		}
+		i.markDirty(key)
 		i.mu.Unlock()
 	}
 

@@ -5,7 +5,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -213,20 +212,20 @@ func (c *client) Delete(
 	if err := r.delete(ctx, string(obj.GetKey())); err != nil {
 		return err
 	}
+
 	if options.SkipReadAfterDelete {
 		return nil
 	}
 
-	err := c.Get(ctx, obj.GetKey(), obj, &GetOptions{RefreshCache: true})
-	if err != nil {
-		// We expect the error to always be NotFound because we deleted the
-		// object from Slurm then attempted to Get the deleted object with
-		// refreshed cache.
-		if !errors.Is(err, apierrors.ErrNotFound) {
-			return err
-		}
+	// Slurm can keep a deleted object (a canceled job stays listed until MinJobAge),
+	// so refresh it in the background instead of dropping or reading it back.
+	c.mu.RLock()
+	informer, ok := c.informers[normalizeObjectType(obj.GetType())].(*informerCache)
+	c.mu.RUnlock()
+	if ok {
+		// The delete already succeeded; if ctx ends first, the next sync settles the entry.
+		_ = informer.refresh(ctx, obj.GetKey())
 	}
-
 	return nil
 }
 

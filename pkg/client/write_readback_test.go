@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -20,25 +21,21 @@ import (
 
 // A nil skips slice exercises the default; multiple values exercise option precedence.
 func writeJob(ctx context.Context, c Client, obj object.Object, operation string, skips ...bool) error {
-	if operation == "update" {
-		opts := make([]UpdateOption, 0, len(skips))
-		for _, skip := range skips {
-			opts = append(opts, &UpdateOptions{SkipReadAfterUpdate: skip})
-		}
-		return c.Update(ctx, obj, api.V0044JobDescMsg{Name: ptr.To("updated")}, opts...)
+	if operation == "delete" {
+		return c.Delete(ctx, obj)
 	}
-	opts := make([]DeleteOption, 0, len(skips))
+	opts := make([]UpdateOption, 0, len(skips))
 	for _, skip := range skips {
-		opts = append(opts, &DeleteOptions{SkipReadAfterDelete: skip})
+		opts = append(opts, &UpdateOptions{SkipReadAfterUpdate: skip})
 	}
-	return c.Delete(ctx, obj, opts...)
+	return c.Update(ctx, obj, api.V0044JobDescMsg{Name: ptr.To("updated")}, opts...)
 }
 
 func TestWriteReadback(t *testing.T) {
 	writeErr := errors.New("write failed")
 	readErr := errors.New("read failed")
 	notFoundErr := fmt.Errorf("job gone: %w", apierrors.ErrNotFound)
-	for _, operation := range []string{"update", "delete"} {
+	for _, operation := range []string{"update"} {
 		for _, tc := range []struct {
 			name     string
 			skips    []bool
@@ -89,11 +86,7 @@ func TestWriteReadback(t *testing.T) {
 					},
 				}}
 				err := writeJob(t.Context(), c, obj, operation, tc.skips...)
-				wantErr := tc.wantErr
-				if operation == "delete" && errors.Is(wantErr, apierrors.ErrNotFound) {
-					wantErr = nil
-				}
-				require.ErrorIs(t, err, wantErr)
+				require.ErrorIs(t, err, tc.wantErr)
 				require.Equal(t, 1, writes)
 				wantReads := 0
 				if tc.wantRead {
@@ -111,7 +104,7 @@ func TestWriteReadback(t *testing.T) {
 }
 
 func TestSkipWriteReadbackPreservesCache(t *testing.T) {
-	for _, operation := range []string{"update", "delete"} {
+	for _, operation := range []string{"update"} {
 		t.Run(operation, func(t *testing.T) {
 			obj := &api.V0044JobInfo{JobId: ptr.To(int32(42)), Name: ptr.To("original")}
 			// Model a started informer with a populated cache, without running its
@@ -149,6 +142,95 @@ func TestSkipWriteReadbackPreservesCache(t *testing.T) {
 			require.NoError(t, c.Get(ctx, obj.GetKey(), cached))
 			require.Equal(t, &api.V0044JobInfo{JobId: ptr.To(int32(42)), Name: ptr.To("original")}, cached)
 			require.Equal(t, cached, obj)
+		})
+	}
+}
+
+// deleteReader holds each Get until release closes, then answers with a canceled job or err.
+type deleteReader struct {
+	emptyClient
+	release chan struct{}
+	err     error
+	reads   atomic.Int32
+}
+
+func (f *deleteReader) Get(_ context.Context, key object.ObjectKey, obj object.Object, _ ...GetOption) error {
+	f.reads.Add(1)
+	<-f.release
+	if f.err != nil {
+		return f.err
+	}
+	if err := obj.SetKey(key); err != nil {
+		return err
+	}
+	obj.(*api.V0044JobInfo).Name = ptr.To("canceled")
+	return nil
+}
+
+func TestDeleteRefreshesCachedObject(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		writeErr  error
+		readErr   error
+		skip      bool
+		stopped   bool
+		wantReads int32
+		wantName  string // empty when the object should leave the cache
+	}{
+		{name: "canceled job stays listed", wantReads: 1, wantName: "canceled"},
+		{name: "deleted object is gone", readErr: fmt.Errorf("gone: %w", apierrors.ErrNotFound), wantReads: 1},
+		{name: "write failure", writeErr: errors.New("write failed"), wantName: "original"},
+		{name: "skip read after delete", skip: true, wantName: "original"},
+		{name: "stopped informer", stopped: true, wantName: "original"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			obj := &api.V0044JobInfo{JobId: ptr.To(int32(42)), Name: ptr.To("original")}
+			reader := &deleteReader{release: make(chan struct{}), err: tc.readErr}
+			i := newInformer(obj.GetType(), reader, defaultSyncPeriod).(*informerCache)
+			if !tc.stopped {
+				stopCh := make(chan struct{})
+				defer close(stopCh)
+				go i.Run(stopCh)
+				for !i.HasStarted() {
+					time.Sleep(time.Millisecond)
+				}
+			}
+			i.mu.Lock()
+			i.processObject(obj)
+			i.dirty = false
+			i.mu.Unlock()
+			c := &client{
+				informers: map[object.ObjectType]InformerCache{obj.GetType(): i},
+				resources: map[object.ObjectType]resource{
+					obj.GetType(): {
+						cacheable: true,
+						delete:    func(context.Context, string) error { return tc.writeErr },
+					},
+				},
+			}
+
+			// Delete must return while the refresh is still blocked in the reader.
+			require.ErrorIs(t, c.Delete(t.Context(), obj, &DeleteOptions{SkipReadAfterDelete: tc.skip}), tc.writeErr)
+			close(reader.release)
+
+			if tc.stopped {
+				i.mu.RLock()
+				entry := i.cache[obj.GetKey()]
+				i.mu.RUnlock()
+				require.False(t, entry.dirty)
+				require.Equal(t, tc.wantName, ptr.Deref(entry.object.(*api.V0044JobInfo).Name, ""))
+				require.Zero(t, reader.reads.Load())
+				return
+			}
+			got := &api.V0044JobInfo{}
+			err := i.Get(t.Context(), obj.GetKey(), got)
+			if tc.wantName == "" {
+				require.ErrorIs(t, err, apierrors.ErrNotFound)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantName, ptr.Deref(got.Name, ""))
+			}
+			require.Equal(t, tc.wantReads, reader.reads.Load())
 		})
 	}
 }
