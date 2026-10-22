@@ -20,7 +20,6 @@ import (
 
 const (
 	defaultSyncPeriod = 30 * time.Second
-	batchPeriod       = 1 * time.Second
 
 	// syncPollInterval is how often waitForSyncGet/waitForSyncList poll the in-memory
 	// dirty flag while waiting for a pending refresh to land, clamped to the wait's own
@@ -78,6 +77,9 @@ type informerCache struct {
 	// fetching holds keys with a Get sync in flight; true means another was requested.
 	fetching map[object.ObjectKey]bool
 
+	// listing is true while a List sync is in flight; listAgain means another was requested.
+	listing, listAgain bool
+
 	// handler runs for each read event from eventCh.
 	handler cache.ResourceEventHandler
 
@@ -124,10 +126,6 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 	ticker := time.NewTicker(i.syncPeriod)
 	defer ticker.Stop()
 
-	batchTimer := time.NewTimer(batchPeriod)
-	defer batchTimer.Stop()
-
-	requestSync := false
 	for {
 		select {
 		case _, ok := <-i.syncCh:
@@ -135,16 +133,16 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 				// syncCh was closed!
 				return
 			}
+			// List right away, but one at a time so an older response cannot
+			// overwrite a newer one.
 			i.mu.Lock()
 			i.dirty = true
+			running := i.listing
+			i.listing, i.listAgain = true, running
 			i.mu.Unlock()
-			requestSync = true
-		case <-batchTimer.C:
-			if requestSync {
-				go i.doListInformer()
-				requestSync = false
+			if !running {
+				go i.runListFetch()
 			}
-			batchTimer.Reset(batchPeriod)
 		case <-ticker.C:
 			i.syncCh <- struct{}{}
 		case <-stopCh:
@@ -153,7 +151,29 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 	}
 }
 
-func (i *informerCache) doListInformer() {
+// runListFetch lists until no refresh arrived during the last list.
+func (i *informerCache) runListFetch() {
+	for {
+		list, err := i.doListInformer()
+		i.mu.Lock()
+		i.syncErrorList = err
+		if err == nil {
+			i.processObjects(list)
+			i.dirty = false
+		}
+		if !i.listAgain {
+			i.listing = false
+			i.mu.Unlock()
+			return
+		}
+		// Keep waiters blocked until the list that started after their request lands.
+		i.listAgain, i.dirty = false, true
+		i.mu.Unlock()
+	}
+}
+
+// doListInformer marks the cache dirty and lists every object from remote.
+func (i *informerCache) doListInformer() (object.ObjectList, error) {
 	i.mu.Lock()
 	i.dirty = true
 	i.mu.Unlock()
@@ -165,14 +185,7 @@ func (i *informerCache) doListInformer() {
 	list := r.newList()
 
 	opts := &ListOptions{SkipCache: true}
-	err := i.reader.List(context.TODO(), list, opts)
-	i.mu.Lock()
-	i.syncErrorList = err
-	if err == nil {
-		i.processObjects(list)
-		i.dirty = false
-	}
-	i.mu.Unlock()
+	return list, i.reader.List(context.TODO(), list, opts)
 }
 
 func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {

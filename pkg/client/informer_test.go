@@ -651,6 +651,24 @@ func TestInformerGetRefreshCacheSkipsBatch(t *testing.T) {
 	}
 }
 
+func TestInformerListRefreshCacheSkipsBatch(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+
+	start := time.Now()
+	if err := i.List(t.Context(), &api.V0044JobInfoObjectList{}, &ListOptions{RefreshCache: true}); err != nil {
+		t.Fatalf("List(RefreshCache) error = %v", err)
+	}
+	if elapsed := time.Since(start); elapsed >= 500*time.Millisecond {
+		t.Fatalf("List(RefreshCache) took %v, want it to list right away", elapsed)
+	}
+}
+
 // blockingJobClient holds each Get until release closes and names the job by call order.
 type blockingJobClient struct {
 	emptyClient
