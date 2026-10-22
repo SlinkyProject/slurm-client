@@ -75,6 +75,9 @@ type informerCache struct {
 	// syncErrorGet is the last Get sync error per object
 	syncErrorGet map[object.ObjectKey]error
 
+	// fetching holds keys with a Get sync in flight; true means another was requested.
+	fetching map[object.ObjectKey]bool
+
 	// handler runs for each read event from eventCh.
 	handler cache.ResourceEventHandler
 
@@ -173,10 +176,6 @@ func (i *informerCache) doListInformer() {
 }
 
 func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
-	batchTimer := time.NewTimer(batchPeriod)
-	defer batchTimer.Stop()
-
-	requestSync := make(map[object.ObjectKey]struct{})
 	for {
 		select {
 		case key, ok := <-i.syncObjCh:
@@ -184,35 +183,52 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 				// syncObjCh was closed!
 				return
 			}
+			// Fetch right away, but one at a time per key so an older response
+			// cannot overwrite a newer one.
 			i.mu.Lock()
-			if obj := i.cache[key]; obj != nil {
-				obj.dirty = true
-			} else {
-				i.cache[key] = &cacheEntry{dirty: true}
-			}
+			_, running := i.fetching[key]
+			i.fetching[key] = running
 			i.mu.Unlock()
-			requestSync[key] = struct{}{}
-		case <-batchTimer.C:
-			if len(requestSync) > 0 {
-				for key := range requestSync {
-					go i.doGetInformer(key)
-				}
-				requestSync = make(map[object.ObjectKey]struct{})
+			if !running {
+				go i.runGetFetch(key)
 			}
-			batchTimer.Reset(batchPeriod)
 		case <-stopCh:
 			return
 		}
 	}
 }
 
-func (i *informerCache) doGetInformer(key object.ObjectKey) {
-	i.mu.Lock()
-	if obj := i.cache[key]; obj != nil {
-		obj.dirty = true
-	} else {
-		i.cache[key] = &cacheEntry{dirty: true}
+// runGetFetch fetches key until no refresh for it arrived during the last fetch.
+func (i *informerCache) runGetFetch(key object.ObjectKey) {
+	for {
+		obj, err := i.doGetInformer(key)
+		i.mu.Lock()
+		if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
+			i.syncErrorGet[key] = err
+		} else {
+			i.syncErrorGet[key] = nil
+		}
+		if errors.Is(err, apierrors.ErrNotFound) {
+			i.deleteObject(key)
+		} else if i.syncErrorGet[key] == nil {
+			i.processObject(obj)
+		}
+		if !i.fetching[key] {
+			delete(i.fetching, key)
+			i.mu.Unlock()
+			return
+		}
+		// Keep waiters blocked until the fetch that started after their request lands.
+		i.fetching[key] = false
+		i.markDirty(key)
+		i.mu.Unlock()
 	}
+}
+
+// doGetInformer marks key dirty and fetches it from remote.
+func (i *informerCache) doGetInformer(key object.ObjectKey) (object.Object, error) {
+	i.mu.Lock()
+	i.markDirty(key)
 	i.mu.Unlock()
 
 	r, ok := resourceCatalog[i.objectType]
@@ -222,20 +238,16 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) {
 	obj := r.newObject()
 
 	opts := &GetOptions{SkipCache: true}
-	err := i.reader.Get(context.TODO(), key, obj, opts)
+	return obj, i.reader.Get(context.TODO(), key, obj, opts)
+}
 
-	i.mu.Lock()
-	if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
-		i.syncErrorGet[key] = err
+// markDirty requires i.mu to be held.
+func (i *informerCache) markDirty(key object.ObjectKey) {
+	if obj := i.cache[key]; obj != nil {
+		obj.dirty = true
 	} else {
-		i.syncErrorGet[key] = nil
+		i.cache[key] = &cacheEntry{dirty: true}
 	}
-	if errors.Is(err, apierrors.ErrNotFound) {
-		i.deleteObject(key)
-	} else if i.syncErrorGet[key] == nil {
-		i.processObject(obj)
-	}
-	i.mu.Unlock()
 }
 
 func (i *informerCache) runHandler(stopCh <-chan struct{}) {
@@ -507,6 +519,7 @@ func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Du
 		cache:        make(map[object.ObjectKey]*cacheEntry),
 		dirty:        true,
 		syncErrorGet: make(map[object.ObjectKey]error),
+		fetching:     make(map[object.ObjectKey]bool),
 		syncPeriod:   syncPeriod,
 		eventCh:      make(chan event.Event, 8),
 		syncCh:       make(chan struct{}, 8),
