@@ -5,7 +5,6 @@ package v0045
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,6 +12,7 @@ import (
 
 	api "github.com/SlinkyProject/slurm-client/api/v0045"
 	clientapi "github.com/SlinkyProject/slurm-client/pkg/client/api"
+	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 )
 
 const (
@@ -78,7 +78,12 @@ func getOpenapiErrors(oapierrors *api.V0045OpenapiErrors) []error {
 	errs := []error{}
 	for _, err := range ptr.Deref(oapierrors, []api.V0045OpenapiError{}) {
 		if err.Error != nil {
-			errs = append(errs, errors.New(*err.Error))
+			errs = append(errs, &apierrors.SlurmError{
+				Number:      ptr.Deref(err.ErrorNumber, 0),
+				Source:      ptr.Deref(err.Source, ""),
+				Message:     *err.Error,
+				Description: ptr.Deref(err.Description, ""),
+			})
 		}
 	}
 	return errs
