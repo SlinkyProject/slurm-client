@@ -141,7 +141,7 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 			i.listing, i.listAgain = true, running
 			i.mu.Unlock()
 			if !running {
-				go i.runListFetch()
+				go i.runListFetch(stopCh)
 			}
 		case <-ticker.C:
 			i.syncCh <- struct{}{}
@@ -151,18 +151,21 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 	}
 }
 
-// runListFetch lists until no refresh arrived during the last list.
-func (i *informerCache) runListFetch() {
+// runListFetch lists until no refresh arrived during the last list or stopCh closes.
+func (i *informerCache) runListFetch(stopCh <-chan struct{}) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go cancelOnStop(ctx, stopCh, cancel)
 	for {
-		list, err := i.doListInformer()
+		list, err := i.doListInformer(ctx)
 		i.mu.Lock()
 		i.syncErrorList = err
 		if err == nil {
 			i.processObjects(list)
 			i.dirty = false
 		}
-		if !i.listAgain {
-			i.listing = false
+		if !i.listAgain || ctx.Err() != nil {
+			i.listing, i.listAgain = false, false
 			i.mu.Unlock()
 			return
 		}
@@ -172,8 +175,17 @@ func (i *informerCache) runListFetch() {
 	}
 }
 
+// cancelOnStop cancels ctx when stopCh closes, so stopping aborts in-flight requests.
+func cancelOnStop(ctx context.Context, stopCh <-chan struct{}, cancel context.CancelFunc) {
+	select {
+	case <-stopCh:
+		cancel()
+	case <-ctx.Done():
+	}
+}
+
 // doListInformer marks the cache dirty and lists every object from remote.
-func (i *informerCache) doListInformer() (object.ObjectList, error) {
+func (i *informerCache) doListInformer(ctx context.Context) (object.ObjectList, error) {
 	i.mu.Lock()
 	i.dirty = true
 	i.mu.Unlock()
@@ -185,7 +197,7 @@ func (i *informerCache) doListInformer() (object.ObjectList, error) {
 	list := r.newList()
 
 	opts := &ListOptions{SkipCache: true}
-	return list, i.reader.List(context.TODO(), list, opts)
+	return list, i.reader.List(ctx, list, opts)
 }
 
 func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
@@ -203,7 +215,7 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 			i.fetching[key] = running
 			i.mu.Unlock()
 			if !running {
-				go i.runGetFetch(key)
+				go i.runGetFetch(stopCh, key)
 			}
 		case <-stopCh:
 			return
@@ -211,10 +223,13 @@ func (i *informerCache) runGetInformer(stopCh <-chan struct{}) {
 	}
 }
 
-// runGetFetch fetches key until no refresh for it arrived during the last fetch.
-func (i *informerCache) runGetFetch(key object.ObjectKey) {
+// runGetFetch fetches key until no refresh for it arrived during the last fetch or stopCh closes.
+func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go cancelOnStop(ctx, stopCh, cancel)
 	for {
-		obj, err := i.doGetInformer(key)
+		obj, err := i.doGetInformer(ctx, key)
 		i.mu.Lock()
 		if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
 			i.syncErrorGet[key] = err
@@ -226,7 +241,7 @@ func (i *informerCache) runGetFetch(key object.ObjectKey) {
 		} else if i.syncErrorGet[key] == nil {
 			i.processObject(obj)
 		}
-		if !i.fetching[key] {
+		if !i.fetching[key] || ctx.Err() != nil {
 			delete(i.fetching, key)
 			i.mu.Unlock()
 			return
@@ -239,7 +254,7 @@ func (i *informerCache) runGetFetch(key object.ObjectKey) {
 }
 
 // doGetInformer marks key dirty and fetches it from remote.
-func (i *informerCache) doGetInformer(key object.ObjectKey) (object.Object, error) {
+func (i *informerCache) doGetInformer(ctx context.Context, key object.ObjectKey) (object.Object, error) {
 	i.mu.Lock()
 	i.markDirty(key)
 	i.mu.Unlock()
@@ -251,7 +266,7 @@ func (i *informerCache) doGetInformer(key object.ObjectKey) (object.Object, erro
 	obj := r.newObject()
 
 	opts := &GetOptions{SkipCache: true}
-	return obj, i.reader.Get(context.TODO(), key, obj, opts)
+	return obj, i.reader.Get(ctx, key, obj, opts)
 }
 
 // refresh marks key dirty and queues a fetch without waiting for it to land.

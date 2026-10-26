@@ -799,3 +799,53 @@ func (f *emptyClient) Versioned() VersionedClients {
 }
 
 var _ Client = &emptyClient{}
+
+// hangingClient holds every Get and List until its context is canceled.
+type hangingClient struct{ emptyClient }
+
+func (f *hangingClient) Get(ctx context.Context, _ object.ObjectKey, _ object.Object, _ ...GetOption) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func (f *hangingClient) List(ctx context.Context, _ object.ObjectList, _ ...ListOption) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func TestInformerStopCancelsInflightFetch(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &hangingClient{}, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+	if err := i.refresh(t.Context(), "42"); err != nil {
+		t.Fatal(err)
+	}
+	i.syncCh <- struct{}{}
+	for {
+		i.mu.RLock()
+		inflight := i.listing && len(i.fetching) > 0
+		i.mu.RUnlock()
+		if inflight {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	close(stopCh)
+	deadline := time.Now().Add(time.Second)
+	for {
+		i.mu.RLock()
+		done := !i.listing && len(i.fetching) == 0
+		i.mu.RUnlock()
+		if done {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("fetch workers still running after stopCh closed")
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
