@@ -269,6 +269,9 @@ upgrades may require updated paths in addition to the version.
 
 Feature requests, code contributions, and bug reports are welcome!
 
+Chat with us in the [Slinky channel][slinky-slack] on
+[Kubernetes Slack][kubernetes-slack].
+
 Github/Gitlab submitted issues and PRs/MRs are handled on a best effort basis.
 
 The SchedMD official issue tracker is at <https://support.schedmd.com/>.
@@ -293,6 +296,8 @@ specific language governing permissions and limitations under the License.
 
 [contact-schedmd]: https://www.schedmd.com/slurm-resources/contact-schedmd/
 [controller-runtime]: https://github.com/kubernetes-sigs/controller-runtime
+[kubernetes-slack]: https://slack.k8s.io/
 [openapi]: https://www.openapis.org/
 [rest-api]: https://slurm.schedmd.com/rest_api.html
 [slinky]: https://slinky.ai/
+[slinky-slack]: https://app.slack.com/client/T09NY5SBT/C0CC9B9C1CH
