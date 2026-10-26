@@ -269,6 +269,8 @@ upgrades may require updated paths in addition to the version.
 
 Feature requests, code contributions, and bug reports are welcome!
 
+Join the [Slinky Slack channel][slinky-slack] for project-wide discussions.
+
 Github/Gitlab submitted issues and PRs/MRs are handled on a best effort basis.
 
 The SchedMD official issue tracker is at <https://support.schedmd.com/>.
@@ -296,3 +298,4 @@ specific language governing permissions and limitations under the License.
 [openapi]: https://www.openapis.org/
 [rest-api]: https://slurm.schedmd.com/rest_api.html
 [slinky]: https://slinky.ai/
+[slinky-slack]: https://app.slack.com/client/T09NY5SBT/C0CC9B9C1CH
