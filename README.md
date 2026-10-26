@@ -269,7 +269,8 @@ upgrades may require updated paths in addition to the version.
 
 Feature requests, code contributions, and bug reports are welcome!
 
-Join the [Slinky Slack channel][slinky-slack] for project-wide discussions.
+Join the [Slinky channel][slinky-slack] in the Kubernetes Slack workspace for
+project-wide discussions.
 
 Github/Gitlab submitted issues and PRs/MRs are handled on a best effort basis.
 
