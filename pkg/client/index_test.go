@@ -220,7 +220,7 @@ func TestInformerIndexGetNotFoundRemovesObject(t *testing.T) {
 		t.Fatal(err)
 	}
 	i.processObject(indexJob(1, "a"))
-	i.doGetInformer("1")
+	i.runGetFetch(make(chan struct{}), "1")
 	if got := indexedIDs(t, i, "a"); len(got) != 0 {
 		t.Fatalf("deleted object still indexed: %v", got)
 	}

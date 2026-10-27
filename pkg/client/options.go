@@ -130,12 +130,12 @@ var _ CreateOption = &CreateOptions{}
 // of metav1.DeleteOptions.
 type DeleteOptions struct {
 	// SkipReadAfterDelete, when true, returns once deletion is acknowledged.
-	// No follow-up GET or cache refresh occurs, and obj is left unchanged.
-	// Cached objects remain until an explicit cache refresh or informer sync
-	// observes the deletion.
+	// No cache refresh occurs, and obj is left unchanged. Cached objects remain
+	// until an explicit cache refresh or informer sync observes the deletion.
 	//
-	// By default, Delete reads the object back from Slurm and ignores NotFound.
-	// Other read errors are returned even though deletion was acknowledged.
+	// By default, Delete returns once deletion is acknowledged and refreshes the
+	// cached object in the background, so cache reads wait for the new state.
+	// Slurm may keep the object (a canceled job stays until MinJobAge).
 	SkipReadAfterDelete bool
 }
 

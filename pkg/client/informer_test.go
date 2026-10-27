@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -625,6 +626,115 @@ func Test_informerCache_ListRefreshCacheWithFullSyncQueue(t *testing.T) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// jobClient answers every Get with a job whose ID is the requested key.
+type jobClient struct{ emptyClient }
+
+func (f *jobClient) Get(_ context.Context, key object.ObjectKey, obj object.Object, _ ...GetOption) error {
+	return obj.SetKey(key)
+}
+
+func TestInformerGetRefreshCacheSkipsBatch(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &jobClient{}, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+
+	start := time.Now()
+	if err := i.Get(t.Context(), "42", &api.V0044JobInfo{}, &GetOptions{RefreshCache: true}); err != nil {
+		t.Fatalf("Get(RefreshCache) error = %v", err)
+	}
+	if elapsed := time.Since(start); elapsed >= 500*time.Millisecond {
+		t.Fatalf("Get(RefreshCache) took %v, want it to fetch right away", elapsed)
+	}
+}
+
+func TestInformerListRefreshCacheSkipsBatch(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+
+	start := time.Now()
+	if err := i.List(t.Context(), &api.V0044JobInfoObjectList{}, &ListOptions{RefreshCache: true}); err != nil {
+		t.Fatalf("List(RefreshCache) error = %v", err)
+	}
+	if elapsed := time.Since(start); elapsed >= 500*time.Millisecond {
+		t.Fatalf("List(RefreshCache) took %v, want it to list right away", elapsed)
+	}
+}
+
+// blockingJobClient holds each Get until release closes and names the job by call order.
+type blockingJobClient struct {
+	emptyClient
+	release             chan struct{}
+	calls, running, max atomic.Int32
+}
+
+func (f *blockingJobClient) Get(_ context.Context, key object.ObjectKey, obj object.Object, _ ...GetOption) error {
+	n := f.running.Add(1)
+	defer f.running.Add(-1)
+	for m := f.max.Load(); n > m && !f.max.CompareAndSwap(m, n); m = f.max.Load() {
+	}
+	<-f.release
+	if err := obj.SetKey(key); err != nil {
+		return err
+	}
+	obj.(*api.V0044JobInfo).Name = ptr.To(strconv.Itoa(int(f.calls.Add(1))))
+	return nil
+}
+
+func TestInformerGetRefreshCacheSerializesPerKey(t *testing.T) {
+	reader := &blockingJobClient{release: make(chan struct{})}
+	i := newInformer(api.ObjectTypeV0044JobInfo, reader, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+
+	refresh := func() <-chan *api.V0044JobInfo {
+		got := make(chan *api.V0044JobInfo, 1)
+		go func() {
+			job := &api.V0044JobInfo{}
+			if err := i.Get(t.Context(), "42", job, &GetOptions{RefreshCache: true}); err != nil {
+				t.Errorf("Get(RefreshCache) error = %v", err)
+			}
+			got <- job
+		}()
+		return got
+	}
+	refresh()
+	for reader.running.Load() == 0 {
+		time.Sleep(time.Millisecond)
+	}
+	// Request again while the first fetch is in flight, then let both complete.
+	second := refresh()
+	for {
+		i.mu.RLock()
+		queued := i.fetching["42"]
+		i.mu.RUnlock()
+		if queued {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+	close(reader.release)
+
+	if got := ptr.Deref((<-second).Name, ""); got != "2" {
+		t.Errorf("second refresh returned fetch %q, want the fetch that started after it (2)", got)
+	}
+	if got := reader.max.Load(); got != 1 {
+		t.Errorf("max concurrent fetches for one key = %d, want 1", got)
+	}
+}
+
 type emptyClient struct{}
 
 // Create implements Client.
@@ -689,3 +799,53 @@ func (f *emptyClient) Versioned() VersionedClients {
 }
 
 var _ Client = &emptyClient{}
+
+// hangingClient holds every Get and List until its context is canceled.
+type hangingClient struct{ emptyClient }
+
+func (f *hangingClient) Get(ctx context.Context, _ object.ObjectKey, _ object.Object, _ ...GetOption) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func (f *hangingClient) List(ctx context.Context, _ object.ObjectList, _ ...ListOption) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func TestInformerStopCancelsInflightFetch(t *testing.T) {
+	i := newInformer(api.ObjectTypeV0044JobInfo, &hangingClient{}, defaultSyncPeriod).(*informerCache)
+	stopCh := make(chan struct{})
+	go i.Run(stopCh)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+	if err := i.refresh(t.Context(), "42"); err != nil {
+		t.Fatal(err)
+	}
+	i.syncCh <- struct{}{}
+	for {
+		i.mu.RLock()
+		inflight := i.listing && len(i.fetching) > 0
+		i.mu.RUnlock()
+		if inflight {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	close(stopCh)
+	deadline := time.Now().Add(time.Second)
+	for {
+		i.mu.RLock()
+		done := !i.listing && len(i.fetching) == 0
+		i.mu.RUnlock()
+		if done {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("fetch workers still running after stopCh closed")
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
