@@ -31,6 +31,33 @@ const (
 	syncPollInterval = 50 * time.Millisecond
 )
 
+// refreshResult is immutable after done closes. A batch covers requests through sequence.
+type refreshResult struct {
+	sequence uint64
+	done     chan struct{}
+	object   object.Object
+	list     object.ObjectList
+	err      error
+}
+type refreshSequence struct {
+	requested, completed uint64
+	pending              *refreshResult
+}
+
+func (s *refreshSequence) request() *refreshResult {
+	s.requested++
+	if s.pending == nil {
+		s.pending = &refreshResult{done: make(chan struct{})}
+	}
+	s.pending.sequence = s.requested
+	return s.pending
+}
+func (s *refreshSequence) take() *refreshResult {
+	result := s.pending
+	s.pending = nil
+	return result
+}
+
 type cacheEntry struct {
 	lastUpdate time.Time
 	object     object.Object
@@ -79,6 +106,8 @@ type informerCache struct {
 
 	// listing is true while a List sync is in flight; listAgain means another was requested.
 	listing, listAgain bool
+	getSequences       map[object.ObjectKey]*refreshSequence
+	listSequence       refreshSequence
 
 	// handler runs for each read event from eventCh.
 	handler cache.ResourceEventHandler
@@ -157,12 +186,25 @@ func (i *informerCache) runListFetch(stopCh <-chan struct{}) {
 	defer cancel()
 	go cancelOnStop(ctx, stopCh, cancel)
 	for {
+		i.mu.Lock()
+		batch := i.listSequence.take()
+		i.mu.Unlock()
 		list, err := i.doListInformer(ctx)
 		i.mu.Lock()
 		i.syncErrorList = err
 		if err == nil {
 			i.processObjects(list)
 			i.dirty = false
+		}
+		if batch != nil {
+			batch.list, batch.err = list, err
+			i.listSequence.completed = batch.sequence
+			close(batch.done)
+		}
+		if ctx.Err() != nil && i.listSequence.pending != nil {
+			pending := i.listSequence.take()
+			pending.err = ctx.Err()
+			close(pending.done)
 		}
 		if !i.listAgain || ctx.Err() != nil {
 			i.listing, i.listAgain = false, false
@@ -229,6 +271,13 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 	defer cancel()
 	go cancelOnStop(ctx, stopCh, cancel)
 	for {
+		i.mu.Lock()
+		sequence := i.getSequences[key]
+		var batch *refreshResult
+		if sequence != nil {
+			batch = sequence.take()
+		}
+		i.mu.Unlock()
 		obj, err := i.doGetInformer(ctx, key)
 		i.mu.Lock()
 		if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
@@ -240,6 +289,16 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 			i.deleteObject(key)
 		} else if i.syncErrorGet[key] == nil {
 			i.processObject(obj)
+		}
+		if batch != nil {
+			batch.object, batch.err = obj, err
+			sequence.completed = batch.sequence
+			close(batch.done)
+		}
+		if ctx.Err() != nil && sequence != nil && sequence.pending != nil {
+			pending := sequence.take()
+			pending.err = ctx.Err()
+			close(pending.done)
 		}
 		if !i.fetching[key] || ctx.Err() != nil {
 			delete(i.fetching, key)
@@ -467,10 +526,37 @@ func (i *informerCache) Get(ctx context.Context, key object.ObjectKey, obj objec
 	options.ApplyOptions(opts)
 
 	if options.RefreshCache {
-		// refresh marks dirty before the sync request, so waitForSyncGet
-		// cannot see a clean entry before the receiver picks up the key.
-		if err := i.refresh(ctx, key); err != nil {
+		if err := ctx.Err(); err != nil {
 			return err
+		}
+		i.mu.Lock()
+		if !i.started {
+			i.mu.Unlock()
+			return fmt.Errorf("informer has not started")
+		}
+		sequence := i.getSequences[key]
+		if sequence == nil {
+			sequence = &refreshSequence{}
+			i.getSequences[key] = sequence
+		}
+		batch := sequence.request()
+		i.markDirty(key)
+		i.mu.Unlock()
+		select {
+		case i.syncObjCh <- key:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		waitCtx, cancel := context.WithTimeout(ctx, 2*i.syncPeriod)
+		defer cancel()
+		select {
+		case <-batch.done:
+			if batch.err != nil {
+				return batch.err
+			}
+			return copyObject(obj, batch.object.DeepCopyObject().(object.Object))
+		case <-waitCtx.Done():
+			return waitCtx.Err()
 		}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
@@ -503,16 +589,35 @@ func (i *informerCache) List(ctx context.Context, list object.ObjectList, opts .
 	options.ApplyOptions(opts)
 
 	if options.RefreshCache {
-		// Mark dirty before sync request to avoid lock race between channel
-		// receiver and waitForSyncList().
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		i.mu.Lock()
+		if !i.started {
+			i.mu.Unlock()
+			return fmt.Errorf("informer has not started")
+		}
+		batch := i.listSequence.request()
 		i.dirty = true
 		i.mu.Unlock()
-
 		select {
 		case i.syncCh <- struct{}{}:
 		case <-ctx.Done():
 			return ctx.Err()
+		}
+		waitCtx, cancel := context.WithTimeout(ctx, 2*i.syncPeriod)
+		defer cancel()
+		select {
+		case <-batch.done:
+			if batch.err != nil {
+				return batch.err
+			}
+			for _, item := range batch.list.GetItems() {
+				appendCachedObject(list, item)
+			}
+			return nil
+		case <-waitCtx.Done():
+			return waitCtx.Err()
 		}
 	} else if options.WaitRefreshCache {
 		i.mu.Lock()
@@ -554,6 +659,7 @@ func newInformer(objectType object.ObjectType, reader Reader, syncPeriod time.Du
 		dirty:        true,
 		syncErrorGet: make(map[object.ObjectKey]error),
 		fetching:     make(map[object.ObjectKey]bool),
+		getSequences: make(map[object.ObjectKey]*refreshSequence),
 		syncPeriod:   syncPeriod,
 		eventCh:      make(chan event.Event, 8),
 		syncCh:       make(chan struct{}, 8),
