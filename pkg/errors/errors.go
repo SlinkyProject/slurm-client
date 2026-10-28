@@ -39,7 +39,7 @@ func (e *SlurmError) Error() string { return e.Message }
 const (
 	ErrInvalidPartitionName int32 = 2000
 	ErrInvalidNodeCount     int32 = 2006
-	ErrMaxJobCount          int32 = 2007
+	ErrMaxJobCount          int32 = 2007 // Slurm 26.05.2 on; earlier releases return EAGAIN instead.
 	ErrBadTaskCount         int32 = 2025
 	ErrInvalidFeature       int32 = 2029
 	ErrInvalidAccount       int32 = 2045
