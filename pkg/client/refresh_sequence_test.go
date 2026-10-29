@@ -158,3 +158,43 @@ func TestSequenceStopReleasesCurrentAndPendingWaiters(t *testing.T) {
 		}
 	}
 }
+
+func TestWaitRefreshCacheWakesWhenFetchLands(t *testing.T) {
+	reader := &sequenceReader{entered: make(chan int32, 8), release: [2]chan struct{}{make(chan struct{}), make(chan struct{})}}
+	i := newInformer(api.ObjectTypeV0044JobInfo, reader, defaultSyncPeriod).(*informerCache)
+	stop := make(chan struct{})
+	defer close(stop)
+	go i.Run(stop)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	if err := i.refresh(ctx, "42"); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-reader.entered:
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	}
+	done := make(chan error, 1)
+	job := &api.V0044JobInfo{}
+	go func() { done <- i.Get(ctx, "42", job, &GetOptions{WaitRefreshCache: true}) }()
+	for {
+		i.mu.Lock()
+		waiting := i.getSequences["42"] != nil && i.getSequences["42"].changed != nil
+		i.mu.Unlock()
+		if waiting {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+	close(reader.release[0])
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	if got := ptr.Deref(job.Name, ""); got != "1" {
+		t.Fatalf("name = %q, want 1", got)
+	}
+}
