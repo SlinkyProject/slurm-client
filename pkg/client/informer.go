@@ -319,6 +319,10 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 		}
 		if !i.fetching[key] || ctx.Err() != nil {
 			delete(i.fetching, key)
+			// Nobody is waiting on this key, so drop its sequence; one is made again on demand.
+			if sequence != nil && sequence.pending == nil && sequence.changed == nil {
+				delete(i.getSequences, key)
+			}
 			i.mu.Unlock()
 			return
 		}
