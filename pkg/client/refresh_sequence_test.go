@@ -198,3 +198,34 @@ func TestWaitRefreshCacheWakesWhenFetchLands(t *testing.T) {
 		t.Fatalf("name = %q, want 1", got)
 	}
 }
+
+func TestGetSequenceDroppedWhenFetchIdle(t *testing.T) {
+	reader := &sequenceReader{entered: make(chan int32, 8), release: [2]chan struct{}{make(chan struct{}), make(chan struct{})}}
+	close(reader.release[0])
+	close(reader.release[1])
+	i := newInformer(api.ObjectTypeV0044JobInfo, reader, defaultSyncPeriod).(*informerCache)
+	stop := make(chan struct{})
+	defer close(stop)
+	go i.Run(stop)
+	for !i.HasStarted() {
+		time.Sleep(time.Millisecond)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	if err := i.Get(ctx, "42", &api.V0044JobInfo{}, &GetOptions{RefreshCache: true}); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for {
+		i.mu.Lock()
+		left, fetching := len(i.getSequences), len(i.fetching)
+		i.mu.Unlock()
+		if left == 0 && fetching == 0 {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("sequences = %d, fetching = %d, want 0", left, fetching)
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
