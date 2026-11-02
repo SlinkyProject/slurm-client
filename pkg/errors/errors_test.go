@@ -5,6 +5,7 @@ package errors_test
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -31,5 +32,13 @@ func TestNewHTTPError_UnmappedStatus(t *testing.T) {
 				t.Errorf("NewHTTPError() error = %v, unexpectedly matches ErrNotImplemented", err)
 			}
 		})
+	}
+}
+
+func TestSlurmErrorAs(t *testing.T) {
+	err := fmt.Errorf("submit: %w", errors.Join(errors.New("Bad Request"), &apierrors.SlurmError{Number: apierrors.ErrInvalidTimeLimit, Message: "Invalid time limit"}))
+	var se *apierrors.SlurmError
+	if !errors.As(err, &se) || se.Number != apierrors.ErrInvalidTimeLimit || se.Error() != "Invalid time limit" {
+		t.Errorf("errors.As = %v, %+v", errors.As(err, &se), se)
 	}
 }
