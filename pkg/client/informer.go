@@ -185,7 +185,18 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 				go i.runListFetch(stopCh)
 			}
 		case <-ticker.C:
-			i.syncCh <- struct{}{}
+			// A periodic poll can reuse the in-flight list. Queuing another
+			// keeps the cache dirty indefinitely when lists take longer than
+			// syncPeriod, starving ordinary List and ByIndex readers.
+			// Explicit refreshes above still require a subsequent response.
+			i.mu.Lock()
+			if i.listing {
+				i.mu.Unlock()
+				continue
+			}
+			i.dirty, i.listing = true, true
+			i.mu.Unlock()
+			go i.runListFetch(stopCh)
 		case <-stopCh:
 			return
 		}
