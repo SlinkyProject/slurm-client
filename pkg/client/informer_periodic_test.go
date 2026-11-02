@@ -73,3 +73,46 @@ func TestPeriodicRefreshDoesNotStarveIndexReaders(t *testing.T) {
 		}
 	})
 }
+
+func TestPeriodicRefreshDoesNotBlockReaders(t *testing.T) {
+	for _, method := range []string{"List", "ByIndex"} {
+		t.Run(method, func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				i := newInformer(api.ObjectTypeV0044JobInfo, &slowListClient{}, 100*time.Millisecond).(*informerCache)
+				if err := i.AddIndex("all", func(object.Object) []string { return []string{"all"} }); err != nil {
+					t.Fatal(err)
+				}
+				stop := make(chan struct{})
+				defer close(stop)
+				go i.Run(stop)
+
+				read := func(wantName string) {
+					t.Helper()
+					ctx, cancel := context.WithTimeout(t.Context(), 10*time.Millisecond)
+					defer cancel()
+					jobs := &api.V0044JobInfoObjectList{}
+					var err error
+					if method == "List" {
+						err = i.List(ctx, jobs)
+					} else {
+						err = i.ByIndex(ctx, "all", "all", jobs)
+					}
+					if err != nil {
+						t.Fatalf("cached read waited for a periodic refresh: %v", err)
+					}
+					if len(jobs.Items) != 1 || ptr.Deref(jobs.Items[0].JobId, 0) != 42 || ptr.Deref(jobs.Items[0].Name, "") != wantName {
+						t.Fatalf("cached jobs = %v, want job 42 from response %s", jobs.Items, wantName)
+					}
+				}
+
+				// The first response landed at 250ms. The second list started
+				// at 300ms and will not finish until 450ms, beyond the read deadline.
+				time.Sleep(360 * time.Millisecond)
+				read("1")
+				// Once the background list lands, readers see its updated snapshot.
+				time.Sleep(100 * time.Millisecond)
+				read("2")
+			})
+		})
+	}
+}
