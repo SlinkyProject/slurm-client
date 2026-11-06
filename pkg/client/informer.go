@@ -174,21 +174,31 @@ func (i *informerCache) runListInformer(stopCh <-chan struct{}) {
 				// syncCh was closed!
 				return
 			}
-			// List right away, but one at a time so an older response cannot
-			// overwrite a newer one.
-			i.mu.Lock()
-			i.dirty = true
-			running := i.listing
-			i.listing, i.listAgain = true, running
-			i.mu.Unlock()
-			if !running {
-				go i.runListFetch(stopCh)
-			}
+			i.requestList(stopCh, false)
 		case <-ticker.C:
-			i.syncCh <- struct{}{}
+			i.requestList(stopCh, true)
 		case <-stopCh:
 			return
 		}
+	}
+}
+
+// requestList starts a list or queues an explicit one behind the in-flight list.
+// Periodic lists never mark the cache dirty, so readers keep the current snapshot.
+func (i *informerCache) requestList(stopCh <-chan struct{}, periodic bool) {
+	i.mu.Lock()
+	running := i.listing
+	if periodic && running {
+		i.mu.Unlock()
+		return
+	}
+	if !periodic {
+		i.dirty, i.listAgain = true, running
+	}
+	i.listing = true
+	i.mu.Unlock()
+	if !running {
+		go i.runListFetch(stopCh)
 	}
 }
 
@@ -239,12 +249,9 @@ func cancelOnStop(ctx context.Context, stopCh <-chan struct{}, cancel context.Ca
 	}
 }
 
-// doListInformer marks the cache dirty and lists every object from remote.
+// doListInformer lists every object from remote. Refresh requests mark the cache
+// dirty themselves, so periodic lists do not block readers.
 func (i *informerCache) doListInformer(ctx context.Context) (object.ObjectList, error) {
-	i.mu.Lock()
-	i.dirty = true
-	i.mu.Unlock()
-
 	r, ok := resourceCatalog[i.objectType]
 	if !ok || !r.cacheable || r.newList == nil {
 		panic(fmt.Sprintf("doListInformer: attempting to cache '%s', this should never have happened.", i.objectType))
