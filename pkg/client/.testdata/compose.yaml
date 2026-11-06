@@ -86,7 +86,8 @@ services:
       - SLURMRESTD_SECURITY=disable_unshare_files,disable_unshare_sysv
     restart: unless-stopped
     ports:
-      - 16820:6820
+      # Let Docker assign a free host port so test stacks can run concurrently.
+      - '6820'
     networks:
       - default
     depends_on:
