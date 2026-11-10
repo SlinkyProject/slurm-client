@@ -68,6 +68,7 @@ func (s *refreshSequence) take() *refreshResult {
 
 type cacheEntry struct {
 	lastUpdate time.Time
+	generation uint64
 	object     object.Object
 	dirty      bool
 }
@@ -87,6 +88,10 @@ type informerCache struct {
 	// cache holds the actual object cache.
 	cache   map[object.ObjectKey]*cacheEntry
 	indexes map[string]*secondaryIndex
+
+	generation, listedGeneration uint64
+	inflight                     map[uint64]struct{}
+	deleted                      map[object.ObjectKey]uint64
 
 	// started is true if the informers have been started.
 	started bool
@@ -210,14 +215,16 @@ func (i *informerCache) runListFetch(stopCh <-chan struct{}) {
 	for {
 		i.mu.Lock()
 		batch := i.listSequence.take()
+		generation := i.beginFetch()
 		i.mu.Unlock()
 		list, err := i.doListInformer(ctx)
 		i.mu.Lock()
 		i.syncErrorList = err
 		if err == nil {
-			i.processObjects(list)
+			i.processItems(list.GetItems(), generation)
 			i.dirty = false
 		}
+		i.endFetch(generation)
 		i.listSequence.notify()
 		if batch != nil {
 			batch.list, batch.err = list, err
@@ -292,6 +299,8 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 	go cancelOnStop(ctx, stopCh, cancel)
 	for {
 		i.mu.Lock()
+		generation := i.beginFetch()
+		i.markDirty(key)
 		sequence := i.getSequences[key]
 		var batch *refreshResult
 		if sequence != nil {
@@ -301,16 +310,21 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 		obj, err := i.doGetInformer(ctx, key)
 		i.mu.Lock()
 		sequence = i.getSequences[key]
-		if err != nil && !errors.Is(err, apierrors.ErrNotFound) {
-			i.syncErrorGet[key] = err
-		} else {
-			i.syncErrorGet[key] = nil
+		if generation >= i.observedGeneration(key) {
+			switch {
+			case errors.Is(err, apierrors.ErrNotFound):
+				i.deleteObject(key)
+				if i.deleted == nil {
+					i.deleted = make(map[object.ObjectKey]uint64)
+				}
+				i.deleted[key] = generation
+			case err != nil:
+				i.syncErrorGet[key] = err
+			default:
+				i.publishObject(obj, generation)
+			}
 		}
-		if errors.Is(err, apierrors.ErrNotFound) {
-			i.deleteObject(key)
-		} else if i.syncErrorGet[key] == nil {
-			i.processObject(obj)
-		}
+		i.endFetch(generation)
 		if sequence != nil {
 			sequence.notify()
 		}
@@ -340,12 +354,8 @@ func (i *informerCache) runGetFetch(stopCh <-chan struct{}, key object.ObjectKey
 	}
 }
 
-// doGetInformer marks key dirty and fetches it from remote.
+// doGetInformer fetches a single object from remote.
 func (i *informerCache) doGetInformer(ctx context.Context, key object.ObjectKey) (object.Object, error) {
-	i.mu.Lock()
-	i.markDirty(key)
-	i.mu.Unlock()
-
 	r, ok := resourceCatalog[i.objectType]
 	if !ok || !r.cacheable || r.newObject == nil {
 		panic(fmt.Sprintf("doGetInformer: attempting to cache '%s', this should never have happened.", i.objectType))
@@ -424,21 +434,25 @@ func (i *informerCache) pushEvent(e event.Event) {
 }
 
 func (i *informerCache) processObjects(list object.ObjectList) {
-	now := time.Now()
-	for _, item := range list.GetItems() {
-		i.processObject(item)
-	}
+	i.generation++
+	i.processItems(list.GetItems(), i.generation)
+}
 
+// processItems publishes prepared objects while mu is held.
+func (i *informerCache) processItems(items []object.Object, generation uint64) {
+	if generation < i.listedGeneration {
+		return
+	}
+	for _, item := range items {
+		i.publishObject(item, generation)
+	}
 	for key, entry := range i.cache {
-		if entry == nil {
-			continue
-		}
-		if entry.object == nil {
-			i.deleteObject(key)
-		} else if now.After(entry.lastUpdate) {
+		if entry != nil && entry.generation < generation {
 			i.deleteObject(key)
 		}
 	}
+	// Also fence older GETs for keys absent from this snapshot.
+	i.listedGeneration = generation
 }
 
 // deleteObject removes an object and its secondary keys under mu.
