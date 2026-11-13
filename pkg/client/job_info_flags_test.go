@@ -5,8 +5,6 @@ package client
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -22,39 +20,13 @@ import (
 	"github.com/SlinkyProject/slurm-client/pkg/object"
 )
 
-// Read the default server response independently of the client's job-read flags.
-type jobResourceResponse struct {
-	Jobs []struct {
-		JobID        int32 `json:"job_id"`
-		JobResources *struct {
-			Nodes struct {
-				Allocation []json.RawMessage `json:"allocation"`
-			} `json:"nodes"`
-		} `json:"job_resources"`
-	} `json:"jobs"`
-}
-
-func readDefaultJobResources(ctx context.Context, path string) (jobResourceResponse, error) {
-	var result jobResourceResponse
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, restapiServer+path, nil)
-	if err != nil {
-		return result, err
-	}
-	req.Header.Set("X-SLURM-USER-TOKEN", slurmJwt)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return result, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return result, fmt.Errorf("default job read: HTTP %d", resp.StatusCode)
-	}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	return result, err
-}
-
 var _ = DescribeTable("Job reads omit resource details",
-	func(ctx SpecContext, version string, newJob func() object.Object, newList func() object.ObjectList) {
+	func(ctx SpecContext,
+		newJob func() object.Object,
+		newList func() object.ObjectList,
+		readDefaultJob func(context.Context, Gomega, Client, string) object.Object,
+		listDefaultJobs func(context.Context, Client) object.ObjectList,
+	) {
 		cl, err := NewClient(&Config{
 			Server: restapiServer, TokenProvider: token.StaticProvider(slurmJwt),
 		})
@@ -77,22 +49,18 @@ var _ = DescribeTable("Job reads omit resource details",
 			Expect(cl.Delete(ctx, submitted, &DeleteOptions{SkipReadAfterDelete: true})).To(Succeed())
 		}, NodeTimeout(10*time.Second))
 
-		prefix := "/slurm/v0.0." + version
 		By("waiting for the default job response to contain an allocated node")
 		Eventually(func(g Gomega) {
-			response, err := readDefaultJobResources(ctx, prefix+"/job/"+string(submitted.GetKey()))
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(response.Jobs).To(HaveLen(1))
-			g.Expect(response.Jobs[0].JobResources).NotTo(BeNil())
-			g.Expect(response.Jobs[0].JobResources.Nodes.Allocation).NotTo(BeEmpty())
+			job := readDefaultJob(ctx, g, cl, string(submitted.GetKey()))
+			g.Expect(job).To(HaveField("JobResources", Not(BeNil())))
+			g.Expect(job).To(HaveField("JobResources.Nodes.Allocation", HaveValue(Not(BeEmpty()))))
 		}, 30*time.Second, time.Second).Should(Succeed())
 
 		By("confirming the default list response also contains the allocation")
-		response, err := readDefaultJobResources(ctx, prefix+"/jobs/")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(response.Jobs).To(ContainElement(And(
-			HaveField("JobID", Equal(*submitted.JobId)),
-			HaveField("JobResources.Nodes.Allocation", Not(BeEmpty())),
+		list := listDefaultJobs(ctx, cl)
+		Expect(list.GetItems()).To(ContainElement(And(
+			HaveField("JobId", Equal(submitted.JobId)),
+			HaveField("JobResources.Nodes.Allocation", HaveValue(Not(BeEmpty()))),
 		)))
 
 		By("reading the same job through the client without resource details")
@@ -102,7 +70,7 @@ var _ = DescribeTable("Job reads omit resource details",
 		Expect(job).To(HaveField("JobResources", BeNil()))
 
 		By("listing through the client without resource details")
-		list := newList()
+		list = newList()
 		Expect(cl.List(ctx, list, &ListOptions{SkipCache: true})).To(Succeed())
 		var found object.Object
 		for _, item := range list.GetItems() {
@@ -114,8 +82,88 @@ var _ = DescribeTable("Job reads omit resource details",
 		Expect(found).NotTo(BeNil(), "the allocated job must remain in the list")
 		Expect(found).To(HaveField("JobResources", BeNil()))
 	},
-	Entry("v0042", SpecTimeout(time.Minute), "42", func() object.Object { return &v42.V0042JobInfo{} }, func() object.ObjectList { return &v42.V0042JobInfoObjectList{} }),
-	Entry("v0043", SpecTimeout(time.Minute), "43", func() object.Object { return &v43.V0043JobInfo{} }, func() object.ObjectList { return &v43.V0043JobInfoObjectList{} }),
-	Entry("v0044", SpecTimeout(time.Minute), "44", func() object.Object { return &v44.V0044JobInfo{} }, func() object.ObjectList { return &v44.V0044JobInfoObjectList{} }),
-	Entry("v0045", SpecTimeout(time.Minute), "45", func() object.Object { return &v45.V0045JobInfo{} }, func() object.ObjectList { return &v45.V0045JobInfoObjectList{} }),
+	Entry("v0042", SpecTimeout(time.Minute),
+		func() object.Object { return &v42.V0042JobInfo{} },
+		func() object.ObjectList { return &v42.V0042JobInfoObjectList{} },
+		func(ctx context.Context, g Gomega, cl Client, jobID string) object.Object {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0042().SlurmV0042GetJobWithResponse(ctx, jobID, nil)
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			g.Expect(response.JSON200).NotTo(BeNil())
+			g.Expect(response.JSON200.Jobs).To(HaveLen(1))
+			return &response.JSON200.Jobs[0]
+		},
+		func(ctx context.Context, cl Client) object.ObjectList {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0042().SlurmV0042GetJobsWithResponse(ctx, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			Expect(response.JSON200).NotTo(BeNil())
+			return &v42.V0042JobInfoObjectList{Items: response.JSON200.Jobs}
+		},
+	),
+	Entry("v0043", SpecTimeout(time.Minute),
+		func() object.Object { return &v43.V0043JobInfo{} },
+		func() object.ObjectList { return &v43.V0043JobInfoObjectList{} },
+		func(ctx context.Context, g Gomega, cl Client, jobID string) object.Object {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0043().SlurmV0043GetJobWithResponse(ctx, jobID, nil)
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			g.Expect(response.JSON200).NotTo(BeNil())
+			g.Expect(response.JSON200.Jobs).To(HaveLen(1))
+			return &response.JSON200.Jobs[0]
+		},
+		func(ctx context.Context, cl Client) object.ObjectList {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0043().SlurmV0043GetJobsWithResponse(ctx, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			Expect(response.JSON200).NotTo(BeNil())
+			return &v43.V0043JobInfoObjectList{Items: response.JSON200.Jobs}
+		},
+	),
+	Entry("v0044", SpecTimeout(time.Minute),
+		func() object.Object { return &v44.V0044JobInfo{} },
+		func() object.ObjectList { return &v44.V0044JobInfoObjectList{} },
+		func(ctx context.Context, g Gomega, cl Client, jobID string) object.Object {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0044().SlurmV0044GetJobWithResponse(ctx, jobID, nil)
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			g.Expect(response.JSON200).NotTo(BeNil())
+			g.Expect(response.JSON200.Jobs).To(HaveLen(1))
+			return &response.JSON200.Jobs[0]
+		},
+		func(ctx context.Context, cl Client) object.ObjectList {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0044().SlurmV0044GetJobsWithResponse(ctx, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			Expect(response.JSON200).NotTo(BeNil())
+			return &v44.V0044JobInfoObjectList{Items: response.JSON200.Jobs}
+		},
+	),
+	Entry("v0045", SpecTimeout(time.Minute),
+		func() object.Object { return &v45.V0045JobInfo{} },
+		func() object.ObjectList { return &v45.V0045JobInfoObjectList{} },
+		func(ctx context.Context, g Gomega, cl Client, jobID string) object.Object {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0045().SlurmV0045GetJobWithResponse(ctx, jobID, nil)
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			g.Expect(response.JSON200).NotTo(BeNil())
+			g.Expect(response.JSON200.Jobs).To(HaveLen(1))
+			return &response.JSON200.Jobs[0]
+		},
+		func(ctx context.Context, cl Client) object.ObjectList {
+			GinkgoHelper()
+			response, err := cl.Versioned().V0045().SlurmV0045GetJobsWithResponse(ctx, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			Expect(response.JSON200).NotTo(BeNil())
+			return &v45.V0045JobInfoObjectList{Items: response.JSON200.Jobs}
+		},
+	),
 )
