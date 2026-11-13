@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"errors"
+	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -104,6 +105,66 @@ var _ = Describe("Client v0045", func() {
 				cl.Stop()
 			})
 		})
+
+		It("should omit resource details from job reads", func(ctx SpecContext) {
+			By("submitting a job that retains an allocation throughout the assertions")
+			submitted := &api.V0045JobInfo{}
+			Expect(cl.Create(ctx, submitted, api.V0045JobSubmitReq{
+				Job: &api.V0045JobDescMsg{
+					Environment:             &api.V0045StringArray{"PATH=/usr/bin:/bin"},
+					CurrentWorkingDirectory: ptr.To("/tmp"),
+					Script:                  ptr.To("#!/bin/sh\nsleep 300"),
+					Tasks:                   ptr.To[int32](1),
+					MinimumCpus:             ptr.To[int32](1),
+					MinimumNodes:            ptr.To[int32](1),
+				},
+			})).To(Succeed())
+			DeferCleanup(func(ctx SpecContext) {
+				Expect(cl.Delete(ctx, submitted, &DeleteOptions{SkipReadAfterDelete: true})).To(Succeed())
+			}, NodeTimeout(10*time.Second))
+
+			By("waiting for the default job response to contain an allocated node")
+			Eventually(func(g Gomega) {
+				response, err := cl.Versioned().V0045().SlurmV0045GetJobWithResponse(ctx, string(submitted.GetKey()), nil)
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(response.StatusCode()).To(Equal(http.StatusOK))
+				g.Expect(response.JSON200).NotTo(BeNil())
+				g.Expect(response.JSON200.Jobs).To(HaveLen(1))
+				job := &response.JSON200.Jobs[0]
+				g.Expect(job).To(HaveField("JobResources", Not(BeNil())))
+				g.Expect(job).To(HaveField("JobResources.Nodes.Allocation", HaveValue(Not(BeEmpty()))))
+			}, 30*time.Second, time.Second).Should(Succeed())
+
+			By("confirming the default list response also contains the allocation")
+			response, err := cl.Versioned().V0045().SlurmV0045GetJobsWithResponse(ctx, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode()).To(Equal(http.StatusOK))
+			Expect(response.JSON200).NotTo(BeNil())
+			list := &api.V0045JobInfoObjectList{Items: response.JSON200.Jobs}
+			Expect(list.GetItems()).To(ContainElement(And(
+				HaveField("JobId", Equal(submitted.JobId)),
+				HaveField("JobResources.Nodes.Allocation", HaveValue(Not(BeEmpty()))),
+			)))
+
+			By("reading the same job through the client without resource details")
+			job := &api.V0045JobInfo{}
+			Expect(cl.Get(ctx, submitted.GetKey(), job, &GetOptions{SkipCache: true})).To(Succeed())
+			Expect(job.GetKey()).To(Equal(submitted.GetKey()))
+			Expect(job).To(HaveField("JobResources", BeNil()))
+
+			By("listing through the client without resource details")
+			list = &api.V0045JobInfoObjectList{}
+			Expect(cl.List(ctx, list, &ListOptions{SkipCache: true})).To(Succeed())
+			var found object.Object
+			for _, item := range list.GetItems() {
+				if item.GetKey() == submitted.GetKey() {
+					found = item
+					break
+				}
+			}
+			Expect(found).NotTo(BeNil(), "the allocated job must remain in the list")
+			Expect(found).To(HaveField("JobResources", BeNil()))
+		}, SpecTimeout(time.Minute))
 
 		Context("Create", func() {
 			It("should create a new object", func(ctx SpecContext) {
