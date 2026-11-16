@@ -8,6 +8,8 @@ import (
 	"errors"
 	"net/http"
 
+	"k8s.io/utils/ptr"
+
 	api "github.com/SlinkyProject/slurm-client/api/v0042"
 	apierrors "github.com/SlinkyProject/slurm-client/pkg/errors"
 )
@@ -86,7 +88,8 @@ func (c *SlurmClient) UpdateJobInfo(ctx context.Context, jobId string, req any) 
 
 // GetJobInfo implements ClientInterface
 func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*api.V0042JobInfo, error) {
-	params := &api.SlurmV0042GetJobParams{}
+	// Explicit ALL avoids the server's implicit per-node/core DETAIL payload.
+	params := &api.SlurmV0042GetJobParams{Flags: ptr.To(api.SlurmV0042GetJobParamsFlagsALL)}
 	res, err := c.SlurmV0042GetJobWithResponse(ctx, jobId, params)
 	if err != nil {
 		return nil, err
@@ -110,7 +113,8 @@ func (c *SlurmClient) GetJobInfo(ctx context.Context, jobId string) (*api.V0042J
 
 // ListJobInfo implements ClientInterface
 func (c *SlurmClient) ListJobInfo(ctx context.Context) (*api.V0042JobInfoObjectList, error) {
-	params := &api.SlurmV0042GetJobsParams{}
+	// Explicit ALL avoids the server's implicit per-node/core DETAIL payload.
+	params := &api.SlurmV0042GetJobsParams{Flags: ptr.To(api.SlurmV0042GetJobsParamsFlagsALL)}
 	res, err := c.SlurmV0042GetJobsWithResponse(ctx, params)
 	if err != nil {
 		return nil, err
