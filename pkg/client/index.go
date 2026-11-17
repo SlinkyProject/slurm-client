@@ -45,22 +45,66 @@ func (i *informerCache) AddIndex(name string, extract IndexFunc) error {
 }
 
 func (i *informerCache) ByIndex(ctx context.Context, name, value string, list object.ObjectList) error {
-	if list.GetType() != i.objectType {
-		return fmt.Errorf("index on %s cannot populate %s", i.objectType, list.GetType())
-	}
+	return i.ByIndexes(ctx, map[string][]string{name: {value}}, list)
+}
+
+func (i *informerCache) KeysByIndex(ctx context.Context, name string, values ...string) ([]object.ObjectKey, error) {
 	i.mu.RLock()
 	_, exists := i.indexes[name]
 	i.mu.RUnlock()
 	if !exists {
-		return fmt.Errorf("index %q is not registered", name)
+		return nil, fmt.Errorf("index %q is not registered", name)
 	}
+	if err := i.waitForSyncList(ctx); err != nil {
+		return nil, fmt.Errorf("failed to wait on type %s cache sync: %w", i.objectType, err)
+	}
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+	seen := make(map[object.ObjectKey]struct{})
+	for _, value := range values {
+		for key := range i.indexes[name].values[value] {
+			if entry := i.cache[key]; entry != nil && entry.object != nil {
+				seen[key] = struct{}{}
+			}
+		}
+	}
+	keys := make([]object.ObjectKey, 0, len(seen))
+	for key := range seen {
+		keys = append(keys, key)
+	}
+	return keys, nil
+}
+
+func (i *informerCache) ByIndexes(ctx context.Context, queries map[string][]string, list object.ObjectList) error {
+	if list.GetType() != i.objectType {
+		return fmt.Errorf("index on %s cannot populate %s", i.objectType, list.GetType())
+	}
+	i.mu.RLock()
+	for name := range queries {
+		if _, exists := i.indexes[name]; !exists {
+			i.mu.RUnlock()
+			return fmt.Errorf("index %q is not registered", name)
+		}
+	}
+	i.mu.RUnlock()
 	if err := i.waitForSyncList(ctx); err != nil {
 		return fmt.Errorf("failed to wait on type %s cache sync: %w", i.objectType, err)
 	}
 	i.mu.RLock()
 	defer i.mu.RUnlock()
-	for key := range i.indexes[name].values[value] {
-		appendCachedObject(list, i.cache[key].object)
+	seen := make(map[object.ObjectKey]struct{})
+	for name, values := range queries {
+		for _, value := range values {
+			for key := range i.indexes[name].values[value] {
+				if _, exists := seen[key]; exists {
+					continue
+				}
+				seen[key] = struct{}{}
+				if entry := i.cache[key]; entry != nil && entry.object != nil {
+					appendCachedObject(list, entry.object)
+				}
+			}
+		}
 	}
 	return nil
 }

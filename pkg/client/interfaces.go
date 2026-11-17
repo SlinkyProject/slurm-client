@@ -106,6 +106,14 @@ type Indexer interface {
 	// a known index with no matches returns an empty result, not ErrNotFound.
 	// A cache miss is not proof that an object does not exist on the server.
 	ByIndex(ctx context.Context, name, value string, list object.ObjectList) error
+
+	// ByIndexes reads the union of several index queries from one cache snapshot,
+	// appending deep copies deduplicated by key.
+	ByIndexes(ctx context.Context, queries map[string][]string, list object.ObjectList) error
+
+	// KeysByIndex returns the deduplicated object keys matching any of the
+	// requested index values without copying cached objects.
+	KeysByIndex(ctx context.Context, name string, values ...string) ([]object.ObjectKey, error)
 }
 
 // Informer - informer allows you interact with the underlying informer.
