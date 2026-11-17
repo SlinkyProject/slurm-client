@@ -44,6 +44,23 @@ func (f *fakeInformer) AddIndex(name string, extract client.IndexFunc) error {
 // ByIndex evaluates the index against the fake store, including writes made
 // since registration. Production informers maintain the index incrementally.
 func (f *fakeInformer) ByIndex(ctx context.Context, name, value string, list object.ObjectList) error {
+	return f.ByIndexes(ctx, map[string][]string{name: {value}}, list)
+}
+
+func (f *fakeInformer) KeysByIndex(ctx context.Context, name string, values ...string) ([]object.ObjectKey, error) {
+	objects := &indexObjects{objectType: f.objectType}
+	if err := f.ByIndexes(ctx, map[string][]string{name: values}, objects); err != nil {
+		return nil, err
+	}
+	keys := make([]object.ObjectKey, 0, len(objects.items))
+	for _, obj := range objects.items {
+		keys = append(keys, obj.GetKey())
+	}
+	return keys, nil
+}
+
+// ByIndexes evaluates each extractor once per object, then unions the matches.
+func (f *fakeInformer) ByIndexes(ctx context.Context, queries map[string][]string, list object.ObjectList) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -51,18 +68,27 @@ func (f *fakeInformer) ByIndex(ctx context.Context, name, value string, list obj
 		return fmt.Errorf("index on %s cannot populate %s", f.objectType, list.GetType())
 	}
 	f.mu.RLock()
-	extract, exists := f.indexes[name]
-	f.mu.RUnlock()
-	if !exists {
-		return fmt.Errorf("index %q is not registered", name)
+	extractors := make(map[string]client.IndexFunc, len(queries))
+	for name := range queries {
+		extract, exists := f.indexes[name]
+		if !exists {
+			f.mu.RUnlock()
+			return fmt.Errorf("index %q is not registered", name)
+		}
+		extractors[name] = extract
 	}
+	f.mu.RUnlock()
 	all := &indexObjects{objectType: f.objectType}
 	if err := f.reader.List(ctx, all); err != nil {
 		return err
 	}
 	for _, obj := range all.items {
-		if slices.Contains(extract(obj), value) {
-			list.AppendItem(obj.DeepCopyObject().(object.Object))
+		for name, extract := range extractors {
+			keys := extract(obj)
+			if slices.ContainsFunc(queries[name], func(value string) bool { return slices.Contains(keys, value) }) {
+				list.AppendItem(obj)
+				break
+			}
 		}
 	}
 	return nil

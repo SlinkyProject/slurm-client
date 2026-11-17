@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"testing/synctest"
@@ -114,5 +115,67 @@ func TestPeriodicRefreshDoesNotBlockReaders(t *testing.T) {
 				read("2")
 			})
 		})
+	}
+}
+
+type blockedItemsList struct {
+	api.V0044JobInfoObjectList
+	entered chan struct{}
+	proceed chan struct{}
+}
+
+func (l *blockedItemsList) GetItems() []object.Object {
+	close(l.entered)
+	<-l.proceed
+	return l.V0044JobInfoObjectList.GetItems()
+}
+
+// Periodic refresh preparation must leave the previous snapshot available.
+// Block the copy explicitly so this tests locking, not machine-dependent speed.
+func TestPeriodicListPreparationDoesNotBlockReaders(t *testing.T) {
+	i := readyIndexInformer()
+	i.processObject(indexJob(1, "old"))
+	if err := i.AddIndex("owners", jobOwners); err != nil {
+		t.Fatal(err)
+	}
+	list := &blockedItemsList{
+		V0044JobInfoObjectList: api.V0044JobInfoObjectList{Items: []api.V0044JobInfo{*indexJob(1, "new")}},
+		entered:                make(chan struct{}), proceed: make(chan struct{}),
+	}
+	original := resourceCatalog[api.ObjectTypeV0044JobInfo]
+	r := original
+	r.newList = func() object.ObjectList { return list }
+	resourceCatalog[api.ObjectTypeV0044JobInfo] = r
+	t.Cleanup(func() { resourceCatalog[api.ObjectTypeV0044JobInfo] = original })
+	unblock := sync.OnceFunc(func() { close(list.proceed) })
+	done := make(chan struct{})
+	stop := make(chan struct{})
+	go func() { i.runListFetch(stop); close(done) }()
+	t.Cleanup(func() { unblock(); <-done; close(stop) })
+	select {
+	case <-list.entered:
+	case <-time.After(time.Second):
+		t.Fatal("refresh did not prepare list")
+	}
+	read := make(chan error, 1)
+	jobs := &api.V0044JobInfoObjectList{}
+	go func() { read <- i.ByIndex(t.Context(), "owners", "old", jobs) }()
+	select {
+	case err := <-read:
+		if err != nil || len(jobs.Items) != 1 {
+			t.Fatalf("old snapshot unavailable during preparation: jobs=%d, err=%v", len(jobs.Items), err)
+		}
+	case <-time.After(time.Second):
+		unblock()
+		<-read
+		t.Fatal("list preparation held the cache lock")
+	}
+	unblock()
+	<-done
+	if got := indexedIDs(t, i, "new"); len(got) != 1 || got[0] != 1 {
+		t.Fatalf("new snapshot was not published: %v", got)
+	}
+	if got := indexedIDs(t, i, "old"); len(got) != 0 {
+		t.Fatalf("old index survived publication: %v", got)
 	}
 }

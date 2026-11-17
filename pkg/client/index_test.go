@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: Copyright (C) SchedMD LLC.
+// SPDX-FileCopyrightText: Copyright (C) NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
 package client
@@ -320,4 +321,118 @@ func BenchmarkInformerByIndex(b *testing.B) {
 			}
 		})
 	}
+}
+
+func TestInformerBatchIndex(t *testing.T) {
+	i := readyIndexInformer()
+	i.processObject(indexJob(1, "old,new"))
+	i.processObject(indexJob(2, "old"))
+	for _, name := range []string{"legacy", "current"} {
+		if err := i.AddIndex(name, jobOwners); err != nil {
+			t.Fatal(err)
+		}
+	}
+	query := map[string][]string{"legacy": {"old", "old", "missing"}, "current": {"new"}}
+	list := &api.V0044JobInfoObjectList{}
+	if err := i.ByIndexes(t.Context(), query, list); err != nil {
+		t.Fatal(err)
+	}
+	ids := []int32{}
+	for _, job := range list.Items {
+		ids = append(ids, *job.JobId)
+	}
+	slices.Sort(ids)
+	if !slices.Equal(ids, []int32{1, 2}) {
+		t.Fatalf("union = %v", ids)
+	}
+	invalid := &api.V0044JobInfoObjectList{}
+	if err := i.ByIndexes(t.Context(), map[string][]string{"unknown": {"old"}, "current": {"new"}}, invalid); err == nil || len(invalid.Items) != 0 {
+		t.Fatal("invalid query must fail without appending")
+	}
+	i.cache["1"].object = nil
+	delete(i.cache, "2")
+	skewed := &api.V0044JobInfoObjectList{}
+	if keys, err := i.KeysByIndex(t.Context(), "legacy", "old"); err != nil || len(keys) != 0 {
+		t.Fatalf("skewed keys = %v, err = %v", keys, err)
+	}
+	if err := i.ByIndexes(t.Context(), query, skewed); err != nil || len(skewed.Items) != 0 {
+		t.Fatalf("skewed items = %v, err = %v", skewed.Items, err)
+	}
+	i.syncErrorList = errors.New("cache failed")
+	if err := i.ByIndexes(t.Context(), query, &api.V0044JobInfoObjectList{}); !errors.Is(err, i.syncErrorList) {
+		t.Fatalf("cache error lost: %v", err)
+	}
+}
+
+type copyForbiddenObject struct{ object.Object }
+
+func (*copyForbiddenObject) DeepCopyObject() object.RuntimeObject {
+	panic("key lookup copied an object")
+}
+
+func TestInformerIndexKeys(t *testing.T) {
+	i := readyIndexInformer()
+	if err := i.AddIndex("owners", jobOwners); err != nil {
+		t.Fatal(err)
+	}
+	i.processObject(indexJob(1, "a,b"))
+	i.processObject(indexJob(2, "b"))
+	i.cache["1"].object = &copyForbiddenObject{i.cache["1"].object}
+	keys, err := i.KeysByIndex(t.Context(), "owners", "a", "b", "a", "missing")
+	slices.Sort(keys)
+	if err != nil || !slices.Equal(keys, []object.ObjectKey{"1", "2"}) {
+		t.Fatalf("keys=%v, error=%v", keys, err)
+	}
+	keys[0] = "caller mutation"
+	keys, err = i.KeysByIndex(t.Context(), "owners", "a")
+	if err != nil || !slices.Equal(keys, []object.ObjectKey{"1"}) {
+		t.Fatalf("keys=%v, error=%v", keys, err)
+	}
+	if _, err := i.KeysByIndex(t.Context(), "unknown", "a"); err == nil {
+		t.Fatal("unknown index accepted")
+	}
+	i.syncErrorList = errors.New("refresh failed")
+	if _, err := i.KeysByIndex(t.Context(), "owners", "c"); !errors.Is(err, i.syncErrorList) {
+		t.Fatalf("lost refresh error: %v", err)
+	}
+	i.syncErrorList = nil
+	i.started = false
+	if _, err := i.KeysByIndex(t.Context(), "owners", "c"); err == nil {
+		t.Fatal("unsynchronized lookup accepted")
+	}
+}
+
+func BenchmarkNodeIndexKeys(b *testing.B) {
+	i := newInformer(api.ObjectTypeV0044Node, &emptyClient{}, defaultSyncPeriod).(*informerCache)
+	i.started, i.dirty = true, false
+	if err := i.AddIndex("partition", func(o object.Object) []string { return ptr.Deref(o.(*api.V0044Node).Partitions, nil) }); err != nil {
+		b.Fatal(err)
+	}
+	for n := range 2048 {
+		i.processObject(&api.V0044Node{Name: ptr.To(fmt.Sprintf("node-%04d", n)), Partitions: ptr.To([]string{"batch", "gpu"})})
+	}
+	b.Run("full-objects", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			out := &api.V0044NodeObjectList{}
+			if err := i.ByIndex(b.Context(), "partition", "batch", out); err != nil {
+				b.Fatal(err)
+			}
+			if len(out.Items) != 2048 {
+				b.Fatal("missing nodes")
+			}
+		}
+	})
+	b.Run("keys", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			out, err := i.KeysByIndex(b.Context(), "partition", "batch")
+			if err != nil {
+				b.Fatal(err)
+			}
+			if len(out) != 2048 {
+				b.Fatal("missing nodes")
+			}
+		}
+	})
 }

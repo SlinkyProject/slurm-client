@@ -218,10 +218,16 @@ func (i *informerCache) runListFetch(stopCh <-chan struct{}) {
 		generation := i.beginFetch()
 		i.mu.Unlock()
 		list, err := i.doListInformer(ctx)
+		// GetItems deep-copies the response. Prepare these private objects before
+		// excluding cached readers; publishing the cache and indexes stays atomic.
+		var items []object.Object
+		if err == nil {
+			items = list.GetItems()
+		}
 		i.mu.Lock()
 		i.syncErrorList = err
 		if err == nil {
-			i.processItems(list.GetItems(), generation)
+			i.processItems(items, generation)
 			i.dirty = false
 		}
 		i.endFetch(generation)
