@@ -1,3 +1,22 @@
+## v1.3.0
+
+### Added
+
+- Exposed the Slurm error number through SlurmError.
+
+### Fixed
+
+- Prevent slow periodic refreshes from blocking cached reads.
+- Keep cached reads available during periodic refreshes.
+- GO-2026-6769 GO-2026-6785 GO-2026-6795 GO-2026-6800.
+- GO-2026-6859.
+- Prevent older cache refreshes from overwriting newer observations.
+
+### Changed
+
+- Omit resource details from job reads.
+- Reduce cache lock contention and indexed lookup copies.
+
 ## v1.3.0-rc1
 
 ### Added
